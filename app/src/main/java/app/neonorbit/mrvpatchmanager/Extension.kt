@@ -1,11 +1,17 @@
 package app.neonorbit.mrvpatchmanager
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.Closeable
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+
+inline fun <reified T> String.parseJson(): T? {
+    return Gson().fromJson(this, object : TypeToken<T>() {}.type)
+}
 
 fun <T> Response<T>.response(): Response<T> {
     if (!isSuccessful) {
