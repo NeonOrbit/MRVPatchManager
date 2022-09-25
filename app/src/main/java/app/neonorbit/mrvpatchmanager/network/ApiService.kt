@@ -1,11 +1,13 @@
 package app.neonorbit.mrvpatchmanager.network
 
 import app.neonorbit.mrvpatchmanager.network.parser.HtmlParser
+import app.neonorbit.mrvpatchmanager.network.parser.JsonParser
 import app.neonorbit.mrvpatchmanager.network.parser.XmlParser
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboVariantData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorButtonData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorIFormData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkPureItemLinkData
+import app.neonorbit.mrvpatchmanager.remote.data.GithubReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.RssFeedData
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -34,6 +36,10 @@ interface ApiService {
     @GET
     @XmlParser
     suspend fun getRssFeed(@Url url: String): Response<RssFeedData>
+
+    @GET
+    @JsonParser
+    suspend fun getGithubRelease(@Url url: String): Response<GithubReleaseData>
 
     @GET
     @HtmlParser
