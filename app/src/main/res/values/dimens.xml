@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="root_margin">16dp</dimen>
+    <dimen name="primary_item_gap">20dp</dimen>
+    <dimen name="secondary_item_gap">14dp</dimen>
+    <dimen name="primary_item_padding">20dp</dimen>
+</resources>

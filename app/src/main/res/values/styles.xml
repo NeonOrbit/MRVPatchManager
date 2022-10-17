@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DropDownStyle"
+        parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeColor">@color/drop_down_box_stroke</item>
+        <item name="boxStrokeWidth">1.5dp</item>
+        <item name="android:textColorHint">@color/drop_down_box_stroke</item>
+    </style>
+
+    <style name="DropDownHintTextAppearance" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <style name="MaterialCardSimpleOutlined" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardBackgroundColor">@color/background_overlay</item>
+    </style>
+</resources>

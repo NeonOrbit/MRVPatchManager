@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">MRVPatch Manager</string>
+    <string name="title_home">Home</string>
+    <string name="title_patched">Patched</string>
+    <string name="title_settings">Settings</string>
+    <string name="menu_about_title">About</string>
+    <string name="menu_instruction_title">Instruction</string>
+    <string name="save_menu_title">save</string>
+    <string name="delete_menu_title">delete</string>
+    <string name="share_menu_title">share</string>
+    <string name="select_all_menu_title">select all</string>
+    <string name="patcher_title">Patcher</string>
+    <string name="patch_button_title">Patch</string>
+    <string name="module_title">ChatHeadEnabler</string>
+    <string name="module_warning">Please Install ChatHeadEnabler First</string>
+    <string name="manager_title">Manager</string>
+    <string name="version_text">Version: %s</string>
+    <string name="latest_version">Latest: %s</string>
+    <string name="installed_version">Installed: %s</string>
+    <string name="update_text">Update</string>
+    <string name="install_text">Install</string>
+    <string name="patcher_default">Default</string>
+    <string name="patcher_manual">Manual</string>
+    <string name="no_patched_apps">No patched apps</string>
+    <string name="fallback_warning_message"><b>WARNING:</b> Fallback mode is enabled.
+        If you didn\'t enable it, please disable from settings.
+    </string>
 </resources>

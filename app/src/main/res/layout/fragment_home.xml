@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginHorizontal="@dimen/root_margin"
+    android:scrollbars="none"
+    tools:context=".ui.home.HomeFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/manager_card"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/primary_item_gap"
+            style="@style/MaterialCardSimpleOutlined">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/primary_item_padding">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/manager_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@+id/manager_button"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:text="@string/manager_title" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/manager_latest_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/manager_title"
+                    android:textColor="@color/highlight_color"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:text="@string/latest_version" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/manager_installed_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/manager_latest_subtitle"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:text="@string/installed_version" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/manager_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="center_vertical"
+                    android:backgroundTint="@color/highlight_color"
+                    android:text="@string/update_text" />
+
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/module_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/primary_item_gap"
+            style="@style/MaterialCardSimpleOutlined">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:orientation="vertical"
+                android:padding="@dimen/primary_item_padding">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/module_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@+id/module_button_holder"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:text="@string/module_title" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/module_latest_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@id/module_title"
+                        android:textColor="@color/highlight_color"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:visibility="gone"
+                        android:text="@string/latest_version" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/module_installed_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@id/module_latest_subtitle"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:text="@string/installed_version" />
+
+                    <FrameLayout
+                        android:id="@+id/module_button_holder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/module_install_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/install_text"
+                            android:enabled="false" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/module_update_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/highlight_color"
+                            android:text="@string/update_text"
+                            android:visibility="gone"/>
+                    </FrameLayout>
+
+                </RelativeLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/module_warning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/secondary_item_gap"
+                    android:backgroundTint="@android:color/holo_red_light"
+                    app:strokeWidth="0dp"
+                    android:visibility="gone">
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="7dp"
+                        android:textColor="@android:color/white"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:text="@string/module_warning"/>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/patcher_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/primary_item_gap"
+            style="@style/MaterialCardSimpleOutlined">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:orientation="vertical"
+                android:padding="@dimen/primary_item_padding">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/secondary_item_gap"
+                    android:backgroundTint="?colorOutline"
+                    app:cardCornerRadius="4dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/patcher_default"
+                            android:layout_width="0dp"
+                            android:layout_weight="1.1"
+                            android:layout_height="42dp"
+                            android:paddingTop="0dp"
+                            android:paddingBottom="0dp"
+                            android:includeFontPadding="false"
+                            android:text="@string/patcher_default"
+                            app:strokeWidth="0dp"
+                            android:textColor="?colorOnPrimary"
+                            android:background="@drawable/tab_bg_selected"
+                            style="?android:attr/borderlessButtonStyle" />
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/patcher_manual"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="42dp"
+                            android:paddingTop="0dp"
+                            android:paddingBottom="0dp"
+                            android:includeFontPadding="false"
+                            android:text="@string/patcher_manual"
+                            app:strokeWidth="0dp"
+                            android:textColor="?colorOnSurface"
+                            android:backgroundTint="@android:color/transparent"
+                            style="?android:attr/borderlessButtonStyle" />
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/drop_down"
+                        style="@style/DropDownStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:hintTextAppearance="@style/DropDownHintTextAppearance"
+                        android:hint="@string/patcher_title">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/drop_down_menu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAlignment="textEnd"
+                            android:focusable="false"
+                            android:inputType="none" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/patch_button"
+                        android:clickable="false"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/drop_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="@dimen/secondary_item_gap"
+                        android:text="@string/patch_button_title" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/progress_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/progress_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignStart="@id/progress_bar"/>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@id/progress_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_below="@id/progress_status"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        app:trackColor="@color/primary_variant"
+                        app:trackThickness="6dp"
+                        app:trackCornerRadius="20dp" />
+
+                    <TextView
+                        android:id="@+id/progress_details"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/progress_bar"
+                        android:layout_alignStart="@id/progress_bar" />
+
+                    <TextView
+                        android:id="@+id/progress_percent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/progress_bar"
+                        android:layout_alignEnd="@id/progress_bar" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/warning_card"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/primary_item_gap"
+            android:backgroundTint="@color/warning_color"
+            style="@style/Widget.Material3.CardView.Filled">
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="17dp"
+                android:text="@string/fallback_warning_message"/>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
