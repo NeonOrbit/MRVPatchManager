@@ -1,6 +1,7 @@
 package app.neonorbit.mrvpatchmanager
 
 import android.app.Application
+import app.neonorbit.mrvpatchmanager.remote.GithubService
 
 class App : Application() {
     companion object {
@@ -10,5 +11,11 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        onAppInitialized()
+    }
+
+    private fun onAppInitialized() {
+        AppInstaller.register(this)
+        GithubService.checkForUpdate()
     }
 }

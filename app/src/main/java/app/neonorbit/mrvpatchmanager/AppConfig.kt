@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager
 
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
+import app.neonorbit.mrvpatchmanager.data.AppItemData
 import java.io.File
 
 object AppConfig {
@@ -55,4 +56,14 @@ object AppConfig {
     val DEFAULT_FB_PACKAGES: List<String> = listOf() // removed:
     val DEFAULT_FB_SIGNATURE: String = "" // removed: BuildConfig.FB_SIG
     val MRV_PUBLIC_SIGNATURE: String = "" // removed: BuildConfig.MRV_SIG
+
+    val FB_APP_LIST by lazy {
+        listOf(
+            AppItemData("Messenger App", AppType.MESSENGER, R.drawable.ic_fb_orca),
+            AppItemData("Facebook App", AppType.FACEBOOK, R.drawable.ic_fb_katana),
+            AppItemData("Facebook Lite", AppType.FACEBOOK_LITE, R.drawable.ic_fb_lite),
+            AppItemData("Messenger Lite", AppType.MESSENGER_LITE, R.drawable.ic_fb_mlite),
+            AppItemData("Business Suite", AppType.BUSINESS_SUITE, R.drawable.ic_fb_page),
+        )
+    }
 }

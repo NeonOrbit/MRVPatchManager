@@ -1,13 +1,30 @@
 package app.neonorbit.mrvpatchmanager
 
+import android.net.Uri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.Closeable
+import java.io.File
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 inline fun <reified T> String.parseJson(): T? {
     return Gson().fromJson(this, object : TypeToken<T>() {}.type)
@@ -34,6 +51,18 @@ inline fun <T> Response<T>.useResponse(block: (Response<T>) -> Unit) {
     }
 }
 
+fun Uri.toTempFile(): File {
+    return AppServices.contentResolver.openInputStream(this)?.use { input ->
+        File.createTempFile(
+            "resolved", null, AppConfig.TEMP_DIR
+        ).also { tmp ->
+            tmp.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+    } ?: throw Exception("Failed to resolve uri")
+}
+
 val Throwable.error: String; get() = this.message ?: this.javaClass.simpleName
 
 val Throwable.isConnectError: Boolean; get() {
@@ -49,3 +78,43 @@ fun Throwable.toNetworkError(isOnline: Boolean, length: Int = 100): String {
         if (it.length > length) "${it}..." else it
     }
 }
+
+fun LifecycleOwner.withLifecycle(
+    state: Lifecycle.State,
+    block: suspend CoroutineScope.() -> Unit
+) = lifecycleScope.launch(Dispatchers.Main.immediate) {
+    repeatOnLifecycle(state, block)
+}
+
+fun <T> Flow<T>.observeOnUI(
+    owner: LifecycleOwner,
+    collector: FlowCollector<T>
+) = owner.lifecycleScope.launch(Dispatchers.Main.immediate) {
+    owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        this@observeOnUI.collect(collector)
+    }
+}
+
+fun <T> MutableStateFlow<T>.post(
+    scope: CoroutineScope,
+    value: T
+) = scope.launch { emit(value) }
+
+fun <T> MutableStateFlow<T>.postNow(
+    scope: CoroutineScope,
+    value: T
+) = scope.launch(Dispatchers.Main.immediate) { emit(value) }
+
+fun CoroutineScope.launchLocking(
+    mutex: Mutex,
+    context: CoroutineContext = EmptyCoroutineContext,
+    block: suspend CoroutineScope.() -> Unit
+): Job {
+    return this.launch(context) {
+        mutex.withLock {
+            block()
+        }
+    }
+}
+
+fun Long.toMB(): String = String.format("%.2fMB", (toDouble() / (1024 * 1024)))
