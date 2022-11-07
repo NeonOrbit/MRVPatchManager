@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
+import android.widget.Toast
 import androidx.annotation.WorkerThread
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,10 @@ object AppServices {
     @WorkerThread
     fun isNetworkOnline() = SystemServices.Network.isOnline(application)
 
+    fun getAppCacheSize() = application.cacheDir.size()
+
+    fun clearAppCache() = application.cacheDir.deleteRecursively()
+
     fun getCacheDir(): File = application.cacheDir
 
     fun getCacheDir(sub: String): File {
@@ -40,5 +45,11 @@ object AppServices {
         return File(application.filesDir, sub).also {
             if (!it.exists()) it.mkdirs()
         }
+    }
+
+    fun showToast(message: String, long: Boolean = false) {
+        Toast.makeText(application, message,
+            if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+        ).show()
     }
 }

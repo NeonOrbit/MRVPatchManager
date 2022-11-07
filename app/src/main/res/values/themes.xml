@@ -33,5 +33,7 @@
         <item name="colorOutline">@color/outline</item>
 
         <item name="colorControlHighlight">@color/ripple_color</item>
+
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
     </style>
 </resources>

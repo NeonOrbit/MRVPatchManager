@@ -6,6 +6,13 @@ import app.neonorbit.mrvpatchmanager.data.AppItemData
 import java.io.File
 
 object AppConfig {
+    const val DEVELOPER = "NeonOrbit"
+    const val HELP_FORUM = "XDA Thread"
+    const val GITHUB_REPO = "Github Repo"
+    const val DEVELOPER_URL = "https://github.com/NeonOrbit"
+    const val HELP_FORUM_URL = "https://forum.xda-developers.com/t/4331215"
+    const val GITHUB_REPO_URL = "https://github.com/NeonOrbit/MRVPatchManager"
+
     private const val DOWNLOAD_DIR_NAME = "download"
     private const val CACHE_TEMP_DIR_NAME = "temp_dir"
     private const val PATCHED_APK_DIR_NAME = "patched"

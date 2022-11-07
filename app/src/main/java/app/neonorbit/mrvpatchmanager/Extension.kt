@@ -51,6 +51,13 @@ inline fun <T> Response<T>.useResponse(block: (Response<T>) -> Unit) {
     }
 }
 
+fun File.size(): Long {
+    return if (isFile) length()
+    else listFiles()?.sumOf { sub ->
+        sub.size()
+    } ?: 0L
+}
+
 fun Uri.toTempFile(): File {
     return AppServices.contentResolver.openInputStream(this)?.use { input ->
         File.createTempFile(

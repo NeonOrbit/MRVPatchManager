@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:iconSpaceReserved="false"
+        android:title="@string/pref_config_group_title">
+        <rikka.preference.SimpleMenuPreference
+            android:key="pref_apk_server"
+            android:title="@string/pref_apk_server_title"
+            android:summary="@string/pref_apk_server_summery"
+            android:icon="@drawable/ic_pref_config" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:key="pref_fallback_mode"
+            android:title="@string/pref_fallback_mode_title"
+            android:summary="@string/pref_fallback_mode_summery"
+            android:icon="@drawable/ic_pref_config" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:key="pref_mask_package"
+            android:enabled="false"
+            android:title="@string/pref_change_package_title"
+            android:summary="@string/pref_change_package_summery"
+            android:icon="@drawable/ic_pref_config" />
+    </PreferenceCategory>
 
+    <PreferenceCategory android:iconSpaceReserved="false"
+        android:title="@string/pref_action_group_title">
+        <Preference
+            android:key="pref_clear_cache"
+            android:title="@string/pref_clear_cache_title"
+            android:summary="@string/pref_clear_cache_summery"
+            android:icon="@drawable/ic_pref_action" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:iconSpaceReserved="false"
+        android:title="@string/pref_other_group_title">
+        <Preference
+            android:key="pref_instruction"
+            android:title="@string/pref_instruction_title"
+            android:summary="@string/pref_instruction_summery"
+            android:icon="@drawable/ic_pref_other" />
+        <Preference
+            android:key="pref_safety_note"
+            android:title="@string/pref_safety_note_title"
+            android:summary="@string/pref_safety_note_summery"
+            android:icon="@drawable/ic_pref_other" />
+        <Preference
+            android:key="pref_visit_help"
+            android:title="@string/pref_visit_help_title"
+            android:summary="@string/pref_visit_help_summery"
+            android:icon="@drawable/ic_pref_other" />
+        <Preference
+            android:key="pref_visit_source"
+            android:title="@string/pref_visit_source_title"
+            android:summary="@string/pref_visit_source_summery"
+            android:icon="@drawable/ic_pref_other" />
+    </PreferenceCategory>
 </PreferenceScreen>

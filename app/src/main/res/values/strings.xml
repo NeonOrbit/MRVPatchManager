@@ -22,7 +22,45 @@
     <string name="patcher_default">Default</string>
     <string name="patcher_manual">Manual</string>
     <string name="no_patched_apps">No patched apps</string>
+    <string name="pref_config_group_title">Configs</string>
+    <string name="pref_apk_server_title">Apk download server</string>
+    <string name="pref_apk_server_summery">Select a server to download apk files.</string>
+    <string name="pref_fallback_mode_title">Fallback mode (slow)</string>
+    <string name="pref_fallback_mode_summery">Enable this if patched apps does not work after a while.</string>
+    <string name="pref_change_package_title">Mask package name</string>
+    <string name="pref_change_package_summery">Enable this if you cannot uninstall official apps.</string>
+    <string name="pref_action_group_title">Actions</string>
+    <string name="pref_clear_cache_title">Clear download cache</string>
+    <string name="pref_clear_cache_summery">Remove temporary files from the cache.</string>
+    <string name="pref_other_group_title">Others</string>
+    <string name="pref_instruction_title">Instructions</string>
+    <string name="pref_instruction_summery">Read instruction manual.</string>
+    <string name="pref_safety_note_title">Safety Note</string>
+    <string name="pref_safety_note_summery">Is it safe to use? Read safety note.</string>
+    <string name="pref_visit_help_title">Need help?</string>
+    <string name="pref_visit_help_summery">Visit help forum and ask your question.</string>
+    <string name="pref_visit_source_title">Source code at github</string>
+    <string name="pref_visit_source_summery">Visit github project repository.</string>
     <string name="fallback_warning_message"><b>WARNING:</b> Fallback mode is enabled.
         If you didn\'t enable it, please disable from settings.
+    </string>
+    <string name="full_instructions">
+        Instructions:
+        \n\nUninstall all official facebook apps: facebook, messenger, facebook lite, etc.
+        \n\nInstall ChatHeadEnabler module.
+        \n\nPatch and install your preferred facebook apps from here.
+        \n\n[visit help forum from settings]
+    </string>
+    <string name="safety_note">
+        Safety Note:
+        \n\nIs it safe to use?
+        \nYes. It is safe, just like any other app installed from the playstore.
+        \n[Make sure you installed the MRVPatch Manager from the official github link]
+        \n\nHow can I be sure it is safe?
+        \nAll the apps used here are open source, you can find source codes at github.
+        \n\nWhat safety measures are taken?
+        \nThe manager downloads your selected app from the apk servers
+        and verifies it against the original facebook signature,
+        which makes sure you are patching an official facebook app from the playstore.
     </string>
 </resources>

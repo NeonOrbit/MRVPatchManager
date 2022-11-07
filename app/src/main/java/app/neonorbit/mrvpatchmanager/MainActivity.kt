@@ -29,6 +29,10 @@ class MainActivity : AppCompatActivity() {
             setOf(R.id.navigation_home, R.id.navigation_patched, R.id.navigation_settings)
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        theme.applyStyle(
+            rikka.material.preference.R.style.ThemeOverlay_Rikka_Material3_Preference, false
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
