@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager.remote
 
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
+import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
@@ -27,7 +28,11 @@ class ApkRemoteFileProvider {
     private val preferred = HashMap<AppType, ApkRemoteService>()
 
     private fun getServices(type: AppType): Iterator<ApkRemoteService> {
-        return preferred[type]?.let { pref ->
+        return DefaultPreference.getApkServer()?.let { server ->
+            services.firstOrNull { server == it.server() }?.let {
+                listOf(it).iterator()
+            }
+        } ?: preferred[type]?.let { pref ->
             services.sortedBy { if (it == pref) -1 else 0 }.iterator()
         } ?: services.iterator()
     }

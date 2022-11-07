@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
@@ -56,7 +57,7 @@ class HomeViewModel : ViewModel() {
         MutableStateFlow(VersionStatus(null, null))
     }
 
-    val warnFallback: Boolean get() = false
+    val warnFallback: Boolean get() = DefaultPreference.isFallbackMode()
 
     private val filePickerIntent: Intent by lazy {
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
