@@ -41,6 +41,9 @@
     <string name="pref_visit_help_summery">Visit help forum and ask your question.</string>
     <string name="pref_visit_source_title">Source code at github</string>
     <string name="pref_visit_source_summery">Visit github project repository.</string>
+    <string name="developer_info_text">Developer: &#160;%s</string>
+    <string name="help_forum_info_text">Help Forum: &#160;%s</string>
+    <string name="source_code_info_text">Source Code: &#160;%s</string>
     <string name="fallback_warning_message"><b>WARNING:</b> Fallback mode is enabled.
         If you didn\'t enable it, please disable from settings.
     </string>

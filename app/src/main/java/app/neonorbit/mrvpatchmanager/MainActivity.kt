@@ -1,6 +1,7 @@
 package app.neonorbit.mrvpatchmanager
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -8,7 +9,10 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import app.neonorbit.mrvpatchmanager.databinding.AboutDialogBinding
 import app.neonorbit.mrvpatchmanager.databinding.ActivityMainBinding
+import com.bumptech.glide.Glide
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -43,12 +47,37 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.about -> {
+                showAboutDialog()
                 true
             }
             R.id.instruction -> {
+                showInstructionDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun showInstructionDialog() {
+        MaterialAlertDialogBuilder(this).setMessage(
+            getString(R.string.full_instructions)
+        ).show()
+    }
+
+    private fun showAboutDialog() {
+        val adb = AboutDialogBinding.inflate(LayoutInflater.from(this), null, false)
+        adb.appTitle.text = getString(R.string.app_name)
+        adb.appVersion.text = getString(R.string.version_text, BuildConfig.VERSION_NAME)
+        adb.developerInfo.setLinkedText(
+            R.string.developer_info_text, AppConfig.DEVELOPER, AppConfig.DEVELOPER_URL
+        )
+        adb.helpForumInfo.setLinkedText(
+            R.string.help_forum_info_text, AppConfig.HELP_FORUM, AppConfig.HELP_FORUM_URL
+        )
+        adb.sourceCodeInfo.setLinkedText(
+            R.string.source_code_info_text, AppConfig.GITHUB_REPO, AppConfig.GITHUB_REPO_URL
+        )
+        MaterialAlertDialogBuilder(this).setView(adb.root).show()
+        Glide.with(this).load(R.mipmap.ic_launcher).circleCrop().into(adb.aboutIcon)
     }
 }

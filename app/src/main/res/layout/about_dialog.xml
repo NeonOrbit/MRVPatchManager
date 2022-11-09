@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="25dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/about_icon"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/primary_item_gap">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/app_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:textAppearance="@android:style/TextAppearance.Material.Body1" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/app_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/primary_item_gap"
+            android:textSize="14sp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/developer_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textSize="14sp"
+            android:textColor="?android:textColorSecondary" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/help_forum_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textSize="14sp"
+            android:textColor="?android:textColorSecondary" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/source_code_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textSize="14sp"
+            android:textColor="?android:textColorSecondary" />
+
+    </LinearLayout>
+
+</LinearLayout>

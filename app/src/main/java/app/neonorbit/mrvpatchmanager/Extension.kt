@@ -1,6 +1,12 @@
 package app.neonorbit.mrvpatchmanager
 
+import android.content.Context
 import android.net.Uri
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
+import androidx.annotation.StringRes
+import androidx.core.text.HtmlCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +29,7 @@ import java.io.File
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -125,3 +132,21 @@ fun CoroutineScope.launchLocking(
 }
 
 fun Long.toMB(): String = String.format("%.2fMB", (toDouble() / (1024 * 1024)))
+
+@Suppress("unused")
+fun String.capitalizeWords(): String = split(" ").joinToString(" ") {
+    it.lowercase(Locale.getDefault()).replaceFirstChar { word ->
+        if (word.isLowerCase()) word.titlecase(Locale.getDefault()) else it
+    }
+}
+
+fun Context.getStringWithLink(@StringRes resId: Int, text: String, url: String): Spanned {
+    return HtmlCompat.fromHtml(getString(
+        resId, "<a href=\"$url\">$text</a>"), HtmlCompat.FROM_HTML_MODE_COMPACT
+    )
+}
+
+fun TextView.setLinkedText(@StringRes resId: Int, linkText: String, linkUrl: String) {
+    text = context.getStringWithLink(resId, linkText, linkUrl)
+    movementMethod = LinkMovementMethod.getInstance()
+}
