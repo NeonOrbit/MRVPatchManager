@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import app.neonorbit.mrvpatchmanager.ui.SelectionTrackerFactory
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import java.util.Collections
 
 class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
@@ -45,7 +47,10 @@ class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
         holder.apkVersion.text = holder.itemView.context.getString(
             R.string.version_text, item.version
         )
-        // TODO: Load apk icon with glide
+        Glide.with(holder.itemView)
+            .load(item.path)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .into(holder.apkIcon)
         callback?.let { call ->
             holder.itemView.setOnClickListener {
                 call.onItemClicked(item)

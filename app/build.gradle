@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
+apply plugin: "kotlin-kapt"
 
 android {
     namespace 'app.neonorbit.mrvpatchmanager'
@@ -58,6 +59,12 @@ dependencies {
     implementation('dev.rikka.rikkax.preference:simplemenu-preference:1.0.3') {
         transitive = false
     }
+
+    implementation 'com.github.bumptech.glide:glide:4.13.2'
+    implementation ('com.github.bumptech.glide:recyclerview-integration:4.13.2') {
+        transitive = false
+    }
+    kapt 'com.github.bumptech.glide:compiler:4.13.2'
 
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'

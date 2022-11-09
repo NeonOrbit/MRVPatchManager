@@ -14,12 +14,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.databinding.FragmentPatchedBinding
+import app.neonorbit.mrvpatchmanager.glide.RecyclerPreloadProvider
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
-import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
+import com.bumptech.glide.util.ViewPreloadSizeProvider
 import java.io.File
 
 class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback {
@@ -48,6 +52,13 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
             registerSelectionObserver(it)
         }
         recyclerAdapter.setItemClickListener(this)
+
+        val sizeProvider = ViewPreloadSizeProvider<ApkFileData>()
+        val modelProvider = RecyclerPreloadProvider(this, recyclerAdapter.items)
+        val viewPreLoader = RecyclerViewPreloader(
+            Glide.with(this), modelProvider, sizeProvider, 20
+        )
+        recyclerView.addOnScrollListener(viewPreLoader)
 
         initializeFragment(binding!!, viewModel!!)
         viewModel?.reloadPatchedApks()

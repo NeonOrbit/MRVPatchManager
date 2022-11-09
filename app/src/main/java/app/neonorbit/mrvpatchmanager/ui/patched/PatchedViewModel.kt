@@ -3,10 +3,10 @@ package app.neonorbit.mrvpatchmanager.ui.patched
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
 import app.neonorbit.mrvpatchmanager.launchLocking
 import app.neonorbit.mrvpatchmanager.repository.ApkRepository
+import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import java.io.File

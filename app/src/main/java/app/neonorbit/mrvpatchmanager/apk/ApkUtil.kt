@@ -3,6 +3,7 @@ package app.neonorbit.mrvpatchmanager.apk
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.Signature
+import android.graphics.drawable.Drawable
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import java.io.File
@@ -45,6 +46,14 @@ object ApkUtil {
     fun getApkSimpleInfo(file: File): ApkSimpleInfo? {
         return getPackageInfo(file, cert = false, meta = true)?.let {
             ApkSimpleInfo(it.packageName, it.getAppName(), it.versionName)
+        }
+    }
+
+    fun getApkIcon(file: File): Drawable? {
+        return getPackageInfo(file)?.let {
+            it.applicationInfo.sourceDir = file.absolutePath
+            it.applicationInfo.publicSourceDir = file.absolutePath
+            it.applicationInfo.loadIcon(AppServices.packageManager)
         }
     }
 
