@@ -3,16 +3,10 @@ package app.neonorbit.mrvpatchmanager
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.data.AppItemData
+import org.lsposed.lspatch.share.ConstantsM
 import java.io.File
 
 object AppConfig {
-    const val DEVELOPER = "NeonOrbit"
-    const val HELP_FORUM = "XDA Thread"
-    const val GITHUB_REPO = "Github Repo"
-    const val DEVELOPER_URL = "https://github.com/NeonOrbit"
-    const val HELP_FORUM_URL = "https://forum.xda-developers.com/t/4331215"
-    const val GITHUB_REPO_URL = "https://github.com/NeonOrbit/MRVPatchManager"
-
     private const val DOWNLOAD_DIR_NAME = "download"
     private const val CACHE_TEMP_DIR_NAME = "temp_dir"
     private const val PATCHED_APK_DIR_NAME = "patched"
@@ -39,6 +33,18 @@ object AppConfig {
         (getFbAppName(info.pkg) ?: info.name.replace(' ', '-')) + "-v${info.version}.apk"
     }?.let { name -> File(PATCHED_APK_DIR, name) }
 
+    const val DEVELOPER = "NeonOrbit"
+    const val HELP_FORUM = "XDA Thread"
+    const val GITHUB_REPO = "Github Repo"
+    const val DEVELOPER_URL = "https://github.com/NeonOrbit"
+    const val HELP_FORUM_URL = "https://forum.xda-developers.com/t/4331215"
+    const val GITHUB_REPO_URL = "https://github.com/NeonOrbit/MRVPatchManager"
+
+    @Suppress("UNCHECKED_CAST")
+    val DEFAULT_FB_PACKAGES = ConstantsM.DEFAULT_FB_PACKAGES as Set<String>
+    const val DEFAULT_FB_SIGNATURE = ConstantsM.DEFAULT_FB_SIGNATURE
+    const val MRV_PUBLIC_SIGNATURE  = ConstantsM.DEFAULT_MRV_SIGNATURE
+
     fun getFbAppName(type: AppType): String {
         return when(type) {
             AppType.FACEBOOK -> "Facebook"
@@ -59,10 +65,6 @@ object AppConfig {
             else -> null
         }
     }
-
-    val DEFAULT_FB_PACKAGES: List<String> = listOf() // removed:
-    val DEFAULT_FB_SIGNATURE: String = "" // removed: BuildConfig.FB_SIG
-    val MRV_PUBLIC_SIGNATURE: String = "" // removed: BuildConfig.MRV_SIG
 
     val FB_APP_LIST by lazy {
         listOf(

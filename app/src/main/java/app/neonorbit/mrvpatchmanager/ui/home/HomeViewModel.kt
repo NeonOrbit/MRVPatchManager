@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.DefaultPatcher
+import app.neonorbit.mrvpatchmanager.DefaultPatcher.PatchStatus
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
@@ -170,7 +172,34 @@ class HomeViewModel : ViewModel() {
     }
 
     private suspend fun patchApk(input: File): File? {
-        TODO("Not yet implemented")
+        val patched = AppConfig.getPatchedApkFile(input) ?: throw Exception(
+            "Failed to get patched apk info"
+        )
+        if (patched.exists() && !confirmationEvent.ask(
+                "${patched.name} already exists in the patched apk list, patch again?"
+            )) {
+            progressStatus.emit(null)
+            return null
+        }
+        progressStatus.emit("Patching: ${input.name}")
+        return DefaultPatcher.patch(input, DefaultPreference.isFallbackMode()).onEach { status ->
+            when (status) {
+                is PatchStatus.PATCHING -> progressStatus.emit("Patching: ${status.msg}")
+                is PatchStatus.FINISHED -> {
+                    status.file.copyTo(patched, true)
+                    status.file.delete()
+                    progressStatus.emit("Patched: ${patched.name}")
+                }
+                is PatchStatus.FAILED -> {
+                    throw Exception(status.msg)
+                }
+            }
+        }.catch {
+            progressStatus.emit("Patch Failed: ${it.error}")
+            progressTracker.emit(ProgressTrack(0))
+        }.lastOrNull().let {
+            if (it is PatchStatus.FINISHED) patched else null
+        }
     }
 
     private suspend fun getPatchableApkFile(type: AppType): File? {
