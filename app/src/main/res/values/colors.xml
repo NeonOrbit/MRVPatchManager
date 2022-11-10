@@ -6,7 +6,7 @@
     <color name="highlight_color">#89B602</color>
 
     <color name="background">#FAFDF9</color>
-    <color name="ripple_color">#A9DCD4</color>
+    <color name="ripple_color">#A8DCD6</color>
     <color name="selection_color">#B7E8E3</color>
 
     <color name="primary">#29B3A5</color>
@@ -16,8 +16,8 @@
     <color name="secondary">#2E9187</color>
     <color name="secondary_foreground">#576363</color>
 
-    <color name="outline">#B6DCD7</color>
-    <color name="background_overlay">#EFF3EA</color>
+    <color name="outline">#A9D1CC</color>
+    <color name="background_overlay">#F0FAF5</color>
 
     <color name="surface_foreground">#315752</color>
     <color name="surface_foreground_variant">#3F6863</color>
@@ -25,5 +25,6 @@
     <color name="secondary_container">#8ECFCF</color>
     <color name="secondary_container_foreground">#315752</color>
 
+    <color name="notice_color">#B7E8E3</color>
     <color name="warning_color">#FBE1D0</color>
 </resources>

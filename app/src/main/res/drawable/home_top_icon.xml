@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="34dp" android:height="34dp" android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="@color/secondary"/>
+        </shape>
+    </item>
+    <item android:drawable="@mipmap/ic_launcher_foreground" android:width="44dp" android:height="44dp"/>
+</layer-list>

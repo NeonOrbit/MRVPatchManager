@@ -15,6 +15,16 @@
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start|top"
+            android:paddingBottom="24dp"
+            android:text="@string/app_name"
+            android:textSize="25sp"
+            android:textColor="@color/surface_foreground"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
+
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/manager_card"
             android:visibility="gone"
@@ -184,7 +194,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/secondary_item_gap"
-                    android:backgroundTint="?colorOutline"
+                    android:backgroundTint="@color/ripple_color"
                     app:cardCornerRadius="4dp"
                     app:strokeWidth="0dp">
 

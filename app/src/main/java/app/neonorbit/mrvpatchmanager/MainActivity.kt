@@ -34,6 +34,14 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.navigation_home) {
+                supportActionBar?.title = null
+                supportActionBar?.setDisplayHomeAsUpEnabled(true)
+                supportActionBar?.setHomeAsUpIndicator(R.drawable.home_top_icon)
+            }
+        }
+
         theme.applyStyle(
             rikka.material.preference.R.style.ThemeOverlay_Rikka_Material3_Preference, false
         )
@@ -46,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.about -> {
+            R.id.about, android.R.id.home -> {
                 showAboutDialog()
                 true
             }

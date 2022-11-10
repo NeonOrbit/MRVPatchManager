@@ -119,7 +119,7 @@ object FileDownloader {
         }
     }
 
-    private fun getInfoKey(file: File) = "download_info${file.name}"
+    private fun getInfoKey(file: File) = "download_info_${file.name.lowercase()}"
 
     private fun getDownloadInfo(file: File): DownloadInfo? {
         return DefaultPreference.getString(getInfoKey(file))?.let {
