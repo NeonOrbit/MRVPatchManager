@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 apply plugin: "kotlin-kapt"
+apply from: "dependency.gradle"
 
 android {
     namespace 'app.neonorbit.mrvpatchmanager'
@@ -36,10 +37,39 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    packagingOptions {
+        exclude 'XPP3_*_VERSION'
+        exclude 'DebugProbesKt.bin'
+        exclude 'META-INF/CHANGES'
+        exclude 'META-INF/README.md'
+    }
+
+    applicationVariants.all { variant ->
+        def buildType = variant.name.capitalize()
+        def apkTaskName = "copy${buildType}Apk"
+        def nameSuffix = variant.name == "release" ? '' : "-${variant.name}"
+        def outFileName = "${project.name}-v${variant.versionName}${nameSuffix}.apk"
+        variant.outputs.all {
+            outputFileName = outFileName
+        }
+        task "$apkTaskName"(type: Copy) {
+            from file("$rootProject.projectDir/app/$variant.name/$outFileName")
+            into file("$rootProject.projectDir/out")
+            doLast {
+                delete file("$rootProject.projectDir/app/$variant.name/$outFileName")
+            }
+        }
+    }
+
+    afterEvaluate {
+        assembleDebug.finalizedBy(copyDebugApk)
+        assembleRelease.finalizedBy(copyReleaseApk)
+    }
 }
 
 dependencies {
-    implementation(fileTree(dir: "libs", include: "*.jar"))
+    implementation mrvpatcher('5.5.1')
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.browser:browser:1.4.0'
@@ -69,7 +99,7 @@ dependencies {
 
     kapt 'com.github.bumptech.glide:compiler:4.13.2'
     implementation 'com.github.bumptech.glide:glide:4.13.2'
-    implementation ('com.github.bumptech.glide:recyclerview-integration:4.13.2') { transitive false }
+    implementation('com.github.bumptech.glide:recyclerview-integration:4.13.2') { transitive false }
 
     implementation('dev.rikka.rikkax.material:material-preference:2.0.0') { transitive false }
     implementation('dev.rikka.rikkax.preference:simplemenu-preference:1.0.3') { transitive false }

@@ -12,5 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "MRVPatch Manager"
 include ':app'
+rootProject.name = "MRVPatchManager"
+project(':app').name = 'MRVPatchManager'

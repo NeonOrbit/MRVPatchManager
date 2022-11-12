@@ -1,0 +1,21 @@
+import org.codehaus.groovy.runtime.MethodClosure
+
+ext {
+  mrvpatcher = this.&getMrvPatcher as MethodClosure
+}
+
+def getMrvPatcher(String version) {
+  if (gradle.gradleUserHomeDir == null) throw AssertionError()
+  String name = "MRVPatcher-${version}.jar"
+  File file = file("${gradle.gradleUserHomeDir}/download/MRVPatcher/$name")
+  String url = "https://github.com/NeonOrbit/MRVPatcher/releases/download/$version/$name"
+  if (!file.exists()) {
+    file.parentFile.mkdirs()
+    new URL(url).withInputStream { downloadStream ->
+      file.withOutputStream { fileOut ->
+        fileOut << downloadStream
+      }
+    }
+  }
+  files(file.absolutePath)
+}
