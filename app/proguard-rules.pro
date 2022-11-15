@@ -1,13 +1,17 @@
 -dontoptimize
 -dontobfuscate
--keepattributes *Annotation*
+-keepattributes Signature, *Annotation*
 -keepattributes SourceFile, LineNumberTable
 
--keep class org.lsposed.** { *; }
--keep class com.android.apksig.** { *; }
--keep class com.beust.jcommander.** { *; }
--keep class app.neonorbit.mrvpatchmanager.** { *; }
--keep class com.android.tools.build.apkzlib.** { *; }
+-keep class app.neonorbit.mrvpatchmanager.** {*;}
+-keep class org.simpleframework.xml.** {*;}
+-keep class com.google.gson.annotations.** {*;}
+-keep class pl.droidsonroids.jspoon.annotation.** {*;}
+
+-keep class org.lsposed.** {*;}
+-keep class com.android.apksig.** {*;}
+-keep class com.beust.jcommander.** {*;}
+-keep class com.android.tools.build.apkzlib.** {*;}
 
 -keepclassmembers enum * {
     public static **[] values();
