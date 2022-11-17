@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager.ui.home
 
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppConfig
@@ -18,7 +19,7 @@ import app.neonorbit.mrvpatchmanager.post
 import app.neonorbit.mrvpatchmanager.postNow
 import app.neonorbit.mrvpatchmanager.remote.GithubService
 import app.neonorbit.mrvpatchmanager.repository.ApkRepository
-import app.neonorbit.mrvpatchmanager.toMB
+import app.neonorbit.mrvpatchmanager.toSize
 import app.neonorbit.mrvpatchmanager.toTempFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -40,6 +41,7 @@ class HomeViewModel : ViewModel() {
     val fbAppList = AppConfig.FB_APP_LIST
     var currentApp = AppConfig.FB_APP_LIST[0]
 
+    val uriEvent = SingleEvent<Uri>()
     val intentEvent = SingleEvent<Intent>()
     val messageEvent = SingleEvent<String>()
     val installEvent = SingleEvent<File>()
@@ -60,6 +62,12 @@ class HomeViewModel : ViewModel() {
     }
 
     val warnFallback: Boolean get() = DefaultPreference.isFallbackMode()
+
+    private val moduleInfoIntent: Intent by lazy {
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", AppConfig.MODULE_PACKAGE, null)
+        )
+    }
 
     private val filePickerIntent: Intent by lazy {
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -88,22 +96,26 @@ class HomeViewModel : ViewModel() {
             if (version == null || version >= (moduleLatest ?: "")) {
                 moduleLatest = null
             }
-            moduleStatus.postNow(viewModelScope, VersionStatus(version, moduleLatest))
+            moduleStatus.postNow(VersionStatus(version, moduleLatest), with = this)
         }
     }
 
     fun updateModuleStatus(current: String, latest: String) {
         if (latest != moduleLatest) {
             moduleLatest = latest
-            moduleStatus.postNow(viewModelScope, VersionStatus(current, moduleLatest))
+            moduleStatus.postNow(VersionStatus(current, moduleLatest), with = this)
         }
     }
+
+    fun showModuleInfo() = intentEvent.post(viewModelScope, moduleInfoIntent)
+    fun visitModule() = uriEvent.post(viewModelScope, Uri.parse(AppConfig.MODULE_LATEST_URL))
+    fun visitManager() = uriEvent.post(viewModelScope, Uri.parse(AppConfig.MANAGER_LATEST_URL))
 
     fun installModule(force: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO + catcher) {
             install(repository.getModuleApk(force))
         }.let { job ->
-            quickDownloadJob.post(viewModelScope, job)
+            quickDownloadJob.post(job, with = this)
         }
     }
 
@@ -111,7 +123,7 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO + catcher) {
             install(repository.getManagerApk())
         }.let { job ->
-            quickDownloadJob.post(viewModelScope, job)
+            quickDownloadJob.post(job, with = this)
         }
     }
 
@@ -135,7 +147,7 @@ class HomeViewModel : ViewModel() {
             val file = uri?.toTempFile()?.also {
                 manual = it
                 if (!ApkUtil.verifyFbSignature(it) &&
-                    !confirmationEvent.ask("Warning", "This apk isn't official, continue?")) {
+                    !confirmationEvent.ask("Warning!", "This apk isn't official, continue?")) {
                     progressStatus.emit(null)
                     return@launch
                 }
@@ -155,7 +167,7 @@ class HomeViewModel : ViewModel() {
                 }
             }
         }.let { job ->
-            patchingJob.post(viewModelScope, job)
+            patchingJob.post(job, with = this)
             job.invokeOnCompletion {
                 manual?.delete()
                 if (it is CancellationException) {
@@ -164,9 +176,9 @@ class HomeViewModel : ViewModel() {
                         progressTracker.emit(ProgressTrack())
                     }
                 } else if (progressTracker.value.current < 0) {
-                    progressTracker.post(viewModelScope, ProgressTrack(0))
+                    progressTracker.post(ProgressTrack(0), with = this)
                 }
-                patchingJob.post(viewModelScope, null)
+                patchingJob.post(null, with = this)
             }
         }
     }
@@ -216,7 +228,7 @@ class HomeViewModel : ViewModel() {
                         progressTracker.emit(ProgressTrack())
                     } else {
                         val percent = getPercentage(status.current, status.total)
-                        val details = "${status.current.toMB()}/${status.total.toMB()}"
+                        val details = "${status.current.toSize()}/${status.total.toSize()}"
                         progressTracker.emit(ProgressTrack(percent, details))
                     }
                 }

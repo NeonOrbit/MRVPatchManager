@@ -17,7 +17,8 @@
     <color name="secondary_foreground">#93A5A5</color>
 
     <color name="outline">#627774</color>
-    <color name="background_overlay">#3F4C48</color>
+    <color name="background_overlay">#3C4944</color>
+    <color name="background_overlay_variant">#4D5E57</color>
 
     <color name="surface_foreground">#C7EDE9</color>
     <color name="surface_foreground_variant">#C1DFDC</color>

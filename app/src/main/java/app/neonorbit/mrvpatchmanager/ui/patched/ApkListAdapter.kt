@@ -9,7 +9,7 @@ import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import app.neonorbit.mrvpatchmanager.ui.SelectionTrackerFactory
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import java.util.Collections
 
 class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
@@ -49,7 +49,8 @@ class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
         )
         Glide.with(holder.itemView)
             .load(item.path)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .placeholder(R.drawable.generic_placeholder)
+            .transition(DrawableTransitionOptions.withCrossFade())
             .into(holder.apkIcon)
         callback?.let { call ->
             holder.itemView.setOnClickListener {

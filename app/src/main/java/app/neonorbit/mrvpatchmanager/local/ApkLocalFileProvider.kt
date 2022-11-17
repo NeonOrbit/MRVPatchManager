@@ -26,7 +26,11 @@ class ApkLocalFileProvider {
         )?.map { it.key }?.collect(Collectors.toList()) ?: listOf()
     }
 
-    private fun File.toApkData(): ApkFileData = ApkFileData(
-        name, absolutePath, ApkUtil.getApkVersionName(this) ?: "unknown"
-    )
+
+    private val File.version: String get() = this.name
+        .substringAfterLast("-v", "")
+        .substringBeforeLast(".apk", "")
+        .takeUnless { it.isEmpty() } ?: ApkUtil.getApkVersionName(this) ?: "unknown"
+
+    private fun File.toApkData(): ApkFileData = ApkFileData(name, absolutePath, version)
 }

@@ -9,8 +9,10 @@ import androidx.annotation.StringRes
 import androidx.core.text.HtmlCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +34,8 @@ import java.net.UnknownHostException
 import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.math.log10
+import kotlin.math.pow
 
 inline fun <reified T> String.parseJson(): T? {
     return Gson().fromJson(this, object : TypeToken<T>() {}.type)
@@ -110,14 +114,14 @@ fun <T> Flow<T>.observeOnUI(
 }
 
 fun <T> MutableStateFlow<T>.post(
-    scope: CoroutineScope,
-    value: T
-) = scope.launch { emit(value) }
+    value: T,
+    with: ViewModel
+) = with.viewModelScope.launch { emit(value) }
 
 fun <T> MutableStateFlow<T>.postNow(
-    scope: CoroutineScope,
-    value: T
-) = scope.launch(Dispatchers.Main.immediate) { emit(value) }
+    value: T,
+    with: ViewModel
+) = with.viewModelScope.launch(Dispatchers.Main.immediate) { emit(value) }
 
 fun CoroutineScope.launchLocking(
     mutex: Mutex,
@@ -131,7 +135,15 @@ fun CoroutineScope.launchLocking(
     }
 }
 
-fun Long.toMB(): String = String.format("%.2fMB", (toDouble() / (1024 * 1024)))
+fun Long.toSize(withSpace: Boolean = false): String {
+    val space = (if (withSpace) " " else "")
+    if (this <= 0) return "0${space}Bytes"
+    val units = arrayOf("B", "KB", "MB", "GB", "TB")
+    val digit = (log10(this.toDouble()) / log10(1024.0)).toInt()
+    return String.format("%.2f", (this.toDouble() / 1024.0.pow(digit))).let {
+        "$it${space}${units[digit]}"
+    }
+}
 
 @Suppress("unused")
 fun String.capitalizeWords(): String = split(" ").joinToString(" ") {
@@ -140,13 +152,13 @@ fun String.capitalizeWords(): String = split(" ").joinToString(" ") {
     }
 }
 
+fun TextView.setLinkedText(@StringRes resId: Int, linkText: String, linkUrl: String) {
+    text = context.getStringWithLink(resId, linkText, linkUrl)
+    movementMethod = LinkMovementMethod.getInstance()
+}
+
 fun Context.getStringWithLink(@StringRes resId: Int, text: String, url: String): Spanned {
     return HtmlCompat.fromHtml(getString(
         resId, "<a href=\"$url\">$text</a>"), HtmlCompat.FROM_HTML_MODE_COMPACT
     )
-}
-
-fun TextView.setLinkedText(@StringRes resId: Int, linkText: String, linkUrl: String) {
-    text = context.getStringWithLink(resId, linkText, linkUrl)
-    movementMethod = LinkMovementMethod.getInstance()
 }

@@ -12,7 +12,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.R
-import app.neonorbit.mrvpatchmanager.toMB
+import app.neonorbit.mrvpatchmanager.toSize
 import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
@@ -43,7 +43,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         }
         viewModel.cacheSize.observe(viewLifecycleOwner) { size ->
             findPreference<Preference>(KEY_PREF_CLEAR_CACHE)?.let {
-                it.summary = size.toMB()
+                it.summary = size.toSize(true)
             }
         }
         viewModel.loadCacheSize()
@@ -81,7 +81,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
 
         onPreferenceClick(KEY_PREF_CLEAR_CACHE) {
             AppUtil.prompt(requireContext(),
-                "Cache", "Clear download cache?", "Clear"
+                "Clear cache?", "This won't delete your patched apps.", "Clear"
             ) {
                 if (it) viewModel.clearCache()
             }

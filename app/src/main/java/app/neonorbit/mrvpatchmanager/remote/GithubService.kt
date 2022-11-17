@@ -63,8 +63,7 @@ object GithubService {
                 CacheManager.put(cacheKey, it, CACHE_TIMEOUT_HOUR)
             }
         } catch (_: Exception) {
-            if (AppServices.isNetworkOnline()) null
-            else CacheManager.get(cacheKey, true)
+            CacheManager.get(cacheKey, true)
         }
     }
 

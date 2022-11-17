@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -38,7 +39,7 @@ class HomeFragment : Fragment(),
     private var binding: FragmentHomeBinding? = null
     private var viewModel: HomeViewModel? = null
     private var intentLauncher: ActivityResultLauncher<Intent>? = null
-
+    private val uriLauncher by lazy { CustomTabsIntent.Builder().build() }
     private val autoProgressDialog by lazy { AutoProgressDialog.newInstance() }
 
     override fun onCreateView(
@@ -124,6 +125,12 @@ class HomeFragment : Fragment(),
         }
 
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            model.uriEvent.observe {
+                uriLauncher.launchUrl(requireContext(), it)
+            }
+        }
+
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
             model.installEvent.observe { file ->
                 AppInstaller.install(requireContext(), file)
             }
@@ -140,8 +147,11 @@ class HomeFragment : Fragment(),
         binding.warningCard.isVisible = model.warnFallback
         binding.patcherManual.setOnClickListener { model.manualRequest() }
         binding.managerButton.setOnClickListener { model.installManager() }
+        binding.moduleInfoButton.setOnClickListener { model.showModuleInfo() }
         binding.moduleUpdateButton.setOnClickListener { model.installModule() }
         binding.moduleInstallButton.setOnClickListener { model.installModule(true) }
+        binding.managerChangelogButton.setOnClickListener { model.visitManager() }
+        binding.moduleChangelogButton.setOnClickListener { model.visitModule() }
     }
 
     override fun onActivityResult(result: ActivityResult?) {
@@ -214,15 +224,19 @@ class HomeFragment : Fragment(),
             binding!!.moduleInstallButton.isVisible = false
             binding!!.moduleUpdateButton.isVisible = true
             binding!!.moduleLatestSubtitle.isVisible = true
+            binding!!.moduleChangelogButton.isVisible = true
             binding!!.moduleLatestSubtitle.text = requireContext().getString(
                 R.string.latest_version, status.latest
             )
         } else {
+            binding!!.moduleChangelogButton.isVisible = false
             binding!!.moduleLatestSubtitle.isVisible = false
             binding!!.moduleUpdateButton.isVisible = false
-            binding!!.moduleInstallButton.isVisible = true
-            binding!!.moduleInstallButton.isEnabled = status.current == null
-            binding!!.moduleWarning.isVisible = status.current == null
+            (status.current != null).let { installed ->
+                binding!!.moduleInfoButton.isVisible = installed
+                binding!!.moduleInstallButton.isVisible = !installed
+                binding!!.moduleWarning.isVisible = !installed
+            }
         }
         binding!!.moduleInstalledSubtitle.text = requireContext().getString(
             R.string.installed_version, status.current ?: "none"

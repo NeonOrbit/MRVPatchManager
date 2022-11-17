@@ -2,7 +2,6 @@ package app.neonorbit.mrvpatchmanager.glide
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import androidx.core.content.ContextCompat
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
@@ -16,19 +15,19 @@ import java.io.File
 
 class ApkIconLoaderFactory(val context: Context) : ModelLoaderFactory<String, Drawable> {
     override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<String, Drawable> {
-        return ApkIconModelLoader(context)
+        return ApkIconModelLoader()
     }
 
     override fun teardown() {}
 
-    class ApkIconModelLoader(private val context: Context) : ModelLoader<String, Drawable> {
+    class ApkIconModelLoader : ModelLoader<String, Drawable> {
         override fun buildLoadData(
             model: String,
             width: Int,
             height: Int,
             options: Options
         ): ModelLoader.LoadData<Drawable> {
-            return ModelLoader.LoadData(ObjectKey(model), ApkIconFetcher(context, model))
+            return ModelLoader.LoadData(ObjectKey(model), ApkIconFetcher(model))
         }
 
         override fun handles(model: String): Boolean {
@@ -36,15 +35,10 @@ class ApkIconLoaderFactory(val context: Context) : ModelLoaderFactory<String, Dr
         }
     }
 
-    class ApkIconFetcher(
-        private val context: Context,
-        private val path: String
-    ) : DataFetcher<Drawable> {
+    class ApkIconFetcher(private val path: String) : DataFetcher<Drawable> {
         override fun loadData(priority: Priority, callback: DataFetcher.DataCallback<in Drawable>) {
             ApkUtil.getApkIcon(File(path)).let { icon ->
-                callback.onDataReady(
-                    icon ?: ContextCompat.getDrawable(context, android.R.drawable.ic_menu_report_image)
-                )
+                callback.onDataReady(icon)
             }
         }
 

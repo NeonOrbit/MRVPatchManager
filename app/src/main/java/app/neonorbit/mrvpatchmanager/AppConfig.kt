@@ -39,6 +39,8 @@ object AppConfig {
     const val DEVELOPER_URL = "https://github.com/NeonOrbit"
     const val HELP_FORUM_URL = "https://forum.xda-developers.com/t/4331215"
     const val GITHUB_REPO_URL = "https://github.com/NeonOrbit/MRVPatchManager"
+    const val MODULE_LATEST_URL = "https://github.com/NeonOrbit/ChatHeadEnabler/releases/latest"
+    const val MANAGER_LATEST_URL = "https://github.com/NeonOrbit/MRVPatchManager/releases/latest"
 
     @Suppress("UNCHECKED_CAST")
     val DEFAULT_FB_PACKAGES = ConstantsM.DEFAULT_FB_PACKAGES as Set<String>

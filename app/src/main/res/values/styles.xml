@@ -8,7 +8,7 @@
     </style>
 
     <style name="DropDownHintTextAppearance" parent="TextAppearance.MaterialComponents.Button">
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="MaterialCardSimpleOutlined" parent="Widget.Material3.CardView.Outlined">
