@@ -1,21 +1,34 @@
 import org.codehaus.groovy.runtime.MethodClosure
 
+import java.security.MessageDigest
+
 ext {
-  mrvpatcher = this.&getMrvPatcher as MethodClosure
+    mrvpatcher = this.&getMRVPatcher as MethodClosure
 }
 
-def getMrvPatcher(String version) {
-  if (gradle.gradleUserHomeDir == null) throw AssertionError()
-  String name = "MRVPatcher-${version}.jar"
-  File file = file("${gradle.gradleUserHomeDir}/download/MRVPatcher/$name")
-  String url = "https://github.com/NeonOrbit/MRVPatcher/releases/download/$version/$name"
-  if (!file.exists()) {
-    file.parentFile.mkdirs()
-    new URL(url).withInputStream { downloadStream ->
-      file.withOutputStream { fileOut ->
-        fileOut << downloadStream
-      }
+def getMRVPatcher(String version, String sha1sum) {
+    if (gradle.gradleUserHomeDir == null) throw AssertionError()
+    String name = "MRVPatcher-${version}.jar"
+    File file = file("${gradle.gradleUserHomeDir}/download/MRVPatcher/$name")
+    String url = "https://github.com/NeonOrbit/MRVPatcher/releases/download/$version/$name"
+    if (!file.exists()) {
+        file.parentFile.mkdirs()
+        new URL(url).withInputStream { input ->
+            file.withOutputStream { output ->
+                output << input
+            }
+        }
     }
-  }
-  files(file.absolutePath)
+    verifyChecksum(file, sha1sum)
+    files(file.absolutePath)
+}
+
+static def verifyChecksum(File input, String sha1sum) {
+    def digest = MessageDigest.getInstance("SHA-1")
+    try (def is = input.newInputStream()) {
+        def hash = digest.digest(is.bytes).encodeHex().toString()
+        if (!hash.equalsIgnoreCase(sha1sum)) {
+            throw new GradleException("MRVPatcher jar verification failed")
+        }
+    }
 }
