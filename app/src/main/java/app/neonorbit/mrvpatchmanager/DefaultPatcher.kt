@@ -2,17 +2,19 @@ package app.neonorbit.mrvpatchmanager
 
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.onCompletion
 import org.lsposed.patch.LSPatch
 import org.lsposed.patch.OutputLogger
 import java.io.File
 
 object DefaultPatcher {
-    fun patch(input: File, fallback: Boolean) = callbackFlow {
+    fun patch(input: File, fallback: Boolean, output: File = input.out) = callbackFlow {
         var failed = false
         LSPatch.setOutputLogger(object : OutputLogger {
-            override fun v(msg: String) { }
             override fun d(msg: String) {
+                ensureActive()
                 trySend(PatchStatus.PATCHING(msg))
             }
             override fun e(msg: String) {
@@ -21,9 +23,7 @@ object DefaultPatcher {
                 channel.close()
             }
         })
-        val output = File(AppConfig.PATCHED_OUT_DIR, input.name).also {
-            it.delete()
-        }
+        output.delete()
         LSPatch.main(*buildOptions(input, output, fallback).toTypedArray())
         if (!failed) {
             if (output.exists() && ApkUtil.verifyMrvSignature(output)) {
@@ -32,9 +32,11 @@ object DefaultPatcher {
                 output.delete()
                 send(PatchStatus.FAILED("Something went wrong"))
             }
-            close()
+            channel.close()
         }
         awaitClose()
+    }.onCompletion { error ->
+        if (error != null) output.delete()
     }
 
     private fun buildOptions(input: File, output: File, fallback: Boolean) =
@@ -47,6 +49,8 @@ object DefaultPatcher {
             add("--force")
             if (fallback) add("--fallback")
         }
+
+    private val File.out: File get() = File(AppConfig.PATCHED_OUT_DIR, this.name)
 
     sealed class PatchStatus {
         data class PATCHING(val msg: String) : PatchStatus()

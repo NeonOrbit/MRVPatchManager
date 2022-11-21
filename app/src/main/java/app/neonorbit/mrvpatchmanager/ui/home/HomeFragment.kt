@@ -95,13 +95,15 @@ class HomeFragment : Fragment(),
         }
 
         binding.patchButton.setOnClickListener {
-            binding.dropDownMenu.isClickable = false
-            model.patchingJob.value?.cancel() ?: model.patch()
+            binding.patchButton.isClickable = false
+            binding.dropDown.isEnabled = false
+            model.patch()
         }
 
-        model.patchingJob.observeOnUI(viewLifecycleOwner) {
+        model.patchingStatus.observeOnUI(viewLifecycleOwner) {
+            binding.dropDown.isEnabled = !it
             binding.patchButton.isClickable = true
-            binding.patchButton.text = if (it == null) "Patch" else "Cancel"
+            binding.patchButton.text = if (!it) "Patch" else "Cancel"
         }
 
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {

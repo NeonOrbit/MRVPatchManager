@@ -49,7 +49,7 @@ class HomeViewModel : ViewModel() {
 
     val confirmationEvent = ConfirmationEvent()
 
-    var patchingJob = MutableStateFlow<Job?>(null)
+    var patchingStatus = MutableStateFlow(false)
     val progressStatus = MutableStateFlow<String?>(null)
     val progressTracker = MutableStateFlow(ProgressTrack())
 
@@ -62,6 +62,8 @@ class HomeViewModel : ViewModel() {
     }
 
     val warnFallback: Boolean get() = DefaultPreference.isFallbackMode()
+
+    private var patchingJob: Job? = null
 
     private val moduleInfoIntent: Intent by lazy {
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
@@ -128,7 +130,7 @@ class HomeViewModel : ViewModel() {
     }
 
     fun manualRequest() {
-        if (patchingJob.value == null) {
+        if (patchingJob == null) {
             intentEvent.post(viewModelScope, filePickerIntent)
         } else {
             viewModelScope.launch {
@@ -140,6 +142,13 @@ class HomeViewModel : ViewModel() {
     }
 
     fun patch(uri: Uri? = null) {
+        if (patchingJob != null) {
+            viewModelScope.launch {
+                progressStatus.emit("Stopping...")
+            }
+            patchingJob?.cancel()
+            return
+        }
         var manual: File? = null
         viewModelScope.launch(Dispatchers.Default + catcher) {
             progressStatus.emit("Status")
@@ -167,7 +176,8 @@ class HomeViewModel : ViewModel() {
                 }
             }
         }.let { job ->
-            patchingJob.post(job, with = this)
+            patchingJob = job
+            patchingStatus.post(true, with = this)
             job.invokeOnCompletion {
                 manual?.delete()
                 if (it is CancellationException) {
@@ -178,7 +188,8 @@ class HomeViewModel : ViewModel() {
                 } else if (progressTracker.value.current < 0) {
                     progressTracker.post(ProgressTrack(0), with = this)
                 }
-                patchingJob.post(null, with = this)
+                patchingJob = null
+                patchingStatus.post(false, with = this)
             }
         }
     }
@@ -193,6 +204,7 @@ class HomeViewModel : ViewModel() {
             progressStatus.emit(null)
             return null
         }
+        patched.delete()
         progressStatus.emit("Patching: ${input.name}")
         return DefaultPatcher.patch(input, DefaultPreference.isFallbackMode()).onEach { status ->
             when (status) {
