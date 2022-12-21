@@ -4,6 +4,7 @@ import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.network.HttpSpec
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
+import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
 
 object ApkPureService : ApkRemoteService {
@@ -19,26 +20,35 @@ object ApkPureService : ApkRemoteService {
         return "apkpure.com"
     }
 
-    override suspend fun fetchLink(type: AppType): String {
+    override suspend fun fetch(type: AppType): RemoteApkInfo {
         return when (type) {
-            AppType.FACEBOOK -> getDirectLink("katana") ?: fetchDirectLink(FB_APP_URL)
-            AppType.MESSENGER -> getDirectLink("orca") ?: fetchDirectLink(MSG_APP_URL)
-            AppType.FACEBOOK_LITE -> getDirectLink("lite") ?: fetchDirectLink(FB_LITE_URL)
-            AppType.MESSENGER_LITE -> getDirectLink("mlite") ?: fetchDirectLink(MSG_LITE_URL)
-            AppType.BUSINESS_SUITE -> getDirectLink("pages.app") ?: fetchDirectLink(BSN_SUITE_URL)
+            AppType.FACEBOOK -> fetchInfo(FB_APP_URL) ?: hardcodedInfo("katana")
+            AppType.MESSENGER -> fetchInfo(MSG_APP_URL) ?: hardcodedInfo("orca")
+            AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL) ?: hardcodedInfo("lite")
+            AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL) ?: hardcodedInfo("mlite")
+            AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL) ?: hardcodedInfo("pages.app")
         }
     }
 
-    private suspend fun getDirectLink(id: String): String? {
-        val link = "https://d.apkpure.com/b/APK/com.facebook.$id?version=latest"
+    private suspend fun fetchInfo(from: String): RemoteApkInfo? {
         return try {
-            RetrofitClient.SERVICE.head(link).headers()[HttpSpec.Header.CONTENT_TYPE].let {
-                if (ApkUtil.APK_MIME_TYPE == it) link else null
+            RetrofitClient.SERVICE.getApkPureItemLink(from).result().let {
+                RemoteApkInfo(it.link, it.versionName)
             }
         } catch (_: Exception) { null }
     }
 
-    private suspend fun fetchDirectLink(from: String): String {
-        return RetrofitClient.SERVICE.getApkPureItemLink(from).result().link
+    private suspend fun hardcodedInfo(id: String): RemoteApkInfo {
+        val link = "https://d.apkpure.com/b/APK/com.facebook.$id?version=latest"
+        return try {
+            RetrofitClient.SERVICE.head(link).let {
+                if (ApkUtil.APK_MIME_TYPE != it.headers()[HttpSpec.Header.CONTENT_TYPE]) {
+                    throw Exception()
+                }
+            }
+            RemoteApkInfo(link)
+        } catch (_: Exception) {
+            throw Exception("Failed to fetch apk info from server")
+        }
     }
 }

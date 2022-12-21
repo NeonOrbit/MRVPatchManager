@@ -33,18 +33,14 @@ class ApkComboVariantData {
         @Selector(".vercode", defValue = "")
         private var _versionCode: String? = null
 
-        val versionName: String? by lazy {
-            try {
-                _versionName?.trim()?.substringAfterLast(' ')?.takeIf {
-                    it.contains('.')
-                }
-            } catch (_: Exception) { null }
-        }
+        val versionName: String? get() = try {
+            _versionName?.trim()?.substringAfterLast(' ')?.takeIf {
+                it.contains('.')
+            }
+        } catch (_: Exception) { null }
 
-        val versionCode: Long? by lazy {
-            try {
-                _versionCode?.trim('(',')')?.trim()?.toLong()
-            } catch (_: Exception) { null }
-        }
+        val versionCode: Long? get() = try {
+            _versionCode?.trim('(',')')?.trim()?.toLong()
+        } catch (_: Exception) { null }
     }
 }

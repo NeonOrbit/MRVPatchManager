@@ -12,13 +12,17 @@ class ApkMirrorButtonData {
     val versionName: String? get() = version?.first
     val versionCode: Long? get() = version?.second
 
-    private val version: Pair<String, Long>? by lazy {
+    private val version: Pair<String, Long?>? by lazy {
         try {
             details?.substringAfter("Version:", "")?.trim()?.split(' ')?.takeIf {
-                it.size >= 2 && it[0].contains('.') && it[1].endsWith(')')
+                it.size >= 2 && it[0].contains('.')
             }?.let {
-                Pair(it[0], it[1].trim('(',')').toLong())
+                val verName = it[0]
+                val verCode = try {
+                    it[1].trim('(',')').toLong()
+                } catch (_: Exception) { null }
+                Pair(verName, verCode)
             }
-        } catch (_: Throwable) { null }
+        } catch (_: Exception) { null }
     }
 }

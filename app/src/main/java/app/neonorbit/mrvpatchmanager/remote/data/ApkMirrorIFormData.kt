@@ -12,7 +12,7 @@ class ApkMirrorIFormData {
     @Selector(value = "#filedownload > input", index = 1, attr = "value")
     lateinit var key: String
 
-    fun getLink(): String {
+    val link: String get() {
         return "$action?id=$id&key=$key&forcebaseapk=true"
     }
 }

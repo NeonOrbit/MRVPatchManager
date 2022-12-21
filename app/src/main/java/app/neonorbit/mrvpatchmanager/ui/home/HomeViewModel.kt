@@ -11,6 +11,7 @@ import app.neonorbit.mrvpatchmanager.DefaultPatcher.PatchStatus
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
+import app.neonorbit.mrvpatchmanager.compareVersion
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.coroutines.coroutineContext
 
 class HomeViewModel : ViewModel() {
     private val repository = ApkRepository()
@@ -49,11 +51,11 @@ class HomeViewModel : ViewModel() {
 
     val confirmationEvent = ConfirmationEvent()
 
-    var patchingStatus = MutableStateFlow(false)
+    val patchingStatus = MutableStateFlow(false)
     val progressStatus = MutableStateFlow<String?>(null)
     val progressTracker = MutableStateFlow(ProgressTrack())
 
-    var quickDownloadJob = MutableStateFlow<Job?>(null)
+    val quickDownloadJob = MutableStateFlow<Job?>(null)
     val quickDownloadProgress = MutableStateFlow<Int?>(null)
 
     private var moduleLatest: String? = null
@@ -95,7 +97,7 @@ class HomeViewModel : ViewModel() {
         if (force) GithubService.checkForUpdate()
         if (moduleStatus.value.current == null || force) {
             val version = ApkUtil.getPrefixedVersionName(AppConfig.MODULE_PACKAGE)
-            if (version == null || version >= (moduleLatest ?: "")) {
+            if ((version?.compareVersion(moduleLatest) ?: 0) >= 0) {
                 moduleLatest = null
             }
             moduleStatus.postNow(VersionStatus(version, moduleLatest), with = this)
@@ -143,31 +145,25 @@ class HomeViewModel : ViewModel() {
 
     fun patch(uri: Uri? = null) {
         if (patchingJob != null) {
-            viewModelScope.launch {
-                progressStatus.emit("Stopping...")
-            }
+            progressStatus.post("Stopping...", this)
             patchingJob?.cancel()
             return
         }
         var manual: File? = null
         viewModelScope.launch(Dispatchers.Default + catcher) {
-            progressStatus.emit("Status")
+            progressStatus.emit("Progress...")
             progressTracker.emit(ProgressTrack())
             val file = uri?.toTempFile()?.also {
                 manual = it
-                if (!ApkUtil.verifyFbSignature(it) &&
-                    !confirmationEvent.ask("Warning!", "This apk isn't official, continue?")) {
-                    progressStatus.emit(null)
-                    return@launch
-                }
             } ?: withContext(Dispatchers.IO) {
                 getPatchableApkFile(currentApp.type)
             }
-            file?.takeIf {
-                !ApkUtil.hasLatestMrvSignedApp(it) ||
-                confirmationEvent.ask("Already on latest version, patch anyway?").also { r ->
-                    if (!r) progressStatus.emit(null)
-                }
+            file?.takeIf { manual == null ||
+                (ApkUtil.verifyFbSignature(it) ||
+                    confirmationEvent.ask("Warning!", "This apk isn't official, continue?")
+                ) && (!ApkUtil.hasLatestMrvSignedApp(it) ||
+                    confirmationEvent.ask("Already on latest version, patch anyway?")
+                ) || run { progressStatus.emit(null); false }
             }?.let { apk ->
                 progressTracker.emit(ProgressTrack())
                 patchApk(apk)?.let { patched ->
@@ -205,7 +201,7 @@ class HomeViewModel : ViewModel() {
             return null
         }
         patched.delete()
-        progressStatus.emit("Patching: ${input.name}")
+        progressStatus.emit("Patching...")
         return DefaultPatcher.patch(input, DefaultPreference.isFallbackMode()).onEach { status ->
             when (status) {
                 is PatchStatus.PATCHING -> progressStatus.emit("Patching: ${status.msg}")
@@ -227,13 +223,21 @@ class HomeViewModel : ViewModel() {
     }
 
     private suspend fun getPatchableApkFile(type: AppType): File? {
+        var version = "latest"
         return repository.getFbApk(type).onEach { status ->
             when (status) {
                 is DownloadStatus.FETCHING -> {
                     progressStatus.emit("Fetching: ${status.server}")
                 }
+                is DownloadStatus.FETCHED -> {
+                    version = status.version
+                    if (ApkUtil.hasLatestMrvSignedApp(type.getPackage(), version) &&
+                        !confirmationEvent.ask("Already on latest version, download anyway?")) {
+                        coroutineContext[Job]?.cancel() ?: throw CancellationException()
+                    }
+                }
                 is DownloadStatus.DOWNLOADING -> {
-                    progressStatus.emit("Downloading: ${type.getName()}")
+                    progressStatus.emit("Downloading: ${type.getName()} ($version)")
                 }
                 is DownloadStatus.PROGRESS -> {
                     if (status.total < status.current) {
@@ -290,7 +294,8 @@ class HomeViewModel : ViewModel() {
                     "Found apps with different signatures.\n" +
                         "Please uninstall these first:\n" +
                         "[${conflicted.values.joinToString(", ")}]"
-                )) uninstallEvent.post(conflicted.keys)
+                )
+            ) uninstallEvent.post(conflicted.keys)
         } else {
             if (confirmationEvent.ask("Install ${file.name}?")) {
                 installEvent.post(file)

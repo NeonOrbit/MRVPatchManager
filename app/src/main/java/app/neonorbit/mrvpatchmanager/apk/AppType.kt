@@ -12,4 +12,8 @@ enum class AppType {
     fun getName(): String {
         return AppConfig.getFbAppName(this)
     }
+
+    fun getPackage(): String {
+        return AppConfig.getFbAppPkg(this)
+    }
 }

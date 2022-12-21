@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager.remote
 
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
+import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
 
 object ApkComboService : ApkRemoteService {
@@ -18,17 +19,17 @@ object ApkComboService : ApkRemoteService {
         return "apkcombo.com"
     }
 
-    override suspend fun fetchLink(type: AppType): String {
+    override suspend fun fetch(type: AppType): RemoteApkInfo {
         return when (type) {
-            AppType.FACEBOOK -> fetchDirectLink(FB_APP_URL)
-            AppType.MESSENGER -> fetchDirectLink(MSG_APP_URL)
-            AppType.FACEBOOK_LITE -> fetchDirectLink(FB_LITE_URL)
-            AppType.MESSENGER_LITE -> fetchDirectLink(MSG_LITE_URL)
-            AppType.BUSINESS_SUITE -> fetchDirectLink(BSN_SUITE_URL)
+            AppType.FACEBOOK -> fetchInfo(FB_APP_URL)
+            AppType.MESSENGER -> fetchInfo(MSG_APP_URL)
+            AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL)
+            AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL)
+            AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL)
         }
     }
 
-    private suspend fun fetchDirectLink(from: String): String {
+    private suspend fun fetchInfo(from: String): RemoteApkInfo {
         val service = RetrofitClient.SERVICE
         return service.get(TOKEN_URL).result().string().let { token ->
             service.getApkComboVariant(from).result().let { combo ->
@@ -36,9 +37,9 @@ object ApkComboService : ApkRemoteService {
                     it.arch.contains("arm64-v8a")
                 }?.apks?.firstOrNull {
                     it.type.equals("apk", true) && it.info.contains("nodpi")
-                }?.let { apk ->
-                    "${apk.link}&$token"
-                } ?: "${combo.fallback.apks[0].link}&$token"
+                } ?: combo.fallback.apks[0]
+            }.let { apk ->
+                RemoteApkInfo("${apk.link}&$token", apk.versionName)
             }
         }
     }

@@ -145,6 +145,23 @@ fun Long.toSize(withSpace: Boolean = false): String {
     }
 }
 
+fun String.compareVersion(other: String?): Int {
+    if (other?.isEmpty() != false) return 1
+    return try {
+        val v1 = this.trimStart('v').split('.')
+        val v2 = other.trimStart('v').split('.')
+        check(v1.size == v2.size)
+        for (i in v1.indices) {
+            val n1 = v1[i].toInt()
+            val n2 = v2[i].toInt()
+            if (n1 != n2) {
+                return n1.compareTo(n2)
+            }
+        }
+        0
+    } catch (_: Exception) { -1 }
+}
+
 @Suppress("unused")
 fun String.capitalizeWords(): String = split(" ").joinToString(" ") {
     it.lowercase(Locale.getDefault()).replaceFirstChar { word ->

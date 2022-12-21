@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager.remote
 
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
+import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
 
 object ApkMirrorService : ApkRemoteService {
@@ -18,24 +19,28 @@ object ApkMirrorService : ApkRemoteService {
         return "apkmirror.com"
     }
 
-    override suspend fun fetchLink(type: AppType): String {
+    override suspend fun fetch(type: AppType): RemoteApkInfo {
         return when (type) {
-            AppType.FACEBOOK -> fetchDirectLink(FB_APP_URL)
-            AppType.MESSENGER -> fetchDirectLink(MSG_APP_URL)
-            AppType.FACEBOOK_LITE -> fetchDirectLink(FB_LITE_URL)
-            AppType.MESSENGER_LITE -> fetchDirectLink(MSG_LITE_URL)
-            AppType.BUSINESS_SUITE -> fetchDirectLink(BSN_SUITE_URL)
+            AppType.FACEBOOK -> fetchInfo(FB_APP_URL)
+            AppType.MESSENGER -> fetchInfo(MSG_APP_URL)
+            AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL)
+            AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL)
+            AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL)
         }
     }
 
-    private suspend fun fetchDirectLink(from: String): String {
+    private suspend fun fetchInfo(from: String): RemoteApkInfo {
         val service = RetrofitClient.SERVICE
         return service.getRssFeed(from).result().channel.item.firstOrNull { item ->
             listOf("alpha", "beta").none { item.title.lowercase().contains(it) }
-        }?.link?.let { link ->
-            "$BASE_URL${service.getApkMirrorButton(link).result().link}"
-        }?.let { link ->
-            "$BASE_URL${service.getApkMirrorInputForm(link).result().getLink()}"
-        } ?: throw Exception("Failed to fetch direct link")
+        }?.link?.let { release ->
+            service.getApkMirrorButton(release).result().let {
+                RemoteApkInfo("$BASE_URL${it.link}", it.versionName)
+            }
+        }?.let { intermediate ->
+            service.getApkMirrorInputForm(intermediate.link).result().let {
+                RemoteApkInfo("$BASE_URL${it.link}", intermediate.version)
+            }
+        } ?: throw Exception("Failed to fetch apk info from server")
     }
 }

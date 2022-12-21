@@ -19,7 +19,6 @@ import okio.buffer
 import okio.sink
 import retrofit2.Response
 import java.io.File
-import java.io.InvalidObjectException
 import java.util.regex.Pattern
 
 object FileDownloader {
@@ -115,7 +114,7 @@ object FileDownloader {
 
     private fun checkContentType(response: Response<ResponseBody>) {
         response.body()!!.contentType().toString().let { type ->
-            if (type.contains(INVALID_TYPE)) throw InvalidObjectException(type)
+            if (type.contains(INVALID_TYPE)) throw Exception("Invalid content type")
         }
     }
 

@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import java.io.File
@@ -25,15 +24,11 @@ class ApkRemoteFileProvider {
         private const val CACHED_THRESHOLD = 20L * 60 * 60 * 1000
     }
 
-    private val preferred = HashMap<AppType, ApkRemoteService>()
-
-    private fun getServices(type: AppType): Iterator<ApkRemoteService> {
+    private fun getServices(): Iterator<ApkRemoteService> {
         return DefaultPreference.getApkServer()?.let { server ->
             services.firstOrNull { server == it.server() }?.let {
                 listOf(it).iterator()
             }
-        } ?: preferred[type]?.let { pref ->
-            services.sortedBy { if (it == pref) -1 else 0 }.iterator()
         } ?: services.iterator()
     }
 
@@ -60,11 +55,15 @@ class ApkRemoteFileProvider {
         if (hasValidFile(file)) {
             return flowOf(DownloadStatus.FINISHED(file))
         }
-        val iterator = getServices(type)
+        val iterator = getServices()
         var service: ApkRemoteService = iterator.next()
         return flow {
             emit(DownloadStatus.FETCHING(service.server()))
-            FileDownloader.download(service.fetchLink(type), file).onEach {
+            val fetched = service.fetch(type)
+            fetched.version?.let {
+                emit(DownloadStatus.FETCHED(it))
+            }
+            FileDownloader.download(fetched.link, file).onEach {
                 if (it is DownloadStatus.FINISHED) {
                     if (!ApkUtil.verifyFbSignature(it.file)) {
                         it.file.delete()
@@ -79,19 +78,14 @@ class ApkRemoteFileProvider {
         }.catch { e ->
             val isOnline = AppServices.isNetworkOnline()
             emit(DownloadStatus.FAILED(e.toNetworkError(isOnline)))
-        }.onCompletion {
-            if (it != null && file.length() > 0L) {
-                preferred[type] = service
-            } else {
-                preferred.remove(type)
-            }
         }
     }
 
     private fun hasValidFile(file: File): Boolean {
         val last = file.lastModified()
         val current = System.currentTimeMillis()
-        return file.exists() && (current - last < CACHED_THRESHOLD) &&
+        return file.exists() && (current - last < CACHED_THRESHOLD) && try {
             ApkUtil.verifyFbSignature(file)
+        } catch (_: Exception) { false }
     }
 }

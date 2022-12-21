@@ -9,6 +9,7 @@ import android.content.pm.Signature
 import android.graphics.drawable.Drawable
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
+import app.neonorbit.mrvpatchmanager.compareVersion
 import java.io.File
 import java.util.Collections
 
@@ -38,12 +39,18 @@ object ApkUtil {
     }
 
     fun hasLatestMrvSignedApp(file: File): Boolean {
-        return getPackageInfo(file, true)?.let { apk ->
-            getPackageInfo(apk.packageName, true)?.takeIf { installed ->
-                try {
-                    installed.matchSignature(AppConfig.MRV_PUBLIC_SIGNATURE)
-                } catch (_: Exception) { false }
-            }?.let { installed -> installed.longVersionCode >= apk.longVersionCode }
+        return getPackageInfo(file)?.let { apk ->
+            hasLatestMrvSignedApp(apk.packageName, apk.versionName)
+        } == true
+    }
+
+    fun hasLatestMrvSignedApp(pkg: String, version: String): Boolean {
+        return getPackageInfo(pkg, true)?.takeIf { installed ->
+            try {
+                installed.matchSignature(AppConfig.MRV_PUBLIC_SIGNATURE)
+            } catch (_: Exception) { false }
+        }?.let { installed ->
+            installed.versionName.compareVersion(version) >= 0
         } == true
     }
 

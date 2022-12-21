@@ -57,6 +57,16 @@ object AppConfig {
         }
     }
 
+    fun getFbAppPkg(type: AppType): String {
+        return when(type) {
+            AppType.FACEBOOK -> "com.facebook.katana"
+            AppType.MESSENGER -> "com.facebook.orca"
+            AppType.FACEBOOK_LITE -> "com.facebook.lite"
+            AppType.MESSENGER_LITE -> "com.facebook.mlite"
+            AppType.BUSINESS_SUITE -> "com.facebook.pages.app"
+        }
+    }
+
     private fun getFbAppName(pkg: String): String? {
         return when(pkg) {
             "com.facebook.katana" -> "Facebook"

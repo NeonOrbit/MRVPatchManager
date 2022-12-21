@@ -4,6 +4,7 @@ import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.CacheManager
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
+import app.neonorbit.mrvpatchmanager.compareVersion
 import app.neonorbit.mrvpatchmanager.event.UpdateEvent
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
 import app.neonorbit.mrvpatchmanager.remote.data.GithubReleaseData
@@ -48,7 +49,9 @@ object GithubService {
 
     private suspend fun fetchUpdate(pkg: String, url: String): UpdateEvent? {
         return ApkUtil.getPrefixedVersionName(pkg)?.let { current ->
-            fetchData(pkg, url)?.takeIf { it.version > current }?.let {
+            fetchData(pkg, url)?.takeIf {
+                it.version.compareVersion(current) > 0
+            }?.let {
                 if (pkg == AppConfig.MANAGER_PACKAGE)
                     UpdateEvent.Manager(current, it.version, it.assets[0].link)
                 else UpdateEvent.Module(current, it.version, it.assets[0].link)
