@@ -41,7 +41,6 @@ class HomeViewModel : ViewModel() {
     private val repository = ApkRepository()
 
     val fbAppList = AppConfig.FB_APP_LIST
-    var currentApp = AppConfig.FB_APP_LIST[0]
 
     val uriEvent = SingleEvent<Uri>()
     val intentEvent = SingleEvent<Intent>()
@@ -143,7 +142,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun patch(uri: Uri? = null) {
+    fun patch(app: AppType? = null, uri: Uri? = null) {
         if (patchingJob != null) {
             progressStatus.post("Stopping...", this)
             patchingJob?.cancel()
@@ -156,7 +155,7 @@ class HomeViewModel : ViewModel() {
             val file = uri?.toTempFile()?.also {
                 manual = it
             } ?: withContext(Dispatchers.IO) {
-                getPatchableApkFile(currentApp.type)
+                getPatchableApkFile(app!!)
             }
             file?.takeIf { manual == null ||
                 (ApkUtil.verifyFbSignature(it) ||

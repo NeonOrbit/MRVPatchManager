@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
-import app.neonorbit.mrvpatchmanager.data.AppItemData
 import app.neonorbit.mrvpatchmanager.databinding.FragmentHomeBinding
 import app.neonorbit.mrvpatchmanager.event.UpdateEvent
 import app.neonorbit.mrvpatchmanager.observeOnUI
@@ -65,13 +64,12 @@ class HomeFragment : Fragment(),
         model.reloadModuleStatus()
 
         binding.dropDownMenu.setAdapter(AppsAdapter(context, model.fbAppList))
-        binding.dropDownMenu.setText(model.currentApp.name)
+        binding.dropDownMenu.setText(model.fbAppList[0].name)
 
-        binding.dropDownMenu.setOnItemClickListener { parent, selected, position, _ ->
+        binding.dropDownMenu.setOnItemClickListener { _, selected, _, _ ->
             binding.patchButton.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 null, null, (selected as TextView).compoundDrawables[0], null
             )
-            model.currentApp = parent.getItemAtPosition(position) as AppItemData
         }
 
         model.quickDownloadProgress.observeOnUI(viewLifecycleOwner) { progress ->
@@ -97,7 +95,11 @@ class HomeFragment : Fragment(),
         binding.patchButton.setOnClickListener {
             binding.patchButton.isClickable = false
             binding.dropDown.isEnabled = false
-            model.patch()
+            model.fbAppList.find {
+                binding.dropDownMenu.text.toString() == it.name
+            }?.let {
+                model.patch(app = it.type)
+            }
         }
 
         model.patchingStatus.observeOnUI(viewLifecycleOwner) {
@@ -159,7 +161,7 @@ class HomeFragment : Fragment(),
     override fun onActivityResult(result: ActivityResult?) {
         if (result?.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let {
-                viewModel?.patch(it)
+                viewModel?.patch(uri = it)
             }
         }
     }
