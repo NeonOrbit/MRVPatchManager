@@ -37,6 +37,11 @@
             android:summary="@string/pref_instruction_summery"
             android:icon="@drawable/ic_pref_other" />
         <Preference
+            android:key="pref_troubleshoot"
+            android:title="@string/pref_troubleshoot_title"
+            android:summary="@string/pref_troubleshoot_summery"
+            android:icon="@drawable/ic_pref_other" />
+        <Preference
             android:key="pref_safety_note"
             android:title="@string/pref_safety_note_title"
             android:summary="@string/pref_safety_note_summery"

@@ -88,7 +88,11 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         }
 
         onPreferenceClick(KEY_PREF_INSTRUCTION) {
-            AppUtil.show(requireContext(), R.string.full_instructions)
+            AppUtil.show(requireContext(), R.string.instructions)
+        }
+
+        onPreferenceClick(KEY_PREF_TROUBLESHOOT) {
+            AppUtil.show(requireContext(), R.string.troubleshoot)
         }
 
         onPreferenceClick(KEY_PREF_SAFETY_NOTE) {
@@ -133,6 +137,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         const val KEY_PREF_MASK_PACKAGE = "pref_mask_package"
         const val KEY_PREF_CLEAR_CACHE = "pref_clear_cache"
         const val KEY_PREF_INSTRUCTION = "pref_instruction"
+        const val KEY_PREF_TROUBLESHOOT = "pref_troubleshoot"
         const val KEY_PREF_SAFETY_NOTE = "pref_safety_note"
         const val KEY_PREF_VISIT_HELP = "pref_visit_help"
         const val KEY_PREF_VISIT_SOURCE = "pref_visit_source"

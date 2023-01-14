@@ -37,6 +37,7 @@ object AppConfig {
     const val HELP_FORUM = "XDA Thread"
     const val GITHUB_REPO = "Github Repo"
     const val DEVELOPER_URL = "https://github.com/NeonOrbit"
+    const val TUTORIAL_URL = "https://www.youtube.com/watch?v=UxHSTHam42w"
     const val HELP_FORUM_URL = "https://forum.xda-developers.com/t/4331215"
     const val GITHUB_REPO_URL = "https://github.com/NeonOrbit/MRVPatchManager"
     const val MODULE_LATEST_URL = "https://github.com/NeonOrbit/ChatHeadEnabler/releases/latest"

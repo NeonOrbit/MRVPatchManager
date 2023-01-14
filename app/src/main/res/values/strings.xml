@@ -5,6 +5,7 @@
     <string name="title_settings">Settings</string>
     <string name="menu_about_title">About</string>
     <string name="menu_instruction_title">Instruction</string>
+    <string name="menu_tutorial_title">Video Tutorial</string>
     <string name="save_menu_title">save</string>
     <string name="delete_menu_title">delete</string>
     <string name="share_menu_title">share</string>
@@ -37,6 +38,8 @@
     <string name="pref_other_group_title">Others</string>
     <string name="pref_instruction_title">Instructions</string>
     <string name="pref_instruction_summery">Read instruction manual.</string>
+    <string name="pref_troubleshoot_title">Troubleshoot</string>
+    <string name="pref_troubleshoot_summery">Having issues? Read solutions.</string>
     <string name="pref_safety_note_title">Safety Note</string>
     <string name="pref_safety_note_summery">Is it safe to use? Read safety note.</string>
     <string name="pref_visit_help_title">Need help?</string>
@@ -49,11 +52,23 @@
     <string name="fallback_warning_message"><b>WARNING:</b> Fallback mode is enabled.
         If you didn\'t enable it, please disable from the settings tab.
     </string>
-    <string name="full_instructions">
+    <string name="instructions">
         Instructions:
         \n\nUninstall all official facebook apps: facebook, messenger, facebook lite, etc.
         \n\nInstall ChatHeadEnabler module.
-        \n\nPatch and install your preferred facebook apps from here.
+        \n\nPatch and install messenger apps from here.
+        \n\nWatch video tutorial (from app menu) for full instruction.
+        \n\n[Visit help forum from the settings tab]
+    </string>
+    <string name="troubleshoot">
+        Troubleshoot:
+        \n\nDownload failed?
+        \nSelect different servers from settings or try again later.
+        \nAlternatively you can download messenger from apkmirror.com and patch it using manual option.
+        \n\nNot working?
+        \nMake sure you installed ChatHeadEnabler. Also try restarting Messenger app.
+        \n\nNot working after few days?
+        \nEnable fallback mode from settings and patch again.
         \n\n[Visit help forum from the settings tab]
     </string>
     <string name="safety_note">
