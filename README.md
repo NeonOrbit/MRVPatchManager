@@ -1,13 +1,18 @@
 # MRVPatch Manager
 
-MRVPatch Manager is a patching app for using [ChatHeadEnabler](https://github.com/NeonOrbit/ChatHeadEnabler) on non-rooted devices.
-
-ChatHeadEnabler is a module that lets you choose between chat head and bubble in Facebook Messenger
-
-Check [xda thread](https://forum.xda-developers.com/t/4331215) for details.
+MRVPatch Manager is a patching app for facebook messenger, so that you can use [ChatHeadEnabler](https://github.com/NeonOrbit/ChatHeadEnabler) on non-rooted devices.
 
 <picture><img src="resource/screenshot.png" height=420/></picture>
 
+Watch [video tutorial](https://www.youtube.com/watch?v=UxHSTHam42w) for instruction.  
+Check [xda thread](https://forum.xda-developers.com/t/4331215) for details.
+
+## Features
+- Direct download from multiple apk servers.
+- Manual option to patch offline apk yourself.
+- Verifies apk signature to ensure its safety.
+- Stores all patched apps internally.
+- Option to select different apk servers.
 
 ## Support
 For help: [XDA-Thread](https://forum.xda-developers.com/t/4331215)
