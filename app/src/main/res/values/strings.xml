@@ -27,49 +27,52 @@
     <string name="no_patched_apps">No patched apps</string>
     <string name="pref_config_group_title">Configs</string>
     <string name="pref_apk_server_title">Apk download server</string>
-    <string name="pref_apk_server_summery">Select a server to download apk files.</string>
+    <string name="pref_apk_server_summery">Pick a server for APK downloads.</string>
     <string name="pref_fallback_mode_title">Fallback mode (slow)</string>
-    <string name="pref_fallback_mode_summery">Enable this if patched apps does not work after a while.</string>
+    <string name="pref_fallback_mode_summery">Enable this if patched apps do not work after some time.</string>
     <string name="pref_change_package_title">Mask package name</string>
-    <string name="pref_change_package_summery">Enable this if you cannot uninstall official apps.</string>
+    <string name="pref_change_package_summery">Enable this if you are unable to remove other fb apps.</string>
     <string name="pref_action_group_title">Actions</string>
     <string name="pref_clear_cache_title">Clear download cache</string>
     <string name="pref_clear_cache_summery">Remove temporary files from the cache.</string>
     <string name="pref_other_group_title">Others</string>
     <string name="pref_instruction_title">Instructions</string>
-    <string name="pref_instruction_summery">Read instruction manual.</string>
+    <string name="pref_instruction_summery">Read the usage instructions.</string>
     <string name="pref_troubleshoot_title">Troubleshoot</string>
-    <string name="pref_troubleshoot_summery">Having issues? Read solutions.</string>
+    <string name="pref_troubleshoot_summery">Common issues and their solutions.</string>
     <string name="pref_safety_note_title">Safety Note</string>
-    <string name="pref_safety_note_summery">Is it safe to use? Read safety note.</string>
-    <string name="pref_visit_help_title">Need help?</string>
-    <string name="pref_visit_help_summery">Visit help forum and ask your question.</string>
-    <string name="pref_visit_source_title">Source code at github</string>
-    <string name="pref_visit_source_summery">Visit github project repository.</string>
+    <string name="pref_safety_note_summery">Wondering whether it is safe to use?</string>
+    <string name="pref_visit_help_title">Help Forum</string>
+    <string name="pref_visit_help_summery">Visit the help forum and ask your question.</string>
+    <string name="pref_visit_source_title">Source Code</string>
+    <string name="pref_visit_source_summery">Visit the github repository of the project.</string>
     <string name="developer_info_text">Developer: &#160;%s</string>
     <string name="help_forum_info_text">Help Forum: &#160;%s</string>
     <string name="source_code_info_text">Source Code: &#160;%s</string>
-    <string name="fallback_warning_message"><b>WARNING:</b> Fallback mode is enabled.
-        If you didn\'t enable it, please disable from the settings tab.
+    <string name="fallback_warning_message"><b>WARNING:</b> Fallback mode is currently enabled.
+        If you didn\'t intend to enable it, please disable it from the settings tab.
     </string>
     <string name="instructions">
         Instructions:
         \n\nUninstall all official facebook apps: facebook, messenger, facebook lite, etc.
-        \n\nInstall ChatHeadEnabler module.
-        \n\nPatch and install messenger apps from here.
-        \n\nWatch video tutorial (from app menu) for full instruction.
-        \n\n[Visit help forum from the settings tab]
+        \n\nInstall the ChatHeadEnabler module.
+        \n\nPatch and install Messenger apps from here.
+        \n\nPlease watch the video tutorial (from the app menu) for complete instructions.
+        \n\n[Visit the help forum from the settings tab]
     </string>
     <string name="troubleshoot">
         Troubleshoot:
         \n\nDownload failed?
-        \nSelect different servers from settings or try again later.
-        \nAlternatively you can download messenger from apkmirror.com and patch it using manual option.
+        \nSelect different servers or try again later.
+        \nAlternatively, you can download Messenger from apkmirror.com and patch it using the manual option.
+        \n\nInstall failed?
+        \nEnsure you have uninstalled all fb apps.
+        If some fb apps cannot be uninstalled, enable the "Fix Apk-Conflict" option and try patching again.
         \n\nNot working?
-        \nMake sure you installed ChatHeadEnabler. Also try restarting Messenger app.
-        \n\nNot working after few days?
-        \nEnable fallback mode from settings and patch again.
-        \n\n[Visit help forum from the settings tab]
+        \nEnsure you have installed ChatHeadEnabler. Also, try restarting the Messenger app.
+        \n\nNot working after a few days?
+        \nEnable fallback mode and then patch again.
+        \n\n[Visit the help forum from the settings tab]
     </string>
     <string name="safety_note">
         Safety Note:
@@ -77,10 +80,10 @@
         \nYes. It is safe, just like any other app installed from the playstore.
         \n[Make sure you installed the MRVPatch Manager from the official github link]
         \n\nHow can I be sure it is safe?
-        \nAll the apps used here are open source, you can find source codes at github.
+        \nAll the apps used here are open source, and you can find their source codes on github.
         \n\nWhat safety measures are taken?
         \nThe manager downloads your selected app from the apk servers
         and verifies it against the original facebook signature,
-        which makes sure you are patching an official facebook app from the playstore.
+        ensuring that you are patching an official Facebook app.
     </string>
 </resources>
