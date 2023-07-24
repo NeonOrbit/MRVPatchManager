@@ -7,6 +7,7 @@ import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.text.HtmlCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -81,6 +82,10 @@ fun Uri.toTempFile(): File {
     } ?: throw Exception("Failed to resolve uri")
 }
 
+fun List<File>.existAnyIn(dir: DocumentFile): Boolean = any { file ->
+    dir.listFiles().any { file.name.equals(it.name, true) }
+}
+
 val Throwable.error: String; get() = this.message ?: this.javaClass.simpleName
 
 val Throwable.isConnectError: Boolean; get() = when (this) {
@@ -124,7 +129,11 @@ fun <T> MutableStateFlow<T>.postNow(
     with: ViewModel
 ) = with.viewModelScope.launch(Dispatchers.Main.immediate) { emit(value) }
 
-fun CoroutineScope.launchLocking(
+/**
+ * Launches a coroutine and immediately returns the Job,
+ * then executes the given action under the mutex's lock.
+ */
+fun CoroutineScope.launchSyncedBlock(
     mutex: Mutex,
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.() -> Unit

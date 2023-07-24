@@ -7,6 +7,8 @@ import org.lsposed.lspatch.share.ConstantsM
 import java.io.File
 
 object AppConfig {
+    const val FILE_PROVIDER_AUTH = "${BuildConfig.APPLICATION_ID}.file.provider"
+
     private const val DOWNLOAD_DIR_NAME = "download"
     private const val CACHE_TEMP_DIR_NAME = "temp_dir"
     private const val PATCHED_APK_DIR_NAME = "patched"

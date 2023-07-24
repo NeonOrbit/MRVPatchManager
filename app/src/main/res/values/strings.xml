@@ -6,10 +6,10 @@
     <string name="menu_about_title">About</string>
     <string name="menu_instruction_title">Instruction</string>
     <string name="menu_tutorial_title">Video Tutorial</string>
-    <string name="save_menu_title">save</string>
-    <string name="delete_menu_title">delete</string>
-    <string name="share_menu_title">share</string>
-    <string name="select_all_menu_title">select all</string>
+    <string name="save_menu_title">Save</string>
+    <string name="delete_menu_title">Delete</string>
+    <string name="share_menu_title">Share</string>
+    <string name="select_all_menu_title">Select All</string>
     <string name="patcher_title">Patcher</string>
     <string name="patch_button_title">Patch</string>
     <string name="module_title">ChatHeadEnabler</string>

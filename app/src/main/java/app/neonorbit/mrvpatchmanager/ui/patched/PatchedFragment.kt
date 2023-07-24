@@ -1,11 +1,14 @@
 package app.neonorbit.mrvpatchmanager.ui.patched
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.view.isVisible
@@ -14,12 +17,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.LinearLayoutManager
-import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.databinding.FragmentPatchedBinding
 import app.neonorbit.mrvpatchmanager.glide.RecyclerPreloadProvider
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
+import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
@@ -31,6 +34,7 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
     private var viewModel: PatchedViewModel? = null
     private var tracker: SelectionTracker<Long>? = null
     private var actionMode: ActionMode? = null
+    private var saveDirPicker: ActivityResultLauncher<Intent>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +43,9 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
     ): View {
         binding = FragmentPatchedBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this)[PatchedViewModel::class.java]
-
+        saveDirPicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            viewModel?.onSaveDirectoryPicked(it.data)
+        }
         binding!!.progressBar.isVisible = true
 
         val recyclerAdapter = ApkListAdapter()
@@ -75,6 +81,18 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
 
         model.progressState.observe(viewLifecycleOwner) {
             binding.progressBar.isVisible = it
+        }
+
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            model.intentEvent.observe { intent ->
+                startActivity(intent)
+            }
+        }
+
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            model.saveFilesEvent.observe { intent ->
+                saveDirPicker?.launch(intent)
+            }
         }
 
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
@@ -122,23 +140,35 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.selectAll -> {
-                recyclerAdapter?.let {
-                    tracker?.setItemsSelected(it.getItemIds(), true)
-                    it.refresh()
+                recyclerAdapter?.let { adapter ->
+                    tracker?.setItemsSelected(adapter.getItemIds(), true)
+                    adapter.refresh()
                 }
-                return true
+                true
+            }
+            R.id.save -> {
+                viewModel?.saveSelectedApks(getSelectedFiles())
+                tracker?.clearSelection()
+                true
+            }
+            R.id.share -> {
+                viewModel?.shareSelectedApks(getSelectedFiles())
+                tracker?.clearSelection()
+                true
             }
             R.id.delete -> {
-                recyclerAdapter?.let { adapter ->
-                    tracker?.selection?.map { adapter.items[it.toInt()] }?.let {
-                        viewModel?.deletePatchedApks(it)
-                    }
-                }
+                viewModel?.deleteSelectedApks(getSelectedFiles())
                 tracker?.clearSelection()
-                return true
+                true
             }
             else -> false
         }
+    }
+
+    private fun getSelectedFiles(): List<ApkFileData> {
+        return recyclerAdapter?.let { adapter ->
+            tracker?.selection?.map { adapter.items[it.toInt()] }
+        } ?: listOf()
     }
 
     override fun onDestroyActionMode(mode: ActionMode) {

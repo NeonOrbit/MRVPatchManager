@@ -2,16 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/delete"
+        android:title="@string/delete_menu_title"
+        android:icon="@android:drawable/ic_menu_delete"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/save"
         android:title="@string/save_menu_title"
-        android:visible="false"
         android:icon="@android:drawable/ic_menu_save"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/delete"
-        android:title="@string/delete_menu_title"
-        android:icon="@android:drawable/ic_menu_delete"
+        android:id="@+id/share"
+        android:title="@string/share_menu_title"
+        android:icon="@android:drawable/ic_menu_share"
         app:showAsAction="ifRoom" />
 
     <item
@@ -19,10 +24,4 @@
         android:title="@string/select_all_menu_title"
         android:icon="?attr/actionModeSelectAllDrawable"
         app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/share"
-        android:title="@string/share_menu_title"
-        android:visible="false"
-        app:showAsAction="never" />
 </menu>

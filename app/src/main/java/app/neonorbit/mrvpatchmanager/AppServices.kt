@@ -4,8 +4,11 @@ import android.content.ContentResolver
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
+import android.net.Uri
 import android.widget.Toast
 import androidx.annotation.WorkerThread
+import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -51,5 +54,11 @@ object AppServices {
         Toast.makeText(application, message,
             if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
         ).show()
+    }
+
+    fun resolveDocumentTree(uri: Uri) = DocumentFile.fromTreeUri(application, uri)
+
+    fun resolveContentUri(file: File): Uri? {
+        return FileProvider.getUriForFile(application, AppConfig.FILE_PROVIDER_AUTH, file)
     }
 }
