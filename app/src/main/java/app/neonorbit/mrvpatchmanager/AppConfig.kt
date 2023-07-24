@@ -68,7 +68,7 @@ object AppConfig {
         }
     }
 
-    private fun getFbAppName(pkg: String): String? {
+    fun getFbAppName(pkg: String): String? {
         return when(pkg) {
             "com.facebook.katana" -> "Facebook"
             "com.facebook.orca" -> "Messenger"

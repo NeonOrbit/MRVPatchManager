@@ -1,5 +1,6 @@
 package app.neonorbit.mrvpatchmanager.remote
 
+import android.util.Log
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPreference
@@ -22,6 +23,7 @@ class ApkRemoteFileProvider {
     companion object {
         val services = listOf(ApkMirrorService, ApkComboService, ApkPureService)
         private const val CACHED_THRESHOLD = 20L * 60 * 60 * 1000
+        private val TAG = ApkRemoteFileProvider::class.simpleName
     }
 
     private fun getServices(): Iterator<ApkRemoteService> {
@@ -71,7 +73,8 @@ class ApkRemoteFileProvider {
                     }
                 }
             }.let { emitAll(it) }
-        }.retryWhen { _, _ ->
+        }.retryWhen { exception, _ ->
+            Log.w(TAG, "getFbApk[${service.server()}]", exception)
             AppServices.isNetworkOnline() && iterator.hasNext().also {
                 if (it) service = iterator.next()
             }

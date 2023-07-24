@@ -1,5 +1,7 @@
 package app.neonorbit.mrvpatchmanager.remote.data
 
+import app.neonorbit.mrvpatchmanager.remote.ApkMirrorService
+import app.neonorbit.mrvpatchmanager.util.Utils
 import pl.droidsonroids.jspoon.annotation.Selector
 
 class ApkMirrorIFormData {
@@ -12,7 +14,9 @@ class ApkMirrorIFormData {
     @Selector(value = "#filedownload > input", index = 1, attr = "value")
     lateinit var key: String
 
-    val link: String get() {
-        return "$action?id=$id&key=$key&forcebaseapk=true"
-    }
+    val link: String get() = Utils.absoluteUrl(
+        ApkMirrorService.BASE_URL, "$action?id=$id&key=$key&forcebaseapk=true"
+    )
+
+    override fun toString(): String = "link: $link"
 }

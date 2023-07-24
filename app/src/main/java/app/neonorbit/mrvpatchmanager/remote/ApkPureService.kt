@@ -8,7 +8,7 @@ import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
 
 object ApkPureService : ApkRemoteService {
-    private const val BASE_URL = "https://www.apkpure.com"
+    const val BASE_URL = "https://www.apkpure.com"
     private const val FILE_URL = "download?from=details"
     private const val FB_APP_URL = "$BASE_URL/facebook/com.facebook.katana/$FILE_URL"
     private const val FB_LITE_URL = "$BASE_URL/facebook-lite/com.facebook.lite/$FILE_URL"
@@ -48,7 +48,7 @@ object ApkPureService : ApkRemoteService {
             }
             RemoteApkInfo(link)
         } catch (_: Exception) {
-            throw Exception("Failed to fetch apk info from server")
+            throw Exception("Failed to fetch apk info from the server ${server()}")
         }
     }
 }

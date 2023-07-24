@@ -72,7 +72,6 @@ object ApkUtil {
 
     fun getPrefixedVersionName(pkg: String) = getPackageInfo(pkg)?.let { "v${it.versionName}" }
 
-    @Suppress("deprecation")
     fun getConflictedApps(file: File): Map<String, String> {
         val conflicted = HashMap<String, String>()
         getPackageInfo(file, true)?.let { apk ->
@@ -138,7 +137,8 @@ object ApkUtil {
     }
 
     private fun PackageInfo.getAppName(): String {
-        return AppServices.packageManager.getApplicationLabel(this.applicationInfo).let {
+        return AppConfig.getFbAppName(packageName) ?:
+        AppServices.packageManager.getApplicationLabel(this.applicationInfo).let {
             if (it.startsWith(this.packageName)) this.packageName else it.toString()
         }
     }

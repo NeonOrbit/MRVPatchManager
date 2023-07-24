@@ -8,7 +8,6 @@ import pl.droidsonroids.retrofit2.JspoonConverterFactory
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.lang.reflect.Type
 
 class ConverterFactory : Converter.Factory() {
@@ -26,8 +25,9 @@ class ConverterFactory : Converter.Factory() {
         JspoonConverterFactory.create()
     }
 
-    private val xml: SimpleXmlConverterFactory by lazy {
-        SimpleXmlConverterFactory.create()
+    @Suppress("deprecation")
+    private val xml: retrofit2.converter.simplexml.SimpleXmlConverterFactory by lazy {
+        retrofit2.converter.simplexml.SimpleXmlConverterFactory.create()
     }
 
     override fun responseBodyConverter(

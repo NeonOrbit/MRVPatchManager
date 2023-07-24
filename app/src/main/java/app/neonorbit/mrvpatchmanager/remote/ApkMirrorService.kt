@@ -6,7 +6,7 @@ import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
 
 object ApkMirrorService : ApkRemoteService {
-    private const val BASE_URL = "https://www.apkmirror.com"
+    const val BASE_URL = "https://www.apkmirror.com"
     private const val META_URL = "$BASE_URL/apk/facebook-2"
     private const val FEED_URL = "variant-{\"arches_slug\":[\"arm64-v8a\"],\"dpis_slug\":[\"nodpi\"]}/feed"
     private const val FB_APP_URL = "$META_URL/facebook/$FEED_URL"
@@ -35,12 +35,12 @@ object ApkMirrorService : ApkRemoteService {
             listOf("alpha", "beta").none { item.title.lowercase().contains(it) }
         }?.link?.let { release ->
             service.getApkMirrorButton(release).result().let {
-                RemoteApkInfo("$BASE_URL${it.link}", it.versionName)
+                RemoteApkInfo(it.link, it.versionName)
             }
         }?.let { intermediate ->
             service.getApkMirrorInputForm(intermediate.link).result().let {
-                RemoteApkInfo("$BASE_URL${it.link}", intermediate.version)
+                RemoteApkInfo(it.link, intermediate.version)
             }
-        } ?: throw Exception("Failed to fetch apk info from server")
+        } ?: throw Exception("Failed to fetch apk info from the server: ${server()}")
     }
 }

@@ -6,7 +6,7 @@ import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
 
 object ApkComboService : ApkRemoteService {
-    private const val BASE_URL = "https://www.apkcombo.com"
+    const val BASE_URL = "https://www.apkcombo.com"
     private const val FILE_URL = "download/apk"
     private const val TOKEN_URL = "$BASE_URL/checkin"
     private const val FB_APP_URL = "$BASE_URL/facebook/com.facebook.katana/$FILE_URL"
@@ -37,10 +37,10 @@ object ApkComboService : ApkRemoteService {
                     it.arch.contains("arm64-v8a")
                 }?.apks?.firstOrNull {
                     it.type.equals("apk", true) && it.info.contains("nodpi")
-                } ?: combo.fallback.apks[0]
-            }.let { apk ->
+                } ?: combo.fallback.apks.getOrNull(0)
+            }?.let { apk ->
                 RemoteApkInfo("${apk.link}&$token", apk.versionName)
-            }
+            } ?: throw Exception("Failed to fetch apk info from the server: ${server()}")
         }
     }
 }

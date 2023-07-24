@@ -83,8 +83,9 @@ fun Uri.toTempFile(): File {
 
 val Throwable.error: String; get() = this.message ?: this.javaClass.simpleName
 
-val Throwable.isConnectError: Boolean; get() {
-    return this is ConnectException|| this is UnknownHostException|| this is SocketTimeoutException
+val Throwable.isConnectError: Boolean; get() = when (this) {
+    is ConnectException, is UnknownHostException, is SocketTimeoutException -> true
+    else -> false
 }
 
 fun Throwable.toNetworkError(isOnline: Boolean, length: Int = 100): String {

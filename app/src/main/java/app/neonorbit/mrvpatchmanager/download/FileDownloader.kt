@@ -1,5 +1,6 @@
 package app.neonorbit.mrvpatchmanager.download
 
+import android.util.Log
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.network.HttpSpec
@@ -22,6 +23,7 @@ import java.io.File
 import java.util.regex.Pattern
 
 object FileDownloader {
+    private val TAG = FileDownloader::class.simpleName
     private const val SEGMENT_SIZE = 8_192L
     private const val INVALID_TYPE = "text/html"
     private const val RANGE_PATTERN = "bytes ([0-9]*)-([0-9]*)/([0-9]*)"
@@ -93,6 +95,7 @@ object FileDownloader {
         relaxed.finish()
         emit(DownloadStatus.FINISHED(file))
     }.catch {
+        Log.w(TAG, it)
         emit(DownloadStatus.FAILED(it.error))
     }.buffer(capacity = 12)
 
