@@ -8,15 +8,19 @@
             android:summary="@string/pref_apk_server_summery"
             android:icon="@drawable/ic_pref_config" />
         <rikka.material.preference.MaterialSwitchPreference
-            android:key="pref_fallback_mode"
-            android:title="@string/pref_fallback_mode_title"
-            android:summary="@string/pref_fallback_mode_summery"
+            android:key="pref_fix_conflict"
+            android:title="@string/pref_fix_conflict_title"
+            android:summary="@string/pref_fix_conflict_summery"
             android:icon="@drawable/ic_pref_config" />
         <rikka.material.preference.MaterialSwitchPreference
             android:key="pref_mask_package"
-            android:enabled="false"
             android:title="@string/pref_change_package_title"
             android:summary="@string/pref_change_package_summery"
+            android:icon="@drawable/ic_pref_config" />
+        <rikka.material.preference.MaterialSwitchPreference
+            android:key="pref_fallback_mode"
+            android:title="@string/pref_fallback_mode_title"
+            android:summary="@string/pref_fallback_mode_summery"
             android:icon="@drawable/ic_pref_config" />
     </PreferenceCategory>
 

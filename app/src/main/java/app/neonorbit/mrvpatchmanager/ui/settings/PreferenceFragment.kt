@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -65,23 +66,13 @@ class PreferenceFragment : PreferenceFragmentCompat() {
             }
         }
 
-        onSwitchChange(KEY_PREF_FALLBACK_MODE) { pref, value ->
-            if (value) {
-                AppUtil.prompt(requireContext(),
-                    "Warning!",
-                    "Do you really want to enable fallback mode?\n" +
-                        "[Fallback patched apps are little slower]",
-                    "Enable"
-                ) {
-                    pref.isChecked = it
-                }
-            }
-            !value
-        }
+        setSwitchConfirmation(KEY_PREF_FIX_CONFLICT, R.string.text_warning, R.string.pref_fix_conflict_confirm_message)
+        setSwitchConfirmation(KEY_PREF_MASK_PACKAGE, R.string.text_warning, R.string.pref_mask_package_confirm_message)
+        setSwitchConfirmation(KEY_PREF_FALLBACK_MODE, R.string.text_warning, R.string.pref_fallback_mode_confirm_message)
 
         onPreferenceClick(KEY_PREF_CLEAR_CACHE) {
             AppUtil.prompt(requireContext(),
-                "Clear cache?", "This won't delete your patched apps.", "Clear"
+                R.string.pref_clear_cache_confirm_prompt, R.string.pref_clear_cache_confirm_message, R.string.text_clear
             ) {
                 if (it) viewModel.clearCache()
             }
@@ -131,10 +122,25 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         }
     }
 
+    private fun setSwitchConfirmation(key: String,
+                                      @StringRes title: Int? = R.string.text_confirmation,
+                                      @StringRes message: Int? = null,
+                                      @StringRes positive: Int? = R.string.text_enable) {
+        onSwitchChange(key) { pref, value ->
+            if (value) {
+                AppUtil.prompt(requireContext(), title, message, positive) {
+                    pref.isChecked = it
+                }
+            }
+            !value
+        }
+    }
+
     companion object {
         const val KEY_PREF_APK_SERVER = "pref_apk_server"
-        const val KEY_PREF_FALLBACK_MODE = "pref_fallback_mode"
+        const val KEY_PREF_FIX_CONFLICT = "pref_fix_conflict"
         const val KEY_PREF_MASK_PACKAGE = "pref_mask_package"
+        const val KEY_PREF_FALLBACK_MODE = "pref_fallback_mode"
         const val KEY_PREF_CLEAR_CACHE = "pref_clear_cache"
         const val KEY_PREF_INSTRUCTION = "pref_instruction"
         const val KEY_PREF_TROUBLESHOOT = "pref_troubleshoot"

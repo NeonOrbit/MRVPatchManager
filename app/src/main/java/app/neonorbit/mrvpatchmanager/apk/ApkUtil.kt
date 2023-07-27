@@ -11,7 +11,6 @@ import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.compareVersion
 import java.io.File
-import java.util.Collections
 
 object ApkUtil {
     const val APK_MIME_TYPE = "application/vnd.android.package-archive"
@@ -26,9 +25,21 @@ object ApkUtil {
         return this.getSignatures().any { it in other.getSignatures() }
     }
 
-    fun verifyFbSignature(file: File): Boolean {
-        return getSignatures(file).any { signature ->
-            Signature(AppConfig.DEFAULT_FB_SIGNATURE) == signature
+    fun isMessenger(app: AppType?): Boolean {
+        return app?.getPackage() == AppConfig.MESSENGER_PACKAGE
+    }
+
+    fun isMessenger(file: File?): Boolean {
+        return file?.let {
+            getPackageInfo(it)
+        }?.packageName == AppConfig.MESSENGER_PACKAGE
+    }
+
+    fun verifyFbSignature(file: File, strict: Boolean = true): Boolean {
+        return getPackageInfo(file, true)?.takeIf {
+            AppConfig.DEFAULT_FB_PACKAGES.contains(it.packageName)
+        }?.matchSignature(AppConfig.DEFAULT_FB_SIGNATURE).let {
+            if (strict) it == true else it != false
         }
     }
 
@@ -72,14 +83,10 @@ object ApkUtil {
 
     fun getPrefixedVersionName(pkg: String) = getPackageInfo(pkg)?.let { "v${it.versionName}" }
 
-    fun getConflictedApps(file: File): Map<String, String> {
+    fun getConflictedApps(file: File, exact: Boolean): Map<String, String> {
         val conflicted = HashMap<String, String>()
         getPackageInfo(file, true)?.let { apk ->
-            (if (apk.packageName in AppConfig.DEFAULT_FB_PACKAGES) {
-                AppConfig.DEFAULT_FB_PACKAGES
-            } else {
-                Collections.singleton(apk.packageName)
-            }).forEach { pkg ->
+            getRelatedPackages(apk.packageName, exact).forEach { pkg ->
                 getPackageInfo(pkg, cert = true, meta = true)?.let { installed ->
                     try {
                         if (!installed.matchSignature(apk)) {
@@ -90,6 +97,10 @@ object ApkUtil {
             }
         }
         return conflicted
+    }
+
+    private fun getRelatedPackages(pkg: String, exact: Boolean): Set<String> {
+        return if (!exact && pkg in AppConfig.DEFAULT_FB_PACKAGES) AppConfig.DEFAULT_FB_PACKAGES else setOf(pkg)
     }
 
     private fun getSignatures(file: File): Array<out Signature> {

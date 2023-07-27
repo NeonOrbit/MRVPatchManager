@@ -148,7 +148,7 @@ class HomeFragment : Fragment(),
             }
         }
 
-        binding.warningCard.isVisible = model.warnFallback
+        binding.warningCard.isVisible = model.isFallback
         binding.patcherManual.setOnClickListener { model.manualRequest() }
         binding.managerButton.setOnClickListener { model.installManager() }
         binding.moduleInfoButton.setOnClickListener { model.showModuleInfo() }

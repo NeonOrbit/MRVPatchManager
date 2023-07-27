@@ -10,7 +10,9 @@ import org.lsposed.patch.OutputLogger
 import java.io.File
 
 object DefaultPatcher {
-    fun patch(input: File, fallback: Boolean, output: File = input.out) = callbackFlow {
+    data class Options(val isFallback: Boolean, val fixConflict: Boolean, val maskPackage: Boolean)
+
+    fun patch(input: File, options: Options, output: File = input.out) = callbackFlow {
         var failed = false
         LSPatch.setOutputLogger(object : OutputLogger {
             override fun d(msg: String) {
@@ -24,7 +26,7 @@ object DefaultPatcher {
             }
         })
         output.delete()
-        LSPatch.main(*buildOptions(input, output, fallback).toTypedArray())
+        LSPatch.main(*buildOptions(input, output, options).toTypedArray())
         if (!failed) {
             if (output.exists() && ApkUtil.verifyMrvSignature(output)) {
                 send(PatchStatus.FINISHED(output))
@@ -39,7 +41,7 @@ object DefaultPatcher {
         if (error != null) output.delete()
     }
 
-    private fun buildOptions(input: File, output: File, fallback: Boolean) =
+    private fun buildOptions(input: File, output: File, options: Options) =
         ArrayList<String>().apply {
             add(input.absolutePath)
             add("--temp-dir")
@@ -47,7 +49,7 @@ object DefaultPatcher {
             add("--out-file")
             add(output.absolutePath)
             add("--force")
-            if (fallback) add("--fallback")
+            if (options.isFallback) add("--fallback")
         }
 
     private val File.out: File get() = File(AppConfig.PATCHED_OUT_DIR, this.name)

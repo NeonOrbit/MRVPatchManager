@@ -47,6 +47,7 @@ object AppConfig {
 
     @Suppress("UNCHECKED_CAST")
     val DEFAULT_FB_PACKAGES = ConstantsM.DEFAULT_FB_PACKAGES as Set<String>
+    const val MESSENGER_PACKAGE = ConstantsM.DEFAULT_TARGET_PACKAGE
     const val DEFAULT_FB_SIGNATURE = ConstantsM.DEFAULT_FB_SIGNATURE
     const val MRV_PUBLIC_SIGNATURE  = ConstantsM.DEFAULT_MRV_SIGNATURE
 

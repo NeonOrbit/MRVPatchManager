@@ -8,12 +8,15 @@ object DefaultPreference {
     private val preferences: SharedPreferences get() = AppServices.preferences
 
     private const val KEY_PREF_APK_SERVER = PreferenceFragment.KEY_PREF_APK_SERVER
-    private const val KEY_PREF_FALLBACK_MODE = PreferenceFragment.KEY_PREF_FALLBACK_MODE
+    private const val KEY_PREF_FIX_CONFLICT = PreferenceFragment.KEY_PREF_FIX_CONFLICT
     private const val KEY_PREF_MASK_PACKAGE = PreferenceFragment.KEY_PREF_MASK_PACKAGE
+    private const val KEY_PREF_FALLBACK_MODE = PreferenceFragment.KEY_PREF_FALLBACK_MODE
 
     fun getApkServer(): String? = getString(KEY_PREF_APK_SERVER)
 
-    fun isFallbackMode(): Boolean = getBoolean(KEY_PREF_FALLBACK_MODE)
+    fun isFallbackEnabled(): Boolean = getBoolean(KEY_PREF_FALLBACK_MODE)
+
+    fun isFixConflictEnabled(): Boolean = getBoolean(KEY_PREF_FIX_CONFLICT)
 
     fun isPackageMaskEnabled(): Boolean = getBoolean(KEY_PREF_MASK_PACKAGE)
 

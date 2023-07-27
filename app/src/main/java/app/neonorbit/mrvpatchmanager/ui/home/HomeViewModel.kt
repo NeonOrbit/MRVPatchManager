@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.coroutines.coroutineContext
 
@@ -62,7 +61,9 @@ class HomeViewModel : ViewModel() {
         MutableStateFlow(VersionStatus(null, null))
     }
 
-    val warnFallback: Boolean get() = DefaultPreference.isFallbackMode()
+    val isFallback: Boolean get() = DefaultPreference.isFallbackEnabled()
+    val fixConflict: Boolean get() = DefaultPreference.isFixConflictEnabled()
+    val maskPackage: Boolean get() = DefaultPreference.isPackageMaskEnabled()
 
     private var patchingJob: Job? = null
 
@@ -154,21 +155,17 @@ class HomeViewModel : ViewModel() {
             progressTracker.emit(ProgressTrack())
             val file = uri?.toTempFile()?.also {
                 manual = it
-            } ?: withContext(Dispatchers.IO) {
-                getPatchableApkFile(app!!)
+            } ?: app?.takeIf { checkMaskPackage(it) }?.let {
+                getPatchableApkFile(app)
             }
-            file?.takeIf { manual == null ||
-                (ApkUtil.verifyFbSignature(it) ||
-                    confirmationEvent.ask("Warning!", "This apk isn't official, continue?")
-                ) && (!ApkUtil.hasLatestMrvSignedApp(it) ||
-                    confirmationEvent.ask("Already on latest version, patch anyway?")
-                ) || run { progressStatus.emit(null); false }
-            }?.let { apk ->
+            if (file != null && checkPreconditions(file, manual != null)) {
                 progressTracker.emit(ProgressTrack())
-                patchApk(apk)?.let { patched ->
+                patchApk(file)?.let { patched ->
                     progressTracker.emit(ProgressTrack(100, percent = ""))
                     install(patched)
                 }
+            } else {
+                progressStatus.emit(null)
             }
         }.let { job ->
             patchingJob = job
@@ -189,6 +186,26 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    private suspend fun checkMaskPackage(app: AppType? = null, file: File? = null): Boolean {
+        if (maskPackage && !(ApkUtil.isMessenger(app) || ApkUtil.isMessenger(file))) {
+            messageEvent.post("[Mask package name] option is currently enabled, " +
+                    "only Messenger is allowed to be patched in this mode."
+            )
+            return false
+        }
+        return true
+    }
+
+    private suspend fun checkPreconditions(file: File, isManual: Boolean): Boolean {
+        if (!checkMaskPackage(file = file)) return false
+        val passed = !fixConflict || ApkUtil.isMessenger(file) || confirmationEvent.ask(
+            "[Resolve apk conflicts] option is currently enabled, there's no need to patch any other apps besides Messenger. Patch anyway?"
+        )
+        if (!isManual || !passed) return passed
+        return ApkUtil.verifyFbSignature(file, false) || confirmationEvent.ask("Warning!", "This apk isn't official, continue?") &&
+                (!ApkUtil.hasLatestMrvSignedApp(file) || confirmationEvent.ask("Already on the latest version, patch anyway?"))
+    }
+
     private suspend fun patchApk(input: File): File? {
         val patched = AppConfig.getPatchedApkFile(input) ?: throw Exception(
             "Failed to get patched apk info"
@@ -201,7 +218,8 @@ class HomeViewModel : ViewModel() {
         }
         patched.delete()
         progressStatus.emit("Patching...")
-        return DefaultPatcher.patch(input, DefaultPreference.isFallbackMode()).onEach { status ->
+        val opt = DefaultPatcher.Options(isFallback, fixConflict, maskPackage)
+        return DefaultPatcher.patch(input, opt).onEach { status ->
             when (status) {
                 is PatchStatus.PATCHING -> progressStatus.emit("Patching: ${status.msg}")
                 is PatchStatus.FINISHED -> {
@@ -231,7 +249,7 @@ class HomeViewModel : ViewModel() {
                 is DownloadStatus.FETCHED -> {
                     version = status.version
                     if (ApkUtil.hasLatestMrvSignedApp(type.getPackage(), version) &&
-                        !confirmationEvent.ask("Already on latest version, download anyway?")) {
+                        !confirmationEvent.ask("Already on the latest version, download anyway?")) {
                         coroutineContext[Job]?.cancel() ?: throw CancellationException()
                     }
                 }
@@ -287,7 +305,9 @@ class HomeViewModel : ViewModel() {
     }
 
     private suspend fun install(file: File) {
-        val conflicted = ApkUtil.getConflictedApps(file)
+        val conflicted = ApkUtil.getConflictedApps(
+            file, fixConflict || maskPackage
+        )
         if (conflicted.isNotEmpty()) {
             if (confirmationEvent.ask(
                     "Found apps with different signatures.\n" +

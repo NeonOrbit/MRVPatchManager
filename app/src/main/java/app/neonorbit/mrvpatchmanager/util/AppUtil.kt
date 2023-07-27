@@ -7,6 +7,21 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 object AppUtil {
     fun prompt(
         context: Context,
+        @StringRes title: Int? = null,
+        @StringRes message: Int? = null,
+        @StringRes positive: Int? = null,
+        block: ((Boolean) -> Unit)? = null
+    ) {
+        prompt(context,
+            title?.let { context.getString(it) },
+            message?.let { context.getString(it) },
+            positive?.let { context.getString(it) },
+            block
+        )
+    }
+
+    fun prompt(
+        context: Context,
         title: String? = null,
         message: String? = null,
         positive: String? = null,
@@ -31,8 +46,8 @@ object AppUtil {
             .show()
     }
 
-    fun show(context: Context, @StringRes resId: Int) {
-        show(context, context.getString(resId))
+    fun show(context: Context, @StringRes message: Int) {
+        show(context, context.getString(message))
     }
 
     private fun show(context: Context, message: String) {
