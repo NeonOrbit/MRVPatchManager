@@ -10,7 +10,7 @@ object AppUtil {
         @StringRes title: Int? = null,
         @StringRes message: Int? = null,
         @StringRes positive: Int? = null,
-        block: ((Boolean) -> Unit)? = null
+        block: ((Boolean) -> Unit)
     ) {
         prompt(context,
             title?.let { context.getString(it) },
@@ -25,7 +25,7 @@ object AppUtil {
         title: String? = null,
         message: String? = null,
         positive: String? = null,
-        block: ((Boolean) -> Unit)? = null
+        block: ((Boolean) -> Unit)
     ) {
         var result = false
         MaterialAlertDialogBuilder(context)
@@ -35,13 +35,16 @@ object AppUtil {
                 positive ?: context.getString(android.R.string.ok)
             ) { _,_-> result = true }
             .setNegativeButton(android.R.string.cancel, null)
-            .setOnDismissListener { block?.invoke(result) }
+            .setOnDismissListener { block.invoke(result) }
             .show()
     }
 
+    fun prompt(context: Context, @StringRes message: Int, vararg formatArgs: Any) {
+        prompt(context, context.getString(message, *formatArgs))
+    }
+
     fun prompt(context: Context, message: String) {
-        MaterialAlertDialogBuilder(context)
-            .setMessage(message)
+        MaterialAlertDialogBuilder(context).setMessage(message)
             .setNegativeButton(android.R.string.ok, null)
             .show()
     }

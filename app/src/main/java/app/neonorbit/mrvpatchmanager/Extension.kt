@@ -172,6 +172,16 @@ fun String.compareVersion(other: String?): Int {
     } catch (_: Exception) { -1 }
 }
 
+fun String?.isValidJavaName(): Boolean {
+    if (this == null) return false
+    for (part in this.split('.').toTypedArray()) {
+        if (part.isEmpty()) return false
+        if (!Character.isJavaIdentifierStart(part[0])) return false
+        if (part.any { !Character.isJavaIdentifierPart(it) }) return false
+    }
+    return true
+}
+
 @Suppress("unused")
 fun String.capitalizeWords(): String = split(" ").joinToString(" ") {
     it.lowercase(Locale.getDefault()).replaceFirstChar { word ->

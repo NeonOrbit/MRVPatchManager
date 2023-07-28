@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         theme.applyStyle(
-            rikka.material.preference.R.style.ThemeOverlay_Rikka_Material3_Preference, false
+            rikka.material.preference.R.style.ThemeOverlay_Rikka_Material3_Preference, true
         )
     }
 

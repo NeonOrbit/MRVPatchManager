@@ -36,11 +36,14 @@
     <string name="pref_apk_server_title">Apk download server</string>
     <string name="pref_apk_server_summery">Pick a server for APK downloads.</string>
     <string name="pref_fix_conflict_title">Resolve apk conflicts</string>
-    <string name="pref_fix_conflict_summery">In case you are unable to remove the preinstalled fb apps.</string>
+    <string name="pref_fix_conflict_summery">If you are unable to remove the preinstalled fb apps.</string>
     <string name="pref_change_package_title">Mask package name</string>
-    <string name="pref_change_package_summery">In case you are unable to remove the original messenger app.</string>
+    <string name="pref_change_package_summery">If unable to remove the original messenger app.</string>
     <string name="pref_fallback_mode_title">Fallback mode (slow)</string>
-    <string name="pref_fallback_mode_summery">In case patched apps do not work after some time.</string>
+    <string name="pref_fallback_mode_summery">If patched apps do not work after some time.</string>
+    <string name="pref_extra_modules_title">Allow third-party modules</string>
+    <string name="pref_extra_modules_summery">[Advanced] Allow third-party modules to be loaded.</string>
+    <string name="pref_extra_modules_message">Package names separated by comma:</string>
     <string name="pref_action_group_title">Actions</string>
     <string name="pref_clear_cache_title">Clear download cache</string>
     <string name="pref_clear_cache_summery">Remove temporary files from the cache.</string>
@@ -55,6 +58,7 @@
     <string name="pref_visit_help_summery">Visit the help forum to ask your question.</string>
     <string name="pref_visit_source_title">Source Code</string>
     <string name="pref_visit_source_summery">Visit the github repository of the project.</string>
+    <string name="pref_extra_modules_invalid_pkg">Invalid package name: %s</string>
     <string name="pref_clear_cache_confirm_prompt">Clear cache</string>
     <string name="pref_clear_cache_confirm_message">"This won\'t delete your patched apps."</string>
     <string name="pref_fix_conflict_confirm_message">Enabling this option will allow you

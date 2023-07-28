@@ -22,6 +22,12 @@
             android:title="@string/pref_fallback_mode_title"
             android:summary="@string/pref_fallback_mode_summery"
             android:icon="@drawable/ic_pref_config" />
+        <EditTextPreference
+            android:key="pref_extra_modules"
+            android:title="@string/pref_extra_modules_title"
+            android:summary="@string/pref_extra_modules_summery"
+            android:dialogMessage="@string/pref_extra_modules_message"
+            android:icon="@drawable/ic_pref_config" />
     </PreferenceCategory>
 
     <PreferenceCategory android:iconSpaceReserved="false"

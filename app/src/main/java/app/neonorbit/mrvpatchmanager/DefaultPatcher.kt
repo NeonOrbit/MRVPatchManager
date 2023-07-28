@@ -10,7 +10,10 @@ import org.lsposed.patch.OutputLogger
 import java.io.File
 
 object DefaultPatcher {
-    data class Options(val isFallback: Boolean, val fixConflict: Boolean, val maskPackage: Boolean)
+    data class Options(
+        val fixConflict: Boolean, val maskPackage: Boolean,
+        val fallbackMode: Boolean, val extraModules: List<String>?
+    )
 
     fun patch(input: File, options: Options, output: File = input.out) = callbackFlow {
         var failed = false
@@ -41,16 +44,16 @@ object DefaultPatcher {
         if (error != null) output.delete()
     }
 
-    private fun buildOptions(input: File, output: File, options: Options) =
-        ArrayList<String>().apply {
-            add(input.absolutePath)
-            add("--temp-dir")
-            add(AppConfig.TEMP_DIR.absolutePath)
-            add("--out-file")
-            add(output.absolutePath)
-            add("--force")
-            if (options.isFallback) add("--fallback")
-        }
+    private fun buildOptions(input: File, output: File, options: Options) = ArrayList<String>().apply {
+        add(input.absolutePath)
+        add("--temp-dir")
+        add(AppConfig.TEMP_DIR.absolutePath)
+        add("--out-file")
+        add(output.absolutePath)
+        add("--force")
+        if (options.fallbackMode) add("--fallback")
+        // TODO 
+    }
 
     private val File.out: File get() = File(AppConfig.PATCHED_OUT_DIR, this.name)
 

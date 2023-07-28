@@ -8,12 +8,14 @@ import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.R
+import app.neonorbit.mrvpatchmanager.isValidJavaName
 import app.neonorbit.mrvpatchmanager.toSize
+import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
@@ -70,6 +72,23 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         setSwitchConfirmation(KEY_PREF_MASK_PACKAGE, R.string.text_warning, R.string.pref_mask_package_confirm_message)
         setSwitchConfirmation(KEY_PREF_FALLBACK_MODE, R.string.text_warning, R.string.pref_fallback_mode_confirm_message)
 
+        findPreference<EditTextPreference>(KEY_PREF_EXTRA_MODULES)?.let { pref ->
+            if (pref.text?.isNotEmpty() == true) pref.summary = "Packages: ${pref.text}"
+            pref.setOnPreferenceChangeListener { _, value ->
+                val packages = value.toString().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                for (pkg in packages) {
+                    if (!pkg.isValidJavaName()) {
+                        AppUtil.prompt(requireContext(), R.string.pref_extra_modules_invalid_pkg, pkg)
+                        return@setOnPreferenceChangeListener false
+                    }
+                }
+                pref.text = packages.joinToString(", ")
+                pref.summary = if (packages.isNotEmpty()) "Packages: ${pref.text}"
+                else requireContext().getString(R.string.pref_extra_modules_summery)
+                false
+            }
+        }
+
         onPreferenceClick(KEY_PREF_CLEAR_CACHE) {
             AppUtil.prompt(requireContext(),
                 R.string.pref_clear_cache_confirm_prompt, R.string.pref_clear_cache_confirm_message, R.string.text_clear
@@ -123,7 +142,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
     }
 
     private fun setSwitchConfirmation(key: String,
-                                      @StringRes title: Int? = R.string.text_confirmation,
+                                      @StringRes title: Int,
                                       @StringRes message: Int? = null,
                                       @StringRes positive: Int? = R.string.text_enable) {
         onSwitchChange(key) { pref, value ->
@@ -141,6 +160,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         const val KEY_PREF_FIX_CONFLICT = "pref_fix_conflict"
         const val KEY_PREF_MASK_PACKAGE = "pref_mask_package"
         const val KEY_PREF_FALLBACK_MODE = "pref_fallback_mode"
+        const val KEY_PREF_EXTRA_MODULES = "pref_extra_modules"
         const val KEY_PREF_CLEAR_CACHE = "pref_clear_cache"
         const val KEY_PREF_INSTRUCTION = "pref_instruction"
         const val KEY_PREF_TROUBLESHOOT = "pref_troubleshoot"

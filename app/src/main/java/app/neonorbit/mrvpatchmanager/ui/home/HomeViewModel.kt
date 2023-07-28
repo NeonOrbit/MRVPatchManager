@@ -61,9 +61,10 @@ class HomeViewModel : ViewModel() {
         MutableStateFlow(VersionStatus(null, null))
     }
 
-    val isFallback: Boolean get() = DefaultPreference.isFallbackEnabled()
     val fixConflict: Boolean get() = DefaultPreference.isFixConflictEnabled()
     val maskPackage: Boolean get() = DefaultPreference.isPackageMaskEnabled()
+    val fallbackMode: Boolean get() = DefaultPreference.isFallbackModeEnabled()
+    val extraModules: List<String>? get() = DefaultPreference.getExtraModules()
 
     private var patchingJob: Job? = null
 
@@ -218,7 +219,7 @@ class HomeViewModel : ViewModel() {
         }
         patched.delete()
         progressStatus.emit("Patching...")
-        val opt = DefaultPatcher.Options(isFallback, fixConflict, maskPackage)
+        val opt = DefaultPatcher.Options(fixConflict, maskPackage, fallbackMode, extraModules)
         return DefaultPatcher.patch(input, opt).onEach { status ->
             when (status) {
                 is PatchStatus.PATCHING -> progressStatus.emit("Patching: ${status.msg}")
