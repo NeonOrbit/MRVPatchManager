@@ -38,17 +38,17 @@ object AppServices {
 
     fun getCacheDir(): File = application.cacheDir
 
-    fun getCacheDir(sub: String): File {
-        return File(application.cacheDir, sub).also {
-            if (!it.exists()) it.mkdirs()
-        }
-    }
+    val appFilesDir: File get() = application.filesDir.init()
 
     fun getFilesDir(sub: String): File {
-        return File(application.filesDir, sub).also {
-            if (!it.exists()) it.mkdirs()
-        }
+        return File(application.filesDir, sub).init()
     }
+
+    fun getCacheDir(sub: String): File {
+        return File(application.cacheDir, sub).init()
+    }
+
+    private fun File.init() = apply { if (!exists()) mkdirs() }
 
     fun showToast(message: String, long: Boolean = false) {
         Toast.makeText(application, message,

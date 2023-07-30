@@ -12,14 +12,18 @@ import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import app.neonorbit.mrvpatchmanager.AppServices
+import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.isValidJavaName
+import app.neonorbit.mrvpatchmanager.keystore.KeystoreInputData
+import app.neonorbit.mrvpatchmanager.observeOnUI
 import app.neonorbit.mrvpatchmanager.toSize
 import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
-class PreferenceFragment : PreferenceFragmentCompat() {
+class PreferenceFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.ResponseListener {
     private var _viewModel: SettingsViewModel? = null
     private val viewModel: SettingsViewModel get() = _viewModel!!
 
@@ -44,22 +48,47 @@ class PreferenceFragment : PreferenceFragmentCompat() {
                 uriLauncher.launchUrl(requireContext(), it)
             }
         }
-        viewModel.cacheSize.observe(viewLifecycleOwner) { size ->
+        viewModel.cacheSize.observeOnUI(viewLifecycleOwner) { size ->
             findPreference<Preference>(KEY_PREF_CLEAR_CACHE)?.let {
-                it.summary = size.toSize(true)
+                it.summary = size?.toSize(true) ?: getString(R.string.pref_clear_cache_summery)
+            }
+        }
+        viewModel.keystoreName.observeOnUI(viewLifecycleOwner) { keyName ->
+            findPreference<Preference>(KEY_PREF_CUSTOM_KEYSTORE)?.let {
+                it.summary = if (keyName == null) getString(R.string.pref_custom_keystore_summery)
+                else getString(R.string.pref_custom_keystore_keystore, keyName)
+            }
+        }
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            viewModel.keystoreSaved.observe { data ->
+                DefaultPreference.setString(KEY_PREF_CUSTOM_KEYSTORE, data?.toJson())
+                KeystoreDialogFragment.finish(this@PreferenceFragment)
+                AppServices.showToast(getString(
+                    if (data != null) R.string.text_saved else R.string.text_cleared
+                ))
+            }
+        }
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            viewModel.ksSaveFailed.observe {
+                KeystoreDialogFragment.failed(this@PreferenceFragment, it)
             }
         }
         viewModel.loadCacheSize()
+        viewModel.loadKeystoreName()
         return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
+    override fun onKeystoreInput(response: KeystoreInputData?) {
+        viewModel.saveKeystore(response)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preference)
 
         findPreference<SimpleMenuPreference>(KEY_PREF_APK_SERVER)?.let { pref ->
-            pref.entries = viewModel.servers
-            pref.entryValues = viewModel.servers
-            pref.summary = pref.value ?: viewModel.defaultServer.also {
+            pref.entries = SettingsData.SERVERS
+            pref.entryValues = SettingsData.SERVERS
+            pref.summary = pref.value ?: SettingsData.DEFAULT_SERVER.also {
                 pref.value = it
             }
             pref.setOnPreferenceChangeListener { _, value ->
@@ -73,7 +102,9 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         setSwitchConfirmation(KEY_PREF_FALLBACK_MODE, R.string.text_warning, R.string.pref_fallback_mode_confirm_message)
 
         findPreference<EditTextPreference>(KEY_PREF_EXTRA_MODULES)?.let { pref ->
-            if (pref.text?.isNotEmpty() == true) pref.summary = "Packages: ${pref.text}"
+            if (pref.text?.isNotEmpty() == true) {
+                pref.summary = getString(R.string.pref_extra_modules_package, pref.text)
+            }
             pref.setOnPreferenceChangeListener { _, value ->
                 val packages = value.toString().split(',').map { it.trim() }.filter { it.isNotEmpty() }
                 for (pkg in packages) {
@@ -83,10 +114,14 @@ class PreferenceFragment : PreferenceFragmentCompat() {
                     }
                 }
                 pref.text = packages.joinToString(", ")
-                pref.summary = if (packages.isNotEmpty()) "Packages: ${pref.text}"
-                else requireContext().getString(R.string.pref_extra_modules_summery)
+                pref.summary = if (packages.isEmpty()) getString(R.string.pref_extra_modules_summery)
+                else getString(R.string.pref_extra_modules_package, pref.text)
                 false
             }
+        }
+
+        onPreferenceClick(KEY_PREF_CUSTOM_KEYSTORE) {
+            KeystoreDialogFragment.show(this)
         }
 
         onPreferenceClick(KEY_PREF_CLEAR_CACHE) {
@@ -161,6 +196,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         const val KEY_PREF_MASK_PACKAGE = "pref_mask_package"
         const val KEY_PREF_FALLBACK_MODE = "pref_fallback_mode"
         const val KEY_PREF_EXTRA_MODULES = "pref_extra_modules"
+        const val KEY_PREF_CUSTOM_KEYSTORE = "pref_custom_keystore"
         const val KEY_PREF_CLEAR_CACHE = "pref_clear_cache"
         const val KEY_PREF_INSTRUCTION = "pref_instruction"
         const val KEY_PREF_TROUBLESHOOT = "pref_troubleshoot"

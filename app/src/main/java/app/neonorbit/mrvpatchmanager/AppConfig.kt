@@ -13,6 +13,7 @@ object AppConfig {
     private const val CACHE_TEMP_DIR_NAME = "temp_dir"
     private const val PATCHED_APK_DIR_NAME = "patched"
     private const val PATCHED_OUT_DIR_NAME = "patch_out"
+    private const val CUSTOM_KEYSTORE_NAME = "keystore.bks"
 
     const val MODULE_PACKAGE = "app.neonorbit.chatheadenabler"
     const val MANAGER_PACKAGE = "app.neonorbit.mrvpatchmanager"
@@ -28,6 +29,8 @@ object AppConfig {
     val PATCHED_OUT_DIR: File get() = AppServices.getCacheDir(PATCHED_OUT_DIR_NAME)
 
     val PATCHED_APK_DIR: File get() = AppServices.getFilesDir(PATCHED_APK_DIR_NAME)
+
+    val CUSTOM_KEYSTORE_FILE: File get() = File(AppServices.appFilesDir, CUSTOM_KEYSTORE_NAME)
 
     fun getDownloadApkFile(type: AppType) = File(DOWNLOAD_DIR, "${type.getName()}.apk")
 

@@ -28,6 +28,11 @@
             android:summary="@string/pref_extra_modules_summery"
             android:dialogMessage="@string/pref_extra_modules_message"
             android:icon="@drawable/ic_pref_config" />
+        <Preference
+            android:key="pref_custom_keystore"
+            android:title="@string/pref_custom_keystore_title"
+            android:summary="@string/pref_custom_keystore_summery"
+            android:icon="@drawable/ic_pref_config" />
     </PreferenceCategory>
 
     <PreferenceCategory android:iconSpaceReserved="false"

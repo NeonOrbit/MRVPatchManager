@@ -70,16 +70,17 @@ fun File.size(): Long {
     } ?: 0L
 }
 
-fun Uri.toTempFile(): File {
-    return AppServices.contentResolver.openInputStream(this)?.use { input ->
-        File.createTempFile(
-            "resolved", null, AppConfig.TEMP_DIR
-        ).also { tmp ->
-            tmp.outputStream().use { output ->
-                input.copyTo(output)
-            }
+fun Uri.toTempFile(): File = File.createTempFile(
+    "resolved", null, AppConfig.TEMP_DIR
+).let { copyTo(it) }
+
+fun Uri.copyTo(file: File): File {
+    AppServices.contentResolver.openInputStream(this)?.use { input ->
+        file.outputStream().use { output ->
+            input.copyTo(output)
         }
-    } ?: throw Exception("Failed to resolve uri")
+    } ?: throw Exception("Failed to resolve uri: $this")
+    return file
 }
 
 fun List<File>.existAnyIn(dir: DocumentFile): Boolean = any { file ->

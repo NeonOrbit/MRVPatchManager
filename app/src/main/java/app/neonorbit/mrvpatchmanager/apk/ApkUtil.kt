@@ -35,17 +35,17 @@ object ApkUtil {
         }?.packageName == AppConfig.MESSENGER_PACKAGE
     }
 
+    fun verifySignature(file: File, sig: String): Boolean {
+        return getSignatures(file).any { signature ->
+            Signature(sig) == signature
+        }
+    }
+
     fun verifyFbSignature(file: File, strict: Boolean = true): Boolean {
         return getPackageInfo(file, true)?.takeIf {
             AppConfig.DEFAULT_FB_PACKAGES.contains(it.packageName)
         }?.matchSignature(AppConfig.DEFAULT_FB_SIGNATURE).let {
             if (strict) it == true else it != false
-        }
-    }
-
-    fun verifyMrvSignature(file: File): Boolean {
-        return getSignatures(file).any { signature ->
-            Signature(AppConfig.MRV_PUBLIC_SIGNATURE) == signature
         }
     }
 

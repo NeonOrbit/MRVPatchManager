@@ -16,6 +16,7 @@ import app.neonorbit.mrvpatchmanager.download.DownloadStatus
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
 import app.neonorbit.mrvpatchmanager.event.SingleEvent
+import app.neonorbit.mrvpatchmanager.keystore.KeystoreData
 import app.neonorbit.mrvpatchmanager.post
 import app.neonorbit.mrvpatchmanager.postNow
 import app.neonorbit.mrvpatchmanager.remote.GithubService
@@ -65,6 +66,7 @@ class HomeViewModel : ViewModel() {
     val maskPackage: Boolean get() = DefaultPreference.isPackageMaskEnabled()
     val fallbackMode: Boolean get() = DefaultPreference.isFallbackModeEnabled()
     val extraModules: List<String>? get() = DefaultPreference.getExtraModules()
+    val customKeystore: KeystoreData? get() = DefaultPreference.getCustomKeystore()
 
     private var patchingJob: Job? = null
 
@@ -219,8 +221,10 @@ class HomeViewModel : ViewModel() {
         }
         patched.delete()
         progressStatus.emit("Patching...")
-        val opt = DefaultPatcher.Options(fixConflict, maskPackage, fallbackMode, extraModules)
-        return DefaultPatcher.patch(input, opt).onEach { status ->
+        val options = DefaultPatcher.Options(
+            fixConflict, maskPackage, fallbackMode, customKeystore, extraModules
+        )
+        return DefaultPatcher(input, options).patch().onEach { status ->
             when (status) {
                 is PatchStatus.PATCHING -> progressStatus.emit("Patching: ${status.msg}")
                 is PatchStatus.FINISHED -> {
