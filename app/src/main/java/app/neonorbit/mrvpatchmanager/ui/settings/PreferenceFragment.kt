@@ -8,22 +8,17 @@ import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
-import app.neonorbit.mrvpatchmanager.AppServices
-import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.R
-import app.neonorbit.mrvpatchmanager.isValidJavaName
-import app.neonorbit.mrvpatchmanager.keystore.KeystoreInputData
 import app.neonorbit.mrvpatchmanager.observeOnUI
 import app.neonorbit.mrvpatchmanager.toSize
 import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
-class PreferenceFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.ResponseListener {
+class PreferenceFragment : PreferenceFragmentCompat() {
     private var _viewModel: SettingsViewModel? = null
     private val viewModel: SettingsViewModel get() = _viewModel!!
 
@@ -31,18 +26,14 @@ class PreferenceFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.Re
         CustomTabsIntent.Builder().build()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        _viewModel = viewModels<SettingsViewModel>(
-            { requireParentFragment() }
-        ).value
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        _viewModel = viewModels<SettingsViewModel>(
+            { requireParentFragment() }
+        ).value
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
             viewModel.uriEvent.observe {
                 uriLauncher.launchUrl(requireContext(), it)
@@ -53,33 +44,8 @@ class PreferenceFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.Re
                 it.summary = size?.toSize(true) ?: getString(R.string.pref_clear_cache_summery)
             }
         }
-        viewModel.keystoreName.observeOnUI(viewLifecycleOwner) { keyName ->
-            findPreference<Preference>(KEY_PREF_CUSTOM_KEYSTORE)?.let {
-                it.summary = if (keyName == null) getString(R.string.pref_custom_keystore_summery)
-                else getString(R.string.pref_custom_keystore_keystore, keyName)
-            }
-        }
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel.keystoreSaved.observe { data ->
-                DefaultPreference.setString(KEY_PREF_CUSTOM_KEYSTORE, data?.toJson())
-                KeystoreDialogFragment.finish(this@PreferenceFragment)
-                AppServices.showToast(getString(
-                    if (data != null) R.string.text_saved else R.string.text_cleared
-                ))
-            }
-        }
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel.ksSaveFailed.observe {
-                KeystoreDialogFragment.failed(this@PreferenceFragment, it)
-            }
-        }
         viewModel.loadCacheSize()
-        viewModel.loadKeystoreName()
         return super.onCreateView(inflater, container, savedInstanceState)
-    }
-
-    override fun onKeystoreInput(response: KeystoreInputData?) {
-        viewModel.saveKeystore(response)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -100,29 +66,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.Re
         setSwitchConfirmation(KEY_PREF_FIX_CONFLICT, R.string.text_warning, R.string.pref_fix_conflict_confirm_message)
         setSwitchConfirmation(KEY_PREF_MASK_PACKAGE, R.string.text_warning, R.string.pref_mask_package_confirm_message)
         setSwitchConfirmation(KEY_PREF_FALLBACK_MODE, R.string.text_warning, R.string.pref_fallback_mode_confirm_message)
-
-        findPreference<EditTextPreference>(KEY_PREF_EXTRA_MODULES)?.let { pref ->
-            if (pref.text?.isNotEmpty() == true) {
-                pref.summary = getString(R.string.pref_extra_modules_package, pref.text)
-            }
-            pref.setOnPreferenceChangeListener { _, value ->
-                val packages = value.toString().split(',').map { it.trim() }.filter { it.isNotEmpty() }
-                for (pkg in packages) {
-                    if (!pkg.isValidJavaName()) {
-                        AppUtil.prompt(requireContext(), R.string.pref_extra_modules_invalid_pkg, pkg)
-                        return@setOnPreferenceChangeListener false
-                    }
-                }
-                pref.text = packages.joinToString(", ")
-                pref.summary = if (packages.isEmpty()) getString(R.string.pref_extra_modules_summery)
-                else getString(R.string.pref_extra_modules_package, pref.text)
-                false
-            }
-        }
-
-        onPreferenceClick(KEY_PREF_CUSTOM_KEYSTORE) {
-            KeystoreDialogFragment.show(this)
-        }
 
         onPreferenceClick(KEY_PREF_CLEAR_CACHE) {
             AppUtil.prompt(requireContext(),
@@ -167,7 +110,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.Re
         }
     }
 
-    @Suppress("SameParameterValue")
     private fun onSwitchChange(key: String, block: (SwitchPreferenceCompat, Boolean) -> Boolean) {
         findPreference<SwitchPreferenceCompat>(key)?.let { pref ->
             pref.setOnPreferenceChangeListener { _, value ->
@@ -195,8 +137,6 @@ class PreferenceFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.Re
         const val KEY_PREF_FIX_CONFLICT = "pref_fix_conflict"
         const val KEY_PREF_MASK_PACKAGE = "pref_mask_package"
         const val KEY_PREF_FALLBACK_MODE = "pref_fallback_mode"
-        const val KEY_PREF_EXTRA_MODULES = "pref_extra_modules"
-        const val KEY_PREF_CUSTOM_KEYSTORE = "pref_custom_keystore"
         const val KEY_PREF_CLEAR_CACHE = "pref_clear_cache"
         const val KEY_PREF_INSTRUCTION = "pref_instruction"
         const val KEY_PREF_TROUBLESHOOT = "pref_troubleshoot"

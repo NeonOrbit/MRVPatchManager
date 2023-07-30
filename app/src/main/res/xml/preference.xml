@@ -22,17 +22,12 @@
             android:title="@string/pref_fallback_mode_title"
             android:summary="@string/pref_fallback_mode_summery"
             android:icon="@drawable/ic_pref_config" />
-        <EditTextPreference
-            android:key="pref_extra_modules"
-            android:title="@string/pref_extra_modules_title"
-            android:summary="@string/pref_extra_modules_summery"
-            android:dialogMessage="@string/pref_extra_modules_message"
-            android:icon="@drawable/ic_pref_config" />
         <Preference
-            android:key="pref_custom_keystore"
-            android:title="@string/pref_custom_keystore_title"
-            android:summary="@string/pref_custom_keystore_summery"
-            android:icon="@drawable/ic_pref_config" />
+            android:key="pref_advanced_settings"
+            android:title="@string/pref_advanced_settings_title"
+            android:summary="@string/pref_advanced_settings_summery"
+            android:icon="@drawable/ic_pref_advanced"
+            android:fragment="app.neonorbit.mrvpatchmanager.ui.settings.PreferenceAdvancedFragment" />
     </PreferenceCategory>
 
     <PreferenceCategory android:iconSpaceReserved="false"

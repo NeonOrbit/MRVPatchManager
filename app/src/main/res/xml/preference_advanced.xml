@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:iconSpaceReserved="false"
+        android:title="@string/pref_advanced_group_title">
+        <Preference
+            android:key="pref_custom_keystore"
+            android:title="@string/pref_custom_keystore_title"
+            android:summary="@string/pref_custom_keystore_summery"
+            android:icon="@drawable/ic_pref_advanced" />
+        <EditTextPreference
+            android:key="pref_extra_modules"
+            android:title="@string/pref_extra_modules_title"
+            android:summary="@string/pref_extra_modules_summery"
+            android:dialogMessage="@string/pref_extra_modules_message"
+            android:icon="@drawable/ic_pref_advanced" />
+    </PreferenceCategory>
+    <Preference
+        android:key="pref_advanced_back"
+        android:title="Back to settings"
+        android:icon="@drawable/ic_pref_back" />
+</PreferenceScreen>

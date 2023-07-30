@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager
 
 import android.content.SharedPreferences
 import app.neonorbit.mrvpatchmanager.keystore.KeystoreData
+import app.neonorbit.mrvpatchmanager.ui.settings.PreferenceAdvancedFragment
 import app.neonorbit.mrvpatchmanager.ui.settings.PreferenceFragment
 
 @Suppress("unused")
@@ -12,8 +13,8 @@ object DefaultPreference {
     private const val KEY_PREF_FIX_CONFLICT = PreferenceFragment.KEY_PREF_FIX_CONFLICT
     private const val KEY_PREF_MASK_PACKAGE = PreferenceFragment.KEY_PREF_MASK_PACKAGE
     private const val KEY_PREF_FALLBACK_MODE = PreferenceFragment.KEY_PREF_FALLBACK_MODE
-    private const val KEY_PREF_EXTRA_MODULES = PreferenceFragment.KEY_PREF_EXTRA_MODULES
-    private const val KEY_PREF_CUSTOM_KEYSTORE = PreferenceFragment.KEY_PREF_CUSTOM_KEYSTORE
+    private const val KEY_PREF_EXTRA_MODULES = PreferenceAdvancedFragment.KEY_PREF_EXTRA_MODULES
+    private const val KEY_PREF_CUSTOM_KEYSTORE = PreferenceAdvancedFragment.KEY_PREF_CUSTOM_KEYSTORE
 
     fun getApkServer(): String? = getString(KEY_PREF_APK_SERVER)
     fun isFixConflictEnabled(): Boolean = getBoolean(KEY_PREF_FIX_CONFLICT)

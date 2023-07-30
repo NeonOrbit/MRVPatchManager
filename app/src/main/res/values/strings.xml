@@ -25,6 +25,7 @@
     <string name="patcher_default">Default</string>
     <string name="patcher_manual">Manual</string>
     <string name="no_patched_apps">No patched apps</string>
+
     <string name="text_confirmation">Confirmation</string>
     <string name="text_warning">Warning!</string>
     <string name="text_default">Default</string>
@@ -37,11 +38,13 @@
     <string name="developer_info_text">Developer: &#160;%s</string>
     <string name="help_forum_info_text">Help Forum: &#160;%s</string>
     <string name="source_code_info_text">Source Code: &#160;%s</string>
+
     <string name="custom_keystore_input_title">Keystore Input (bks)</string>
     <string name="custom_keystore_input_file">Keystore file</string>
     <string name="custom_keystore_input_password">Keystore password</string>
     <string name="custom_keystore_input_key_alias">Key alias (optional)</string>
     <string name="custom_keystore_input_alias_password">Alias password (optional)</string>
+
     <string name="pref_config_group_title">Configs</string>
     <string name="pref_apk_server_title">Apk download server</string>
     <string name="pref_apk_server_summery">Pick a server for APK downloads.</string>
@@ -51,16 +54,22 @@
     <string name="pref_change_package_summery">If unable to remove the original messenger app.</string>
     <string name="pref_fallback_mode_title">Fallback mode (slow)</string>
     <string name="pref_fallback_mode_summery">If patched apps do not work after some time.</string>
+    <string name="pref_advanced_settings_title">Advanced configurations</string>
+    <string name="pref_advanced_settings_summery">Intended for advanced users only.</string>
+
+    <string name="pref_advanced_group_title">Advanced</string>
+    <string name="pref_custom_keystore_title">Custom keystore file</string>
+    <string name="pref_custom_keystore_summery">Set a custom keystore for apk signing.</string>
     <string name="pref_extra_modules_title">Allow third-party modules</string>
-    <string name="pref_extra_modules_summery">[Advanced] Allow third-party modules to be loaded.</string>
+    <string name="pref_extra_modules_summery">Allow third-party modules to be loaded.</string>
     <string name="pref_extra_modules_message">Package names separated by comma:</string>
     <string name="pref_extra_modules_package">Packages: %s</string>
-    <string name="pref_custom_keystore_title">Custom keystore file (.bks)</string>
-    <string name="pref_custom_keystore_summery">[Advanced] Set a custom keystore file for apk signing.</string>
     <string name="pref_custom_keystore_keystore">Keystore: %s</string>
+
     <string name="pref_action_group_title">Actions</string>
     <string name="pref_clear_cache_title">Clear download cache</string>
     <string name="pref_clear_cache_summery">Remove temporary files from the cache.</string>
+
     <string name="pref_other_group_title">Others</string>
     <string name="pref_instruction_title">Instructions</string>
     <string name="pref_instruction_summery">Read the usage instructions.</string>
@@ -75,6 +84,7 @@
     <string name="pref_extra_modules_invalid_pkg">Invalid package name: %s</string>
     <string name="pref_clear_cache_confirm_prompt">Clear cache</string>
     <string name="pref_clear_cache_confirm_message">"This won\'t delete your patched apps."</string>
+
     <string name="pref_fix_conflict_confirm_message">Enabling this option will allow you
         to install patched Messenger alongside the original FB apps,
         but may affect some functionality (opening links, login sharing etc).
