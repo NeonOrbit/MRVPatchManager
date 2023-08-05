@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppServices
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
@@ -70,7 +71,7 @@ class PatchedViewModel : ViewModel() {
                 AppServices.resolveContentUri(File(it.path))
             }.let { ArrayList(it) }
             intentEvent.post(Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                type = ApkUtil.APK_MIME_TYPE
+                type = ApkConfigs.APK_MIME_TYPE
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
             })
@@ -108,7 +109,7 @@ class PatchedViewModel : ViewModel() {
             progressState.postValue(true)
             files.forEach { srcFile ->
                 val outFile = outDir.findFile(srcFile.name) ?: outDir.createFile(
-                    ApkUtil.APK_MIME_TYPE, srcFile.name
+                    ApkConfigs.APK_MIME_TYPE, srcFile.name
                 ) ?: throw Exception("Failed to create file")
                 AppServices.contentResolver.openOutputStream(outFile.uri)?.use { output ->
                     srcFile.inputStream().use { input ->

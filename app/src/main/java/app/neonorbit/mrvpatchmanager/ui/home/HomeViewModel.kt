@@ -9,6 +9,7 @@ import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.DefaultPatcher
 import app.neonorbit.mrvpatchmanager.DefaultPatcher.PatchStatus
 import app.neonorbit.mrvpatchmanager.DefaultPreference
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.compareVersion
@@ -79,7 +80,7 @@ class HomeViewModel : ViewModel() {
     private val filePickerIntent: Intent by lazy {
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = ApkUtil.APK_MIME_TYPE
+            type = ApkConfigs.APK_MIME_TYPE
         }
     }
 

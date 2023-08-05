@@ -61,7 +61,7 @@ class ApkRemoteFileProvider {
         var service: ApkRemoteService = iterator.next()
         return flow {
             emit(DownloadStatus.FETCHING(service.server()))
-            val fetched = service.fetch(type)
+            val fetched = service.fetch(type, AppConfig.DEVICE_ABI)
             fetched.version?.let {
                 emit(DownloadStatus.FETCHED(it))
             }

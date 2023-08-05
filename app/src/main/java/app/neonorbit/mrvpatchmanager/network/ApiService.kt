@@ -3,10 +3,15 @@ package app.neonorbit.mrvpatchmanager.network
 import app.neonorbit.mrvpatchmanager.network.parser.HtmlParser
 import app.neonorbit.mrvpatchmanager.network.parser.JsonParser
 import app.neonorbit.mrvpatchmanager.network.parser.XmlParser
+import app.neonorbit.mrvpatchmanager.remote.data.ApkComboReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboVariantData
-import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorButtonData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorItemData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorIFormData
-import app.neonorbit.mrvpatchmanager.remote.data.ApkPureItemLinkData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorReleaseData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorVariantData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkPureItemData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkPureReleaseData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkPureVariantData
 import app.neonorbit.mrvpatchmanager.remote.data.GithubReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.RssFeedData
 import okhttp3.ResponseBody
@@ -43,7 +48,15 @@ interface ApiService {
 
     @GET
     @HtmlParser
-    suspend fun getApkMirrorButton(@Url url: String): Response<ApkMirrorButtonData>
+    suspend fun getApkMirrorRelease(@Url url: String): Response<ApkMirrorReleaseData>
+
+    @GET
+    @HtmlParser
+    suspend fun getApkMirrorVariant(@Url url: String): Response<ApkMirrorVariantData>
+
+    @GET
+    @HtmlParser
+    suspend fun getApkMirrorItem(@Url url: String): Response<ApkMirrorItemData>
 
     @GET
     @HtmlParser
@@ -51,9 +64,21 @@ interface ApiService {
 
     @GET
     @HtmlParser
+    suspend fun getApkComboRelease(@Url url: String): Response<ApkComboReleaseData>
+
+    @GET
+    @HtmlParser
     suspend fun getApkComboVariant(@Url url: String): Response<ApkComboVariantData>
 
     @GET
     @HtmlParser
-    suspend fun getApkPureItemLink(@Url url: String): Response<ApkPureItemLinkData>
+    suspend fun getApkPureRelease(@Url url: String): Response<ApkPureReleaseData>
+
+    @GET
+    @HtmlParser
+    suspend fun getApkPureVariant(@Url url: String): Response<ApkPureVariantData>
+
+    @GET
+    @HtmlParser
+    suspend fun getApkPureItem(@Url url: String): Response<ApkPureItemData>
 }

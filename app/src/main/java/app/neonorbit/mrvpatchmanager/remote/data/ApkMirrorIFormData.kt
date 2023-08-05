@@ -8,10 +8,10 @@ class ApkMirrorIFormData {
     @Selector(value = "#filedownload", attr = "action")
     lateinit var action: String
 
-    @Selector(value = "#filedownload > input", index = 0, attr = "value")
+    @Selector(value = "#filedownload > input[name=id]", attr = "value")
     lateinit var id: String
 
-    @Selector(value = "#filedownload > input", index = 1, attr = "value")
+    @Selector(value = "#filedownload > input[name=key]", attr = "value")
     lateinit var key: String
 
     val link: String get() = Utils.absoluteUrl(

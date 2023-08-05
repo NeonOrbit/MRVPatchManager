@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import app.neonorbit.mrvpatchmanager.apk.ApkUtil
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import org.greenrobot.eventbus.EventBus
 import java.io.File
 
@@ -39,7 +39,7 @@ object AppInstaller {
     fun install(context: Context, file: File) {
         val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            setDataAndType(AppServices.resolveContentUri(file), ApkUtil.APK_MIME_TYPE)
+            setDataAndType(AppServices.resolveContentUri(file), ApkConfigs.APK_MIME_TYPE)
         }
         context.launch(intent)
     }

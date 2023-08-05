@@ -1,25 +1,26 @@
 package app.neonorbit.mrvpatchmanager.remote.data
 
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.remote.ApkComboService
 import app.neonorbit.mrvpatchmanager.util.Utils
 import pl.droidsonroids.jspoon.annotation.Selector
 
 class ApkComboVariantData {
-    @Selector("#variants-tab > div > ul > li")
+    @Selector("#variants-tab ul:not(ul.file-list) > li")
     var variants: List<Variant> = listOf()
 
-    @Selector("#best-variant-tab > div > ul > li")
-    lateinit var fallback: Variant
+    @Selector("#best-variant-tab .file-list li")
+    var fallback: Apk? = null
 
     override fun toString(): String {
         return "variants: $variants, fallback: $fallback"
     }
 
     class Variant {
-        @Selector("span")
-        var arch: String = ""
+        @Selector("span:contains(arm), code:contains(arm)", defValue = "")
+        lateinit var arch: String
 
-        @Selector(".file-list > li")
+        @Selector(".file-list li")
         var apks: List<Apk> = listOf()
 
         override fun toString(): String {
@@ -27,40 +28,31 @@ class ApkComboVariantData {
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate")
     class Apk {
-        @Selector(".vtype")
-        var type: String = ""
+        @Selector(".vtype", defValue = "")
+        private lateinit var type: String
 
-        @Selector(".description")
-        var info: String = ""
+        @Selector(".description", defValue = "")
+        lateinit var info: String
 
         @Selector("a.variant", attr = "href")
-        private var _link: String = ""
+        private lateinit var _link: String
 
         val link: String get() = Utils.absoluteUrl(
             ApkComboService.BASE_URL, _link
         )
 
-        @Selector(".vername", defValue = "")
+        @Selector(".vername")
         private var _versionName: String? = null
 
-        @Selector(".vercode", defValue = "")
-        private var _versionCode: String? = null
+        val versionName: String? by lazy {
+            _versionName?.let { ApkConfigs.extractVersionName(it) }
+        }
 
-        val versionName: String? get() = try {
-            _versionName?.trim()?.substringAfterLast(' ')?.takeIf {
-                it.contains('.')
-            }
-        } catch (_: Exception) { null }
-
-        val versionCode: Long? get() = try {
-            _versionCode?.trim('(',')')?.trim()?.toLong()
-        } catch (_: Exception) { null }
+        val isValidType: Boolean get() = type.trim().lowercase().let { it == "apk" || "xapk" !in it }
 
         override fun toString(): String {
-            return "type: $type, versionName: $versionName, versionCode: $versionCode, " +
-                    "info: $info, link: $link"
+            return "type: $type, versionName: $versionName, info: $info, link: $link"
         }
     }
 }

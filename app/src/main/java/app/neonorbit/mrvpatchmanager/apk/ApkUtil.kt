@@ -13,8 +13,6 @@ import app.neonorbit.mrvpatchmanager.compareVersion
 import java.io.File
 
 object ApkUtil {
-    const val APK_MIME_TYPE = "application/vnd.android.package-archive"
-
     private fun PackageInfo.matchSignature(other: String): Boolean {
         return this.getSignatures().any { signature ->
             Signature(other) == signature

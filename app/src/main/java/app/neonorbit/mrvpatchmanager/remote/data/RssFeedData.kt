@@ -14,7 +14,7 @@ data class RssFeedData (
     data class RssChannel (
         @field:ElementList(name = "item", inline = true)
         @param:ElementList(name = "item", inline = true)
-        val item: List<RssItem>
+        val items: List<RssItem>
     ) {
         @Root(name = "item", strict = false)
         data class RssItem (

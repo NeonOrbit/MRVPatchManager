@@ -1,5 +1,7 @@
 package app.neonorbit.mrvpatchmanager
 
+import android.os.Build
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.data.AppItemData
@@ -7,6 +9,7 @@ import org.lsposed.lspatch.share.ConstantsM
 import java.io.File
 
 object AppConfig {
+    const val APP_TAG = "MRVPatchManager"
     const val FILE_PROVIDER_AUTH = "${BuildConfig.APPLICATION_ID}.file.provider"
 
     private const val DOWNLOAD_DIR_NAME = "download"
@@ -37,6 +40,10 @@ object AppConfig {
     fun getPatchedApkFile(file: File) = ApkUtil.getApkSimpleInfo(file)?.let { info ->
         (getFbAppName(info.pkg) ?: info.name.replace(' ', '-')) + "-v${info.version}.apk"
     }?.let { name -> File(PATCHED_APK_DIR, name) }
+
+    val DEVICE_ABI: String by lazy {
+        if (ApkConfigs.ARM_64 in Build.SUPPORTED_ABIS) ApkConfigs.ARM_64 else ApkConfigs.ARM_32
+    }
 
     const val DEVELOPER = "NeonOrbit"
     const val HELP_FORUM = "XDA Thread"
@@ -90,7 +97,6 @@ object AppConfig {
             AppItemData("Messenger App", AppType.MESSENGER, R.drawable.ic_fb_orca),
             AppItemData("Facebook App", AppType.FACEBOOK, R.drawable.ic_fb_katana),
             AppItemData("Facebook Lite", AppType.FACEBOOK_LITE, R.drawable.ic_fb_lite),
-            AppItemData("Messenger Lite", AppType.MESSENGER_LITE, R.drawable.ic_fb_mlite),
             AppItemData("Business Suite", AppType.BUSINESS_SUITE, R.drawable.ic_fb_page),
         )
     }
