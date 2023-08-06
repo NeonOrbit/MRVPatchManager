@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.R
@@ -17,6 +18,7 @@ import app.neonorbit.mrvpatchmanager.keystore.KeystoreInputData
 import app.neonorbit.mrvpatchmanager.observeOnUI
 import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
+import rikka.preference.SimpleMenuPreference
 
 class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.ResponseListener {
     private var _viewModel: SettingsViewModel? = null
@@ -57,6 +59,15 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preference_advanced, rootKey)
 
+        findPreference<SimpleMenuPreference>(KEY_PREF_APK_ABI_TYPE)?.let { pref ->
+            pref.summary = getAbiPrefSummery(pref.value)
+            pref.setOnPreferenceChangeListener { _, value ->
+                pref.summary = getAbiPrefSummery(value as String)
+                if (pref.value != value) viewModel.clearCache()
+                true
+            }
+        }
+
         onPreferenceClick(KEY_PREF_CUSTOM_KEYSTORE) {
             KeystoreDialogFragment.show(this)
         }
@@ -85,6 +96,11 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
         }
     }
 
+    private fun getAbiPrefSummery(value: String?): String {
+        return if (value != null && value != getString(R.string.apk_abi_auto)) "ABI: $value"
+        else getString(R.string.pref_apk_abi_type_detected, AppConfig.DEVICE_ABI)
+    }
+
     override fun onKeystoreInput(response: KeystoreInputData?) {
         viewModel.saveKeystore(response)
     }
@@ -105,6 +121,8 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
     }
 
     companion object {
+        const val APK_ABI_AUTO = "auto"
+        const val KEY_PREF_APK_ABI_TYPE = "pref_apk_abi_type"
         const val KEY_PREF_ADVANCED_BACK = "pref_advanced_back"
         const val KEY_PREF_EXTRA_MODULES = "pref_extra_modules"
         const val KEY_PREF_CUSTOM_KEYSTORE = "pref_custom_keystore"

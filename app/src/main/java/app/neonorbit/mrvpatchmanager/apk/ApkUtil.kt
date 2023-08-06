@@ -47,16 +47,17 @@ object ApkUtil {
         }
     }
 
-    fun hasLatestMrvSignedApp(file: File): Boolean {
+    fun hasLatestMrvSignedApp(file: File, sig: String? = null): Boolean {
         return getPackageInfo(file)?.let { apk ->
-            hasLatestMrvSignedApp(apk.packageName, apk.versionName)
+            hasLatestMrvSignedApp(apk.packageName, apk.versionName, sig)
         } == true
     }
 
-    fun hasLatestMrvSignedApp(pkg: String, version: String): Boolean {
+    fun hasLatestMrvSignedApp(pkg: String, version: String, sig: String? = null): Boolean {
+        val signature = sig ?: AppConfig.MRV_PUBLIC_SIGNATURE
         return getPackageInfo(pkg, true)?.takeIf { installed ->
             try {
-                installed.matchSignature(AppConfig.MRV_PUBLIC_SIGNATURE)
+                installed.matchSignature(signature)
             } catch (_: Exception) { false }
         }?.let { installed ->
             installed.versionName.compareVersion(version) >= 0

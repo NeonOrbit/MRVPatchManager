@@ -52,7 +52,7 @@ class ApkRemoteFileProvider {
         }.let { emitAll(it) }
     }
 
-    fun getFbApk(type: AppType): Flow<DownloadStatus> {
+    fun getFbApk(type: AppType, abi: String): Flow<DownloadStatus> {
         val file = AppConfig.getDownloadApkFile(type)
         if (hasValidFile(file)) {
             return flowOf(DownloadStatus.FINISHED(file))
@@ -61,7 +61,7 @@ class ApkRemoteFileProvider {
         var service: ApkRemoteService = iterator.next()
         return flow {
             emit(DownloadStatus.FETCHING(service.server()))
-            val fetched = service.fetch(type, AppConfig.DEVICE_ABI)
+            val fetched = service.fetch(type, abi)
             fetched.version?.let {
                 emit(DownloadStatus.FETCHED(it))
             }

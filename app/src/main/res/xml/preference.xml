@@ -14,8 +14,8 @@
             android:icon="@drawable/ic_pref_config" />
         <rikka.material.preference.MaterialSwitchPreference
             android:key="pref_mask_package"
-            android:title="@string/pref_change_package_title"
-            android:summary="@string/pref_change_package_summery"
+            android:title="@string/pref_mask_package_title"
+            android:summary="@string/pref_mask_package_summery"
             android:icon="@drawable/ic_pref_config" />
         <rikka.material.preference.MaterialSwitchPreference
             android:key="pref_fallback_mode"

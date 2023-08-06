@@ -347,18 +347,20 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/warning_card"
+            android:id="@+id/notice_card"
             android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/primary_item_gap"
-            android:backgroundTint="@color/warning_color"
+            android:animateLayoutChanges="true"
+            android:backgroundTint="@color/notice_color"
             style="@style/Widget.Material3.CardView.Filled">
             <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/notice_card_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="17dp"
-                android:text="@string/fallback_warning_message"/>
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:padding="17dp"/>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>

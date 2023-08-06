@@ -50,14 +50,17 @@
     <string name="pref_apk_server_summery">Pick a server for APK downloads.</string>
     <string name="pref_fix_conflict_title">Resolve apk conflicts</string>
     <string name="pref_fix_conflict_summery">If you are unable to remove the preinstalled fb apps.</string>
-    <string name="pref_change_package_title">Mask package name</string>
-    <string name="pref_change_package_summery">If unable to remove the original messenger app.</string>
+    <string name="pref_mask_package_title">Mask package name</string>
+    <string name="pref_mask_package_summery">If unable to remove the original messenger app.</string>
     <string name="pref_fallback_mode_title">Fallback mode (slow)</string>
     <string name="pref_fallback_mode_summery">If patched apps do not work after some time.</string>
     <string name="pref_advanced_settings_title">Advanced configurations</string>
     <string name="pref_advanced_settings_summery">Intended for advanced users only.</string>
 
     <string name="pref_advanced_group_title">Advanced</string>
+    <string name="pref_apk_abi_type_title">Apk download type</string>
+    <string name="pref_apk_abi_type_summery">Select ABI type for apks</string>
+    <string name="pref_apk_abi_type_detected">"Auto detected: %s"</string>
     <string name="pref_custom_keystore_title">Custom keystore file</string>
     <string name="pref_custom_keystore_summery">Set a custom keystore for apk signing.</string>
     <string name="pref_extra_modules_title">Allow third-party modules</string>
@@ -99,9 +102,6 @@
     </string>
     <string name="pref_fallback_mode_confirm_message">Do you really want to enable fallback mode?
         \n[Apps patched in fallback mode may launch a little slowly]
-    </string>
-    <string name="fallback_warning_message"><b>WARNING:</b> Fallback mode is currently enabled.
-        If you didn\'t intend to enable it, please disable it from the settings tab.
     </string>
     <string name="instructions">
         Instructions:

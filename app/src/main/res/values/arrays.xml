@@ -1,3 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="apk_abi_auto">"auto"</string>
+    <string-array name="apk_abi_entries">
+        <item>"Auto"</item>
+        <item>"Arm64 v8a"</item>
+        <item>"Armeabi v7a"</item>
+    </string-array>
+    <string-array name="apk_abi_values">
+        <item>@string/apk_abi_auto</item>
+        <item>"arm64-v8a"</item>
+        <item>"armeabi-v7a"</item>
+    </string-array>
 </resources>

@@ -2,6 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:iconSpaceReserved="false"
         android:title="@string/pref_advanced_group_title">
+        <rikka.preference.SimpleMenuPreference
+            android:key="pref_apk_abi_type"
+            android:title="@string/pref_apk_abi_type_title"
+            android:summary="@string/pref_apk_abi_type_summery"
+            android:entries="@array/apk_abi_entries"
+            android:entryValues="@array/apk_abi_values"
+            android:defaultValue="@string/apk_abi_auto"
+            android:icon="@drawable/ic_pref_advanced" />
         <Preference
             android:key="pref_custom_keystore"
             android:title="@string/pref_custom_keystore_title"

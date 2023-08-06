@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -29,6 +30,7 @@ import app.neonorbit.mrvpatchmanager.withLifecycle
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.util.StringJoiner
 
 class HomeFragment : Fragment(),
     ActivityResultCallback<ActivityResult>,
@@ -148,7 +150,17 @@ class HomeFragment : Fragment(),
             }
         }
 
-        binding.warningCard.isVisible = model.fallbackMode
+        model.getPatcherOptions().let { opt ->
+            StringJoiner("\n").apply {
+                if (opt.maskPackage) add(getEnabledString(R.string.pref_mask_package_title))
+                if (opt.fixConflict) add(getEnabledString(R.string.pref_fix_conflict_title))
+                if (opt.fallbackMode) add(getEnabledString(R.string.pref_fallback_mode_title))
+            }.toString().takeIf { it.isNotEmpty() }?.let {
+                binding.noticeCard.isVisible = true
+                binding.noticeCardText.text = it
+            } ?: { binding.noticeCard.isVisible = false }
+        }
+
         binding.patcherManual.setOnClickListener { model.manualRequest() }
         binding.managerButton.setOnClickListener { model.installManager() }
         binding.moduleInfoButton.setOnClickListener { model.showModuleInfo() }
@@ -157,6 +169,8 @@ class HomeFragment : Fragment(),
         binding.managerChangelogButton.setOnClickListener { model.visitManager() }
         binding.moduleChangelogButton.setOnClickListener { model.visitModule() }
     }
+
+    private fun getEnabledString(@StringRes resId: Int) = "[Enabled] -> [${getString(resId)}]"
 
     override fun onActivityResult(result: ActivityResult?) {
         if (result?.resultCode == Activity.RESULT_OK) {
