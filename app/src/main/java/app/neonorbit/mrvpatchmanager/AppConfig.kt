@@ -60,6 +60,7 @@ object AppConfig {
     const val MESSENGER_PACKAGE = ConstantsM.DEFAULT_TARGET_PACKAGE
     const val DEFAULT_FB_SIGNATURE = ConstantsM.DEFAULT_FB_SIGNATURE
     const val MRV_PUBLIC_SIGNATURE  = ConstantsM.DEFAULT_MRV_SIGNATURE
+    const val MESSENGER_MASK_PREFIX = "mrv.masked." // TODO
 
     fun getFbAppName(type: AppType): String {
         return when(type) {

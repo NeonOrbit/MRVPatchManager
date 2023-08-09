@@ -9,7 +9,7 @@
     android:gravity="center_vertical">
 
     <ImageView
-        android:id="@+id/apkIcon"
+        android:id="@+id/apk_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginEnd="17dp"
@@ -23,7 +23,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/apkTitle"
+            android:id="@+id/apk_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="middle"
@@ -31,13 +31,14 @@
             android:textAppearance="?textAppearanceListItem" />
 
         <TextView
-            android:id="@+id/apkVersion"
+            android:id="@+id/apk_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="?colorOnSecondary"
-            android:textAppearance="?textAppearanceListItemSecondary"/>
+            android:textAppearance="?textAppearanceListItemSecondary"
+            android:text="@string/patched_apk_placeholder"/>
     </LinearLayout>
 
 </LinearLayout>

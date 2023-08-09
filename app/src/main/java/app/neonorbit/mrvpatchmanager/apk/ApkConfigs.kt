@@ -6,6 +6,8 @@ import app.neonorbit.mrvpatchmanager.compareVersion
 object ApkConfigs {
     const val ARM_64 = "arm64-v8a"
     const val ARM_32 = "armeabi-v7a"
+    const val X86_64 = "x86_64"
+    const val X86 = "x86"
     val SUPPORTED_ABIs = arrayOf(ARM_64, ARM_32)
 
     const val APK_MIME_TYPE = "application/vnd.android.package-archive"

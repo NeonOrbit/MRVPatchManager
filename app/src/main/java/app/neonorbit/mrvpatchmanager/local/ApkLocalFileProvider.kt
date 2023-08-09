@@ -2,7 +2,6 @@ package app.neonorbit.mrvpatchmanager.local
 
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
-import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import java.io.File
 import java.util.stream.Collectors
@@ -26,11 +25,5 @@ class ApkLocalFileProvider {
         )?.map { it.key }?.collect(Collectors.toList()) ?: listOf()
     }
 
-
-    private val File.version: String get() = this.name
-        .substringAfterLast("-v", "")
-        .substringBeforeLast(".apk", "")
-        .takeUnless { it.isEmpty() } ?: ApkUtil.getApkVersionName(this) ?: "unknown"
-
-    private fun File.toApkData(): ApkFileData = ApkFileData(name, absolutePath, version)
+    private fun File.toApkData(): ApkFileData = ApkFileData(name, absolutePath)
 }

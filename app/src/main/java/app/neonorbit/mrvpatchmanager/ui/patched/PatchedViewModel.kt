@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
-import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
 import app.neonorbit.mrvpatchmanager.event.SingleEvent

@@ -183,6 +183,15 @@ fun String?.isValidJavaName(): Boolean {
     return true
 }
 
+fun <T> MutableCollection<T>.removeFirstIf(predicate: (T) -> Boolean) {
+    this.iterator().let {
+        while (it.hasNext()) if (predicate(it.next())) {
+            it.remove()
+            return
+        }
+    }
+}
+
 @Suppress("unused")
 fun String.capitalizeWords(): String = split(" ").joinToString(" ") {
     it.lowercase(Locale.getDefault()).replaceFirstChar { word ->

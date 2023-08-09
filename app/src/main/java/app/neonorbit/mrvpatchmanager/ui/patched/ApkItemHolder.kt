@@ -12,9 +12,9 @@ class ApkItemHolder(itemView: View) :
     RecyclerView.ViewHolder(itemView),
     SelectionTrackerFactory.TrackerItemDetails
 {
-    val apkIcon: ImageView = itemView.findViewById(R.id.apkIcon)
-    val apkTitle: TextView = itemView.findViewById(R.id.apkTitle)
-    val apkVersion: TextView = itemView.findViewById(R.id.apkVersion)
+    val apkIcon: ImageView = itemView.findViewById(R.id.apk_icon)
+    val apkTitle: TextView = itemView.findViewById(R.id.apk_title)
+    val apkInfo: TextView = itemView.findViewById(R.id.apk_info)
 
     override fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> {
         return object: ItemDetailsLookup.ItemDetails<Long>() {

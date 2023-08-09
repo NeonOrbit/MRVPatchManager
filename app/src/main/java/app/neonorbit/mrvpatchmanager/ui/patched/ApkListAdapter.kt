@@ -16,6 +16,7 @@ class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
     private var callback: Callback? = null
     private val list = ArrayList<ApkFileData>()
     private val viewHolders = HashSet<ApkItemHolder>()
+    private lateinit var infoPreloader: ApkInfoPreloader
     private lateinit var tracker: SelectionTracker<Long>
 
     val items: List<ApkFileData> get() = Collections.unmodifiableList(list)
@@ -26,6 +27,10 @@ class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
 
     fun setItemClickListener(callback: Callback) {
         this.callback = callback
+    }
+
+    fun setApkInfoPreloader(preloader: ApkInfoPreloader) {
+        this.infoPreloader = preloader
     }
 
     fun initTracker(recyclerView: RecyclerView): SelectionTracker<Long> {
@@ -44,9 +49,7 @@ class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
         viewHolders.add(holder)
         val item = list[position]
         holder.apkTitle.text = item.name
-        holder.apkVersion.text = holder.itemView.context.getString(
-            R.string.version_text, item.version
-        )
+        infoPreloader.load(holder.apkInfo, position)
         Glide.with(holder.itemView)
             .load(item.path)
             .placeholder(R.drawable.generic_placeholder)
@@ -88,6 +91,7 @@ class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
         if (new == list) return
         list.clear()
         list.addAll(new)
+        infoPreloader.reload()
         notifyDataSetChanged()
     }
 

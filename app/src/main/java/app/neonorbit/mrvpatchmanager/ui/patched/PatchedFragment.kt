@@ -58,6 +58,9 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
             registerSelectionObserver(it)
         }
         recyclerAdapter.setItemClickListener(this)
+        recyclerAdapter.setApkInfoPreloader(
+            ApkInfoPreloader(this, 15, recyclerAdapter.items)
+        )
 
         val sizeProvider = ViewPreloadSizeProvider<ApkFileData>()
         val modelProvider = RecyclerPreloadProvider(this, recyclerAdapter.items)

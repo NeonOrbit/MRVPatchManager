@@ -25,6 +25,7 @@
     <string name="patcher_default">Default</string>
     <string name="patcher_manual">Manual</string>
     <string name="no_patched_apps">No patched apps</string>
+    <string name="patched_apk_placeholder">Patched apk file info</string>
 
     <string name="text_confirmation">Confirmation</string>
     <string name="text_warning">Warning!</string>

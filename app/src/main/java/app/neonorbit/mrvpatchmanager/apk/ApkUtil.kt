@@ -11,6 +11,7 @@ import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.compareVersion
 import java.io.File
+import java.util.StringJoiner
 
 object ApkUtil {
     private fun PackageInfo.matchSignature(other: String): Boolean {
@@ -78,7 +79,13 @@ object ApkUtil {
         }
     }
 
-    fun getApkVersionName(file: File) = getPackageInfo(file)?.versionName
+    fun getApkSummery(file: File) = getPackageInfo(file)?.let { info ->
+        val summery = StringJoiner(" ")
+        summery.add(info.longVersionCode.toString())
+        ApkParser.getABI(file)?.let { summery.add("($it)") }
+        if (info.packageName.startsWith(AppConfig.MESSENGER_MASK_PREFIX)) summery.add("[masked]")
+        summery.toString()
+    }
 
     fun getPrefixedVersionName(pkg: String) = getPackageInfo(pkg)?.let { "v${it.versionName}" }
 

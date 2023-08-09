@@ -220,7 +220,7 @@ class HomeViewModel : ViewModel() {
 
     private suspend fun patchApk(input: File): File? {
         val patched = AppConfig.getPatchedApkFile(input) ?: throw Exception(
-            "Failed to get patched apk info"
+            "Failed to retrieve apk file info"
         )
         if (patched.exists() && !confirmationEvent.ask(
                 "${patched.name} already exists in the patched apk list, patch again?"
