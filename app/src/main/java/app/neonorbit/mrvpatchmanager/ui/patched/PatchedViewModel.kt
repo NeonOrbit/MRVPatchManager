@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
+import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
 import app.neonorbit.mrvpatchmanager.event.SingleEvent
@@ -25,6 +26,7 @@ class PatchedViewModel : ViewModel() {
     private val repository = ApkRepository()
 
     val intentEvent = SingleEvent<Intent>()
+    val dialogEvent = SingleEvent<String>()
     val saveFilesEvent = SingleEvent<Intent>()
     val confirmationEvent = ConfirmationEvent()
     val progressState = MutableLiveData<Boolean>()
@@ -122,6 +124,15 @@ class PatchedViewModel : ViewModel() {
                 viewModelScope.launch(Dispatchers.Main) {
                     AppServices.showToast("Saved")
                 }
+            }
+        }
+    }
+
+    fun showDetails(items: List<ApkFileData>) {
+        if (items.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            ApkUtil.getApkDetails(items.take(4).map { File(it.path) }).let {
+                dialogEvent.post(it)
             }
         }
     }

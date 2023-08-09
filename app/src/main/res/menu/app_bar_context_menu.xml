@@ -20,8 +20,14 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/details"
+        android:title="@string/details_menu_title"
+        android:icon="@android:drawable/ic_menu_info_details"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/selectAll"
         android:title="@string/select_all_menu_title"
         android:icon="?attr/actionModeSelectAllDrawable"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>

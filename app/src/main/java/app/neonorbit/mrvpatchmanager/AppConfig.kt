@@ -5,6 +5,7 @@ import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.data.AppItemData
+import org.lsposed.lspatch.share.Constants
 import org.lsposed.lspatch.share.ConstantsM
 import java.io.File
 
@@ -59,8 +60,10 @@ object AppConfig {
     val DEFAULT_FB_PACKAGES = ConstantsM.DEFAULT_FB_PACKAGES as Set<String>
     const val MESSENGER_PACKAGE = ConstantsM.DEFAULT_TARGET_PACKAGE
     const val DEFAULT_FB_SIGNATURE = ConstantsM.DEFAULT_FB_SIGNATURE
-    const val MRV_PUBLIC_SIGNATURE  = ConstantsM.DEFAULT_MRV_SIGNATURE
-    const val MESSENGER_MASK_PREFIX = "mrv.masked." // TODO
+    const val MRV_PUBLIC_SIGNATURE = ConstantsM.DEFAULT_MRV_SIGNATURE
+    const val PACKAGE_MASKED_PREFIX = "mrv.masked." // TODO
+    const val PATCHED_APK_CONFIG_PATH = Constants.CONFIG_ASSET_PATH
+    const val PATCHED_APK_PROXY_CLASS = Constants.PROXY_APP_COMPONENT_FACTORY
 
     fun getFbAppName(type: AppType): String {
         return when(type) {

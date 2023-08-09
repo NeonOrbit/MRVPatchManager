@@ -87,6 +87,12 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
         }
 
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            model.dialogEvent.observe { message ->
+                AppUtil.show(requireContext(), message)
+            }
+        }
+
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
             model.intentEvent.observe { intent ->
                 startActivity(intent)
             }
@@ -161,6 +167,11 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
             }
             R.id.delete -> {
                 viewModel?.deleteSelectedApks(getSelectedFiles())
+                tracker?.clearSelection()
+                true
+            }
+            R.id.details -> {
+                viewModel?.showDetails(getSelectedFiles())
                 tracker?.clearSelection()
                 true
             }

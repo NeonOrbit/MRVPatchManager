@@ -53,7 +53,7 @@ object AppUtil {
         show(context, context.getString(message))
     }
 
-    private fun show(context: Context, message: String) {
+    fun show(context: Context, message: String) {
         MaterialAlertDialogBuilder(context).setMessage(message).show()
     }
 }

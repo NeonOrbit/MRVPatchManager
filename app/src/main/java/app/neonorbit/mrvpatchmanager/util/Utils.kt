@@ -1,5 +1,6 @@
 package app.neonorbit.mrvpatchmanager.util
 
+import android.os.Build
 import android.util.Log
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.BuildConfig
@@ -23,5 +24,21 @@ object Utils {
             url[0] == '/' -> "$host$url"
             else -> "$host/$url"
         }
+    }
+
+    fun sdkToVersion(sdk: Int) = when (
+        if (sdk < 14) 0 else if (sdk in 14..20) 20 else sdk
+    ) {
+        0 -> 0
+        20 -> 4
+        21, 22 -> 5
+        23 -> 6
+        24, 25 -> 7
+        26, 27 -> 8
+        28 -> 9
+        29 -> 10
+        30 -> 11
+        31, 32 -> 12
+        else -> Build.VERSION.SDK_INT - 20
     }
 }

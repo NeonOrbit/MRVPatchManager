@@ -9,6 +9,7 @@
     <string name="save_menu_title">Save</string>
     <string name="delete_menu_title">Delete</string>
     <string name="share_menu_title">Share</string>
+    <string name="details_menu_title">Details</string>
     <string name="select_all_menu_title">Select All</string>
     <string name="patcher_title">Patcher</string>
     <string name="patch_button_title">Patch</string>

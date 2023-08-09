@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager.apk
 
 import android.os.Build
 import app.neonorbit.mrvpatchmanager.compareVersion
+import app.neonorbit.mrvpatchmanager.util.Utils
 
 object ApkConfigs {
     const val ARM_64 = "arm64-v8a"
@@ -40,18 +41,15 @@ object ApkConfigs {
         Regex("\\bAndroid\\s*\\W+(\\d+)(?:\\.\\d+)*\\+")
     }
 
-    private fun extractMinSdk(str: String): Int? {
+    private fun extractMinVersion(str: String): Int? {
         return MIN_ANDROID_REGEX.find(str)?.groupValues?.getOrNull(1)?.toIntOrNull()
     }
 
     fun isSupportedMinVersion(str: String): Boolean {
-        return extractMinSdk(str)?.let { it <= ANDROID_VERSION } != false
+        return extractMinVersion(str)?.let { it <= ANDROID_VERSION } != false
     }
 
-    private val ANDROID_VERSION = when (Build.VERSION.SDK_INT) {
-        28 -> 9; 29 -> 10; 30 -> 11; 31, 32 -> 12
-        else -> Build.VERSION.SDK_INT - 20
-    }
+    private val ANDROID_VERSION = Utils.sdkToVersion(Build.VERSION.SDK_INT)
 
     fun <T> compareLatest(selector: (T) -> String): Comparator<T> {
         return Comparator<T> { o1, o2 ->
