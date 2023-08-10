@@ -36,7 +36,9 @@ object AppConfig {
 
     val CUSTOM_KEYSTORE_FILE: File get() = File(AppServices.appFilesDir, CUSTOM_KEYSTORE_NAME)
 
-    fun getDownloadApkFile(type: AppType) = File(DOWNLOAD_DIR, "${type.getName()}.apk")
+    fun getDownloadApkFile(type: AppType, targetVersion: String?) = File(DOWNLOAD_DIR, "${
+        type.getName() + if (targetVersion == null) "" else "-versioned"
+    }.apk")
 
     fun getPatchedApkFile(file: File) = ApkUtil.getApkSimpleInfo(file)?.let { info ->
         (getFbAppName(info.pkg) ?: info.name.replace(' ', '-')) + "-v${info.version}.apk"

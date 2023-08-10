@@ -20,6 +20,8 @@ import androidx.lifecycle.ViewModelProvider
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
+import app.neonorbit.mrvpatchmanager.data.AppItemData
+import app.neonorbit.mrvpatchmanager.databinding.ApkVersionDialogBinding
 import app.neonorbit.mrvpatchmanager.databinding.FragmentHomeBinding
 import app.neonorbit.mrvpatchmanager.event.UpdateEvent
 import app.neonorbit.mrvpatchmanager.observeOnUI
@@ -27,6 +29,7 @@ import app.neonorbit.mrvpatchmanager.ui.AutoProgressDialog
 import app.neonorbit.mrvpatchmanager.ui.ConfirmationDialog
 import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -94,20 +97,31 @@ class HomeFragment : Fragment(),
             }
         }
 
-        binding.patchButton.setOnClickListener {
-            binding.patchButton.isClickable = false
-            binding.dropDown.isEnabled = false
-            model.fbAppList.find {
-                binding.dropDownMenu.text.toString() == it.name
-            }?.let {
-                model.patch(app = it.type)
-            }
-        }
-
         model.patchingStatus.observeOnUI(viewLifecycleOwner) {
             binding.dropDown.isEnabled = !it
             binding.patchButton.isClickable = true
             binding.patchButton.text = if (!it) "Patch" else "Cancel"
+        }
+
+        binding.patchButton.setOnClickListener {
+            selectedApp?.let {
+                binding.dropDown.isEnabled = false
+                binding.patchButton.isClickable = false
+                model.patch(it.type)
+            }
+        }
+
+        binding.versionButton.setOnClickListener {
+            ApkVersionDialogBinding.inflate(LayoutInflater.from(requireContext()), null, false).let { avd ->
+                MaterialAlertDialogBuilder(requireContext()).setView(avd.root).create().also { dialog ->
+                    avd.patchButton.setOnClickListener {
+                        dialog.dismiss()
+                        selectedApp?.let {
+                            model.patchVersion(it.type, avd.apkVersion.editText!!.text!!.toString())
+                        }
+                    }
+                }.show()
+            }
         }
 
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
@@ -170,6 +184,9 @@ class HomeFragment : Fragment(),
         binding.moduleChangelogButton.setOnClickListener { model.visitModule() }
     }
 
+    private val selectedApp: AppItemData? get() = viewModel!!.fbAppList.find {
+        binding!!.dropDownMenu.text.toString() == it.name
+    }
     private fun getEnabledString(@StringRes resId: Int) = "[Enabled] -> [${getString(resId)}]"
 
     override fun onActivityResult(result: ActivityResult?) {

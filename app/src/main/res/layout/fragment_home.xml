@@ -292,9 +292,21 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/version_button"
+                        android:padding="12dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/patch_button"
+                        android:layout_alignBottom="@+id/patch_button"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentStart="true"
+                        style="@style/Widget.Material3.Button.IconButton.Outlined"
+                        app:tint="@color/secondary_container"
+                        android:src="@drawable/ic_pref_advanced" />
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/patch_button"
-                        android:clickable="false"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/drop_down"

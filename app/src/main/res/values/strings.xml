@@ -46,6 +46,10 @@
     <string name="custom_keystore_input_password">Keystore password</string>
     <string name="custom_keystore_input_key_alias">Key alias (optional)</string>
     <string name="custom_keystore_input_alias_password">Alias password (optional)</string>
+    <string name="patch_version_input_placeholder">Apk version name</string>
+    <string name="patch_version_dialog_message">Please input an apk version name for patching.
+        Partial version names are allowed, such as:\n\"420\", \"420.15.2\", or full \"420.15.2.11\"
+    </string>
 
     <string name="pref_config_group_title">Configs</string>
     <string name="pref_apk_server_title">Apk download server</string>

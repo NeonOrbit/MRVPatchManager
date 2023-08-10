@@ -26,6 +26,8 @@
     <color name="secondary_container">#476B6B</color>
     <color name="secondary_container_foreground">#C4E6E2</color>
 
+    <color name="secondary_button_stroke">#0D7E7D</color>
+
     <color name="notice_color">#27655C</color>
     <color name="warning_color">#656232</color>
 </resources>

@@ -2,14 +2,11 @@ package app.neonorbit.mrvpatchmanager.remote
 
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.AppType
-import app.neonorbit.mrvpatchmanager.isConnectError
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
-import app.neonorbit.mrvpatchmanager.util.Utils
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
-import kotlin.coroutines.cancellation.CancellationException
 
 object ApkComboService : ApkRemoteService {
     const val BASE_URL = "https://www.apkcombo.com"
@@ -25,28 +22,25 @@ object ApkComboService : ApkRemoteService {
         return "apkcombo.com"
     }
 
-    override suspend fun fetch(type: AppType, abi: String): RemoteApkInfo {
+    override suspend fun fetch(type: AppType, abi: String, ver: String?): RemoteApkInfo {
         return try {
             when (type) {
-                AppType.FACEBOOK -> fetchInfo(FB_APP_URL, abi)
-                AppType.MESSENGER -> fetchInfo(MSG_APP_URL, abi)
-                AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL, abi)
-                AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL, abi)
-                AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi)
+                AppType.FACEBOOK -> fetchInfo(FB_APP_URL, abi, ver)
+                AppType.MESSENGER -> fetchInfo(MSG_APP_URL, abi, ver)
+                AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL, abi, ver)
+                AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL, abi, ver)
+                AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi, ver)
             }
-        } catch (e: Exception) {
-            throw if (e is CancellationException || e.isConnectError) e else {
-                e.message?.let { Utils.warn(it, e) }
-                throw Exception("Failed to fetch apk info from the server: ${server()}")
-            }
+        } catch (exception: Exception) {
+            exception.handleApkServiceException(ver)
         }
     }
 
-    private suspend fun fetchInfo(from: String, abi: String): RemoteApkInfo {
+    private suspend fun fetchInfo(from: String, abi: String, ver: String?): RemoteApkInfo {
         val service = RetrofitClient.SERVICE
         return service.get(TOKEN_URL).result().string().let { token ->
             service.getApkComboRelease(from).result().releases.LOG("Releases").filter {
-                it.isValidType && ApkConfigs.isValidRelease(it.name)
+                it.isValidType && ApkConfigs.isValidRelease(it.name) && ApkConfigs.isValidVersion(it.name, ver)
             }.take(3).LOG("Filtered").selectApk(abi).LOG("Selected")?.let { apk ->
                 RemoteApkInfo("${apk.link}&$token", apk.versionName)
             }

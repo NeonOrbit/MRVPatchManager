@@ -2,7 +2,6 @@ package app.neonorbit.mrvpatchmanager.remote
 
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.AppType
-import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.isConnectError
 import app.neonorbit.mrvpatchmanager.network.HttpSpec
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
@@ -10,7 +9,6 @@ import app.neonorbit.mrvpatchmanager.remote.data.ApkPureItemData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkPureReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
-import app.neonorbit.mrvpatchmanager.util.Utils
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -27,31 +25,26 @@ object ApkPureService : ApkRemoteService {
         return "apkpure.com"
     }
 
-    override suspend fun fetch(type: AppType, abi: String): RemoteApkInfo {
+    override suspend fun fetch(type: AppType, abi: String, ver: String?): RemoteApkInfo {
         return when (type) {
-            AppType.FACEBOOK -> fetchInfo(FB_APP_URL, abi) ?: hardcodedInfo("katana")
-            AppType.MESSENGER -> fetchInfo(MSG_APP_URL, abi) ?: hardcodedInfo("orca")
-            AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL, abi) ?: hardcodedInfo("lite")
-            AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL, abi) ?: hardcodedInfo("mlite")
-            AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi) ?: hardcodedInfo("pages.app")
+            AppType.FACEBOOK -> fetchInfo(FB_APP_URL, abi, ver) ?: hardcodedInfo("katana")
+            AppType.MESSENGER -> fetchInfo(MSG_APP_URL, abi, ver) ?: hardcodedInfo("orca")
+            AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL, abi, ver) ?: hardcodedInfo("lite")
+            AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL, abi, ver) ?: hardcodedInfo("mlite")
+            AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi, ver) ?: hardcodedInfo("pages.app")
         }
     }
 
-    private suspend fun fetchInfo(from: String, abi: String): RemoteApkInfo? {
+    private suspend fun fetchInfo(from: String, abi: String, ver: String?): RemoteApkInfo? {
         return try {
             RetrofitClient.SERVICE.getApkPureRelease(from).result().releases.LOG("Releases").filter {
-                it.isValidType && ApkConfigs.isValidRelease(it.name)
+                it.isValidType && ApkConfigs.isValidRelease(it.name) && ApkConfigs.isValidVersion(it.name, ver)
             }.take(5).LOG("Filtered").selectApk(abi).LOG("Selected")?.let {
                 RemoteApkInfo(it.link, it.version)
-            }
-        } catch (e: Exception) {
-            if (e is CancellationException || e.isConnectError) throw e else {
-                Utils.warn(e.error, e); null
-            }
-        }.also {
-            if (it == null && abi != ApkConfigs.ARM_64) throw Exception(
-                "Failed to fetch apk info from the server: ${server()}"
-            )
+            } ?: throw Exception()
+        } catch (exception: Exception) {
+            exception.handleApkServiceException(ver, abi == ApkConfigs.ARM_64)
+            null
         }
     }
 

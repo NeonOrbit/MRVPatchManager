@@ -23,6 +23,17 @@ object ApkConfigs {
         TEST_BUILDS.none { lower.contains(it) }
     }
 
+    fun isValidVersion(name: String, version: String?): Boolean {
+        if (version == null) return true
+        val ver = version.trim().trimStart('v').split('.')
+        val apk = extractVersionName(name)?.split('.') ?: return false
+        if (ver.size > apk.size) return false
+        for (i in 0 until (ver.size.coerceAtMost(apk.size))) {
+            if (ver[i] != apk[i]) return false
+        }
+        return true
+    }
+
     fun isValidDPI(name: String) = name.lowercase().let { lower ->
         "dpi" !in lower || SUPPORTED_DPIs.any { lower.contains(it) }
     }
@@ -55,5 +66,9 @@ object ApkConfigs {
         return Comparator<T> { o1, o2 ->
             extractVersionName(selector(o1))?.compareVersion(extractVersionName(selector(o2))) ?: 0
         }.reversed()
+    }
+
+    fun isValidVersionString(str: String): Boolean {
+        return str.isNotBlank() && str.split('.').all { it.toIntOrNull() != null }
     }
 }

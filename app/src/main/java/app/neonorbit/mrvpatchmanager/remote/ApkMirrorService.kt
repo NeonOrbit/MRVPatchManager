@@ -2,14 +2,11 @@ package app.neonorbit.mrvpatchmanager.remote
 
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.AppType
-import app.neonorbit.mrvpatchmanager.isConnectError
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
 import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.remote.data.RssFeedData
 import app.neonorbit.mrvpatchmanager.result
-import app.neonorbit.mrvpatchmanager.util.Utils
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
-import kotlin.coroutines.cancellation.CancellationException
 
 object ApkMirrorService : ApkRemoteService {
     const val BASE_URL = "https://www.apkmirror.com"
@@ -35,23 +32,20 @@ object ApkMirrorService : ApkRemoteService {
         return "apkmirror.com"
     }
 
-    override suspend fun fetch(type: AppType, abi: String): RemoteApkInfo {
+    override suspend fun fetch(type: AppType, abi: String, ver: String?): RemoteApkInfo {
         try {
-            return fetchInfo(buildFeedUrl(type, abi), abi)
-        } catch (e: Exception) {
-            throw if (e is CancellationException || e.isConnectError) e else {
-                e.message?.let { Utils.warn(it, e) }
-                throw Exception("Failed to fetch apk info from the server: ${server()}")
-            }
+            return fetchInfo(buildFeedUrl(type, abi), abi, ver)
+        } catch (exception: Exception) {
+            exception.handleApkServiceException(ver)
         }
     }
 
-    private suspend fun fetchInfo(from: String, abi: String): RemoteApkInfo {
+    private suspend fun fetchInfo(from: String, abi: String, ver: String?): RemoteApkInfo {
         val service = RetrofitClient.SERVICE
         return service.getRssFeed(from).result().channel.items.LOG("Items").filter { item ->
-            ApkConfigs.isValidRelease(item.title) && ApkConfigs.isSupportedMinVersion(item.title)
+            ApkConfigs.isValidRelease(item.title) && ApkConfigs.isValidVersion(item.title, ver)
         }.LOG("Filtered").selectDPI().let {
-            it ?: fallback(removeFeedUrl(from), abi)
+            it ?: fallback(removeFeedUrl(from), abi, ver)
         }.LOG("Selected")?.let { release ->
             service.getApkMirrorItem(release).result().let {
                 RemoteApkInfo(it.link, it.versionName)
@@ -76,9 +70,9 @@ object ApkMirrorService : ApkRemoteService {
         }?.link
     }
 
-    private suspend fun fallback(from: String, abi: String): String? {
+    private suspend fun fallback(from: String, abi: String, ver: String?): String? {
         return RetrofitClient.SERVICE.getApkMirrorRelease(from).result().releases.LOG("Fallback Releases").filter { release ->
-            ApkConfigs.isValidRelease(release.name)
+            ApkConfigs.isValidRelease(release.name) && ApkConfigs.isValidVersion(release.name, ver)
         }.sortedWith(ApkConfigs.compareLatest { it.name }).take(3).firstNotNullOfOrNull { release ->
             RetrofitClient.SERVICE.getApkMirrorVariant(release.link).result().variants.LOG("Fallback Variants").filter {
                 it.arch.lowercase().contains(abi) && ApkConfigs.isValidDPI(it.dpi) && ApkConfigs.isSupportedMinVersion(it.min)

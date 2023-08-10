@@ -138,18 +138,21 @@ class HomeViewModel : ViewModel() {
     }
 
     fun manualRequest() {
-        if (patchingJob == null) {
-            intentEvent.post(viewModelScope, filePickerIntent)
+        if (patchingJob == null) intentEvent.post(viewModelScope, filePickerIntent)
+        else messageEvent.post(viewModelScope, "A patching task is already in progress.")
+    }
+
+    fun patchVersion(app: AppType, target: String) {
+        if (patchingJob != null) {
+            messageEvent.post(viewModelScope, "A patching task is already in progress.")
         } else {
-            viewModelScope.launch {
-                messageEvent.post(
-                    "A patching task is already in progress. Please cancel it first."
-                )
-            }
+            target.trim().trim('"', '.').takeIf { ApkConfigs.isValidVersionString(it) }?.let {
+                patch(app = app, target = it)
+            } ?: messageEvent.post(viewModelScope, "Invalid version: $target")
         }
     }
 
-    fun patch(app: AppType? = null, uri: Uri? = null) {
+    fun patch(app: AppType? = null, uri: Uri? = null, target: String? = null) {
         if (patchingJob != null) {
             progressStatus.post("Stopping...", this)
             patchingJob?.cancel()
@@ -163,7 +166,7 @@ class HomeViewModel : ViewModel() {
             val file = uri?.toTempFile()?.also {
                 manual = it
             } ?: app?.takeIf { checkMaskPackage(it) }?.let {
-                getPatchableApkFile(app)
+                getPatchableApkFile(app, target)
             }
             file?.takeIf {
                 checkPreconditions(file, manual != null).also {
@@ -250,10 +253,10 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun getPatchableApkFile(type: AppType): File? {
+    private suspend fun getPatchableApkFile(type: AppType, target: String?): File? {
         var version = "latest"
         val customSig = currentOptions.customKeystore?.keySignature
-        return repository.getFbApk(type, preferredAbi).onEach { status ->
+        return repository.getFbApk(type, preferredAbi, target).onEach { status ->
             when (status) {
                 is DownloadStatus.FETCHING -> {
                     progressStatus.emit("Fetching: ${status.server}")

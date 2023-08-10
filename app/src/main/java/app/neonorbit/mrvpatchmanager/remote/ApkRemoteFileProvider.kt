@@ -52,16 +52,17 @@ class ApkRemoteFileProvider {
         }.let { emitAll(it) }
     }
 
-    fun getFbApk(type: AppType, abi: String): Flow<DownloadStatus> {
-        val file = AppConfig.getDownloadApkFile(type)
+    fun getFbApk(type: AppType, abi: String, version: String?): Flow<DownloadStatus> {
+        val file = AppConfig.getDownloadApkFile(type, version)
         if (hasValidFile(file)) {
-            return flowOf(DownloadStatus.FINISHED(file))
+            if (version != null) file.delete()
+            else return flowOf(DownloadStatus.FINISHED(file))
         }
         val iterator = getServices()
         var service: ApkRemoteService = iterator.next()
         return flow {
             emit(DownloadStatus.FETCHING(service.server()))
-            val fetched = service.fetch(type, abi)
+            val fetched = service.fetch(type, abi, version)
             fetched.version?.let {
                 emit(DownloadStatus.FETCHED(it))
             }
@@ -78,9 +79,9 @@ class ApkRemoteFileProvider {
             AppServices.isNetworkOnline() && iterator.hasNext().also {
                 if (it) service = iterator.next()
             }
-        }.catch { e ->
+        }.catch { exception ->
             val isOnline = AppServices.isNetworkOnline()
-            emit(DownloadStatus.FAILED(e.toNetworkError(isOnline)))
+            emit(DownloadStatus.FAILED(exception.toNetworkError(isOnline)))
         }
     }
 

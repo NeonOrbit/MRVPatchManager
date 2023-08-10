@@ -14,4 +14,9 @@
     <style name="MaterialCardSimpleOutlined" parent="Widget.Material3.CardView.Outlined">
         <item name="cardBackgroundColor">@color/background_overlay</item>
     </style>
+
+    <style name="MaterialButtonSecondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/secondary_button_stroke</item>
+        <item name="strokeWidth">1.5dp</item>
+    </style>
 </resources>

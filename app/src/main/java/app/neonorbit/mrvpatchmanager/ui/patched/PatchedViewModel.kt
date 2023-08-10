@@ -48,8 +48,13 @@ class PatchedViewModel : ViewModel() {
     fun saveSelectedApks(items: List<ApkFileData>) {
         if (items.isEmpty()) return
         pendingSaveFiles.clear()
-        pendingSaveFiles.addAll(items.map { it.path })
-        saveFilesEvent.post(viewModelScope, Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
+        val message = "Save ${getSelectedFilesMsg(items)}?"
+        viewModelScope.launch {
+            if (confirmationEvent.ask("Save", message)) {
+                pendingSaveFiles.addAll(items.map { it.path })
+                saveFilesEvent.post(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
+            }
+        }
     }
 
     fun onSaveDirectoryPicked(intent: Intent?) {
@@ -81,7 +86,7 @@ class PatchedViewModel : ViewModel() {
 
     fun deleteSelectedApks(items: List<ApkFileData>) {
         if (items.isEmpty()) return
-        val message = "Delete ${getDeleteMsg(items)}?"
+        val message = "Delete ${getSelectedFilesMsg(items)}?"
         viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO) {
             if (confirmationEvent.ask("Delete", message)) {
                 progressState.postValue(true)
@@ -130,14 +135,14 @@ class PatchedViewModel : ViewModel() {
 
     fun showDetails(items: List<ApkFileData>) {
         if (items.isEmpty()) return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO) {
             ApkUtil.getApkDetails(items.take(4).map { File(it.path) }).let {
                 dialogEvent.post(it)
             }
         }
     }
 
-    private fun getDeleteMsg(items: List<ApkFileData>): String {
+    private fun getSelectedFilesMsg(items: List<ApkFileData>): String {
         return if (items.size > 1) "${items.size} files" else items.single().name
     }
 }

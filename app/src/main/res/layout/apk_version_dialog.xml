@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="25dp"
+    android:orientation="vertical">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/patch_version_dialog_message"
+        android:textColor="?colorOnSecondary"
+        android:textAppearance="?textAppearanceListItemSecondary" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/apk_version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/patch_version_input_placeholder"
+        android:layout_marginTop="14dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dp"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/patch_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="end"
+        style="@style/MaterialButtonSecondary"
+        android:text="@string/patch_button_title" />
+</LinearLayout>

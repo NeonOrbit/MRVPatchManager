@@ -15,7 +15,7 @@ class ApkRepository {
     private val local = ApkLocalFileProvider()
     private val remote = ApkRemoteFileProvider()
 
-    fun getFbApk(type: AppType, abi: String) = remote.getFbApk(type, abi)
+    fun getFbApk(type: AppType, abi: String, version: String?) = remote.getFbApk(type, abi, version)
 
     fun getPatchedApks(): List<ApkFileData> = local.loadPatchedApks()
 
