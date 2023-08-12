@@ -63,7 +63,7 @@ object AppConfig {
     const val MESSENGER_PACKAGE = ConstantsM.DEFAULT_TARGET_PACKAGE
     const val DEFAULT_FB_SIGNATURE = ConstantsM.DEFAULT_FB_SIGNATURE
     const val MRV_PUBLIC_SIGNATURE = ConstantsM.DEFAULT_MRV_SIGNATURE
-    const val PACKAGE_MASKED_PREFIX = "mrv.masked." // TODO
+    const val PACKAGE_MASKED_PREFIX = ConstantsM.MASK_PREFIX
     const val PATCHED_APK_CONFIG_PATH = Constants.CONFIG_ASSET_PATH
     const val PATCHED_APK_PROXY_CLASS = Constants.PROXY_APP_COMPONENT_FACTORY
 

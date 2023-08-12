@@ -48,15 +48,15 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
+    applicationVariants.configureEach { variant ->
         def buildType = variant.name.capitalize()
         def apkTaskName = "copy${buildType}Apk"
         def nameSuffix = variant.name == "release" ? '' : "-${variant.name}"
         def outFileName = "${project.name}-v${variant.versionName}${nameSuffix}.apk"
-        variant.outputs.all {
+        variant.outputs.configureEach {
             outputFileName = outFileName
         }
-        task "$apkTaskName"(type: Copy) {
+        tasks.register("$apkTaskName", Copy) {
             from file("$rootProject.projectDir/app/$variant.name/$outFileName")
             into file("$rootProject.projectDir/out")
             doLast {
@@ -72,7 +72,7 @@ android {
 }
 
 dependencies {
-    implementation mrvpatcher('5.5.2', 'f45564e6b0b3964ffe2ebef4b8650b7b420caa19')
+    implementation mrvpatcher('5.5.3', '21530076ff776f6759775b2b822728bc421df583')
 
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.browser:browser:1.5.0'
@@ -84,7 +84,7 @@ dependencies {
 
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
-    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.1'
     implementation 'androidx.recyclerview:recyclerview-selection:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
@@ -105,6 +105,7 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.3.1'
 
     // https://mvnrepository.com/artifact/com.github.bumptech.glide/glide
+    //noinspection KaptUsageInsteadOfKsp
     kapt 'com.github.bumptech.glide:compiler:4.15.1'
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation('com.github.bumptech.glide:recyclerview-integration:4.15.1') {

@@ -7,7 +7,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.onCompletion
-import org.lsposed.patch.LSPatch
+import org.lsposed.patch.MRVPatcher
 import org.lsposed.patch.OutputLogger
 import java.io.File
 
@@ -19,7 +19,7 @@ class DefaultPatcher(private val input: File, private val options: Options) {
     fun patch() = callbackFlow {
         checkPreconditions()
         initStatusProducer(this)
-        LSPatch.main(*buildOptions())
+        MRVPatcher.patch(*buildOptions())
         if (output.verify()) {
             send(PatchStatus.FINISHED(output))
         } else {
@@ -33,12 +33,11 @@ class DefaultPatcher(private val input: File, private val options: Options) {
     }
 
     private fun initStatusProducer(scope: ProducerScope<Any>) {
-        LSPatch.setOutputLogger(object : OutputLogger {
+        MRVPatcher.setLogger(object : OutputLogger {
             override fun d(message: String) {
                 scope.ensureActive()
                 scope.trySend(PatchStatus.PATCHING(message))
             }
-
             override fun e(error: String) {
                 throw Exception(error)
             }
@@ -56,13 +55,27 @@ class DefaultPatcher(private val input: File, private val options: Options) {
         this, options.customKeystore?.keySignature ?: AppConfig.MRV_PUBLIC_SIGNATURE
     )
 
-    private fun buildOptions() = ArrayList<String>(15).apply {
+    private fun buildOptions() = ArrayList<String>(17).apply {
         add(input.absolutePath)
         add("--temp-dir")
         add(AppConfig.TEMP_DIR.absolutePath)
         add("--out-file")
         add(output.absolutePath)
         add("--force")
+        if (options.fixConflict) add("--fix-conf")
+        if (options.maskPackage) add("--mask-pkg")
+        if (options.fallbackMode) add("--fallback")
+        options.customKeystore?.let { data ->
+            add("--key-args")
+            add(data.path)
+            add(data.password)
+            add(data.aliasName)
+            add(data.aliasPassword)
+        }
+        options.extraModules?.let { mods ->
+            add("--modules")
+            mods.forEach { add(it) }
+        }
     }.toTypedArray()
 
     sealed class PatchStatus {

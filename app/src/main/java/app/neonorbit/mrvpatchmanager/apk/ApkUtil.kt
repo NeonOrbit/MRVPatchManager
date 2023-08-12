@@ -112,12 +112,19 @@ object ApkUtil {
                 }")
                 details.add("Version: ${info.versionName}")
                 details.add("Version Code: ${info.longVersionCode}")
-                details.add("Min Version: ${info.minAndroidName}")
-                details.add("Target Version: ${info.maxAndroidName}")
+                details.add("Min SDK: ${info.minAndroidName}")
+                details.add("Target SDK: ${info.maxAndroidName}")
                 details.add("Architecture: ${ApkParser.getABI(file) ?: "unknown"}")
-                ApkParser.getPatchedConfig(file)?.let { config ->
+                ApkParser.getPatchedConfig(file)?.also { config ->
                     details.add("Fallback Mode: ${config.fallback}")
-                }
+                    details.add("Package Masked: ${config.pkgMasked}")
+                    details.add("Resolved Conflicts: ${config.confFixed}")
+                    if (config.exModules.isNotEmpty()) {
+                        details.add("Third-party Modules: ${config.exModules}")
+                    }
+                } ?: info.permissions?.takeIf { p ->
+                    p.any { it.name?.startsWith(AppConfig.PACKAGE_MASKED_PREFIX) == true }
+                }?.also { details.add("Resolved Conflicts: true") }
             } ?: details.add("Failed to retrieve apk info: ${file.name}")
             result.add(details.toString())
         }
