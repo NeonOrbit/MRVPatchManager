@@ -1,6 +1,5 @@
 package app.neonorbit.mrvpatchmanager.util
 
-import android.os.Build
 import android.util.Log
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.BuildConfig
@@ -39,6 +38,6 @@ object Utils {
         29 -> 10
         30 -> 11
         31, 32 -> 12
-        else -> Build.VERSION.SDK_INT - 20
+        else -> sdk - 20
     }
 }

@@ -48,7 +48,6 @@ class HomeViewModel : ViewModel() {
     val installEvent = SingleEvent<File>()
     val uninstallEvent = SingleEvent<Set<String>>()
     val appPickerEvent = SingleEvent<List<AppFileData>>()
-
     val confirmationEvent = ConfirmationEvent()
 
     val patchingStatus = MutableStateFlow(false)
@@ -335,20 +334,13 @@ class HomeViewModel : ViewModel() {
     }
 
     private suspend fun install(file: File) {
-        val conflicted = ApkUtil.getConflictedApps(
-            file, currentOptions.fixConflict || currentOptions.maskPackage
-        )
-        if (conflicted.isNotEmpty()) {
-            if (confirmationEvent.ask(
-                    "Found apps with different signatures.\n" +
-                        "Please uninstall these first:\n" +
-                        "[${conflicted.values.joinToString(", ")}]"
-                )
-            ) uninstallEvent.post(conflicted.keys)
-        } else {
-            if (confirmationEvent.ask("Install ${file.name}?")) {
-                installEvent.post(file)
-            }
+        val conflicted = ApkUtil.getConflictedApps(file)
+        if (conflicted.isEmpty()) {
+            if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
+        } else if (confirmationEvent.ask("Apps with different signatures were found.\n" +
+                    "Please uninstall these first:\n" + "[${conflicted.values.joinToString(", ")}]")) {
+            uninstallEvent.post(conflicted.keys)
+            if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
         }
     }
 

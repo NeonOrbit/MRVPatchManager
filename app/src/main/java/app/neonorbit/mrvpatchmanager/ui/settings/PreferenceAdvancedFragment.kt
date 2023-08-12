@@ -21,25 +21,24 @@ import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
 class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.ResponseListener {
-    private var _viewModel: SettingsViewModel? = null
-    private val viewModel: SettingsViewModel get() = _viewModel!!
+    private var viewModel: SettingsViewModel? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _viewModel = viewModels<SettingsViewModel>(
+        viewModel = viewModels<SettingsViewModel>(
             { requireParentFragment() }
         ).value
-        viewModel.keystoreName.observeOnUI(viewLifecycleOwner) { keyName ->
+        viewModel!!.keystoreName.observeOnUI(viewLifecycleOwner) { keyName ->
             findPreference<Preference>(KEY_PREF_CUSTOM_KEYSTORE)?.let {
                 it.summary = if (keyName == null) getString(R.string.pref_custom_keystore_summery)
                 else getString(R.string.pref_custom_keystore_keystore, keyName)
             }
         }
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel.keystoreSaved.observe { data ->
+            viewModel!!.keystoreSaved.observe { data ->
                 DefaultPreference.setString(KEY_PREF_CUSTOM_KEYSTORE, data?.toJson())
                 KeystoreDialogFragment.finish(this@PreferenceAdvancedFragment)
                 AppServices.showToast(getString(
@@ -48,11 +47,11 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
             }
         }
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel.ksSaveFailed.observe {
+            viewModel!!.ksSaveFailed.observe {
                 KeystoreDialogFragment.failed(this@PreferenceAdvancedFragment, it)
             }
         }
-        viewModel.loadKeystoreName()
+        viewModel!!.loadKeystoreName()
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -63,7 +62,7 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
             pref.summary = getAbiPrefSummery(pref.value)
             pref.setOnPreferenceChangeListener { _, value ->
                 pref.summary = getAbiPrefSummery(value as String)
-                if (pref.value != value) viewModel.clearCache()
+                if (pref.value != value) viewModel?.clearCache()
                 true
             }
         }
@@ -97,17 +96,18 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
     }
 
     private fun getAbiPrefSummery(value: String?): String {
+        if (context == null) return value.toString()
         return if (value != null && value != getString(R.string.apk_abi_auto)) "ABI: $value"
         else getString(R.string.pref_apk_abi_type_detected, AppConfig.DEVICE_ABI)
     }
 
     override fun onKeystoreInput(response: KeystoreInputData?) {
-        viewModel.saveKeystore(response)
+        viewModel?.saveKeystore(response)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        _viewModel = null
+        viewModel = null
     }
 
     @Suppress("SameParameterValue")

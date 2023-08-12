@@ -22,14 +22,17 @@ import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.databinding.FragmentPatchedBinding
 import app.neonorbit.mrvpatchmanager.glide.RecyclerPreloadProvider
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
+import app.neonorbit.mrvpatchmanager.ui.ConfirmationDialog
 import app.neonorbit.mrvpatchmanager.util.AppUtil
 import app.neonorbit.mrvpatchmanager.withLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
 import com.bumptech.glide.util.ViewPreloadSizeProvider
-import java.io.File
 
-class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback {
+class PatchedFragment : Fragment(),
+    ActionMode.Callback, ApkListAdapter.Callback,
+    ConfirmationDialog.ResponseListener
+{
     private var binding: FragmentPatchedBinding? = null
     private var viewModel: PatchedViewModel? = null
     private var tracker: SelectionTracker<Long>? = null
@@ -99,6 +102,12 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
         }
 
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            model.installEvent.observe { file ->
+                AppInstaller.install(requireContext(), file)
+            }
+        }
+
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
             model.saveFilesEvent.observe { intent ->
                 saveDirPicker?.launch(intent)
             }
@@ -106,9 +115,9 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
 
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
             model.confirmationEvent.observe { event ->
-                AppUtil.prompt(requireContext(), event.title, event.message) {
-                    event.response(it)
-                }
+                ConfirmationDialog.show(
+                    this@PatchedFragment, event.title, event.message, event.action
+                )
             }
         }
 
@@ -134,7 +143,11 @@ class PatchedFragment : Fragment(), ActionMode.Callback, ApkListAdapter.Callback
     }
 
     override fun onItemClicked(item: ApkFileData) {
-        AppInstaller.install(requireContext(), File(item.path))
+        viewModel?.installApk(item)
+    }
+
+    override fun onResponse(response: Boolean) {
+        viewModel?.confirmationEvent?.sendResponse(response)
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {

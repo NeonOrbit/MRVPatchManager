@@ -225,8 +225,8 @@ class HomeFragment : Fragment(),
         }
     }
 
-    private val selectedApp: AppItemData? get() = viewModel!!.fbAppList.find {
-        binding!!.dropDownMenu.text.toString() == it.name
+    private val selectedApp: AppItemData? get() = viewModel?.fbAppList?.find {
+        binding?.dropDownMenu?.text.toString() == it.name
     }
     private fun getEnabledString(@StringRes resId: Int) = "[Enabled] -> [${getString(resId)}]"
 

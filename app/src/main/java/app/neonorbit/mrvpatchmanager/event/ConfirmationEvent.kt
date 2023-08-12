@@ -18,9 +18,13 @@ class ConfirmationEvent {
     }
 
     suspend fun ask(title: String?, msg: String): Boolean {
+        return ask(title, msg, null)
+    }
+
+    suspend fun ask(title: String? = null, msg: String, action: String? = null): Boolean {
         return mutex.withLock {
             suspendCancellableCoroutine { continuation ->
-                channel.trySend(Event(title, msg) {
+                channel.trySend(Event(title, msg, action) {
                     pending = null
                     continuation.resume(it)
                 }.also { pending = it })
@@ -36,5 +40,5 @@ class ConfirmationEvent {
         channel.receiveAsFlow().collect(observer)
     }
 
-    data class Event(val title: String?, val message: String, val response: (Boolean) -> Unit)
+    data class Event(val title: String?, val message: String, val action: String?, val response: (Boolean) -> Unit)
 }

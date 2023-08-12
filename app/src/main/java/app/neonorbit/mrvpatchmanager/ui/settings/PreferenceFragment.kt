@@ -19,8 +19,7 @@ import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
 class PreferenceFragment : PreferenceFragmentCompat() {
-    private var _viewModel: SettingsViewModel? = null
-    private val viewModel: SettingsViewModel get() = _viewModel!!
+    private var viewModel: SettingsViewModel? = null
 
     private val uriLauncher by lazy {
         CustomTabsIntent.Builder().build()
@@ -31,20 +30,20 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _viewModel = viewModels<SettingsViewModel>(
+        viewModel = viewModels<SettingsViewModel>(
             { requireParentFragment() }
         ).value
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel.uriEvent.observe {
+            viewModel!!.uriEvent.observe {
                 uriLauncher.launchUrl(requireContext(), it)
             }
         }
-        viewModel.cacheSize.observeOnUI(viewLifecycleOwner) { size ->
+        viewModel!!.cacheSize.observeOnUI(viewLifecycleOwner) { size ->
             findPreference<Preference>(KEY_PREF_CLEAR_CACHE)?.let {
                 it.summary = size?.toSize(true) ?: getString(R.string.pref_clear_cache_summery)
             }
         }
-        viewModel.loadCacheSize()
+        viewModel!!.loadCacheSize()
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -71,7 +70,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
             AppUtil.prompt(requireContext(),
                 R.string.pref_clear_cache_confirm_prompt, R.string.pref_clear_cache_confirm_message, R.string.text_clear
             ) {
-                if (it) viewModel.clearCache()
+                if (it) viewModel?.clearCache()
             }
         }
 
@@ -88,17 +87,17 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         }
 
         onPreferenceClick(KEY_PREF_VISIT_HELP) {
-            viewModel.visitHelp()
+            viewModel?.visitHelp()
         }
 
         onPreferenceClick(KEY_PREF_VISIT_SOURCE) {
-            viewModel.visitGithub()
+            viewModel?.visitGithub()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        _viewModel = null
+        viewModel = null
     }
 
     private fun onPreferenceClick(key: String, block: () -> Unit) {

@@ -74,13 +74,15 @@ object ApkUtil {
 
     fun getPrefixedVersionName(pkg: String) = getPackageInfo(pkg)?.let { "v${it.versionName}" }
 
-    fun getConflictedApps(file: File, exact: Boolean): Map<String, String> {
+    fun getConflictedApps(file: File): Map<String, String> {
         val conflicted = HashMap<String, String>()
-        getPackageInfo(file, true)?.let { apk ->
-            getRelatedPackages(apk.packageName, exact).forEach { pkg ->
-                getPackageInfo(pkg, cert = true, meta = true)?.let { installed ->
+        getPackageInfo(file, cert = true, meta = false, perm = true)?.let { apk ->
+            getRelatedPackages(apk.packageName).forEach { pkg ->
+                getPackageInfo(pkg, cert = true, meta = true, perm = true)?.let { installed ->
                     try {
-                        if (!installed.matchSignature(apk)) {
+                        if (!installed.matchSignature(apk) &&
+                            (apk.packageName == installed.packageName ||
+                                    match(apk.isPermissionMasked, installed.isPermissionMasked))) {
                             conflicted[pkg] = installed.getAppName()
                         }
                     } catch (_: Exception) { }
@@ -90,6 +92,8 @@ object ApkUtil {
         return conflicted
     }
 
+    private fun match(a: Boolean?, b: Boolean?): Boolean = a != null && b != null && a == b
+
     fun getApkSummery(file: File) = getPackageInfo(file)?.let { info ->
         val summery = StringJoiner(" ")
         summery.add(info.longVersionCode.toString())
@@ -98,13 +102,11 @@ object ApkUtil {
         summery.toString()
     }
 
-    @Suppress("Deprecation")
     fun getApkDetails(files: List<File>): String {
-        val flags = GET_META_DATA or GET_SIGNING_CERTIFICATES or GET_SIGNATURES or GET_PERMISSIONS
         val result = StringJoiner("\n\n")
         files.forEach { file ->
             val details = StringJoiner("\n")
-            getPackageInfo(file, flags)?.also { info ->
+            getPackageInfo(file, cert = true, meta = true, perm = true)?.also { info ->
                 details.add("Apk: ${info.getAppName()}")
                 details.add("Status: ${if (info.isPatched()) "Patched" else "Signed Only"}")
                 details.add("Signature: ${
@@ -122,9 +124,9 @@ object ApkUtil {
                     if (config.exModules.isNotEmpty()) {
                         details.add("Third-party Modules: ${config.exModules}")
                     }
-                } ?: info.permissions?.takeIf { p ->
-                    p.any { it.name?.startsWith(AppConfig.PACKAGE_MASKED_PREFIX) == true }
-                }?.also { details.add("Resolved Conflicts: true") }
+                } ?: info.isPermissionMasked?.also {
+                    if (it) details.add("Resolved Conflicts: true")
+                }
             } ?: details.add("Failed to retrieve apk info: ${file.name}")
             result.add(details.toString())
         }
@@ -151,9 +153,12 @@ object ApkUtil {
     private val PackageInfo.minAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.minSdkVersion ?: 0)
     private val PackageInfo.maxAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.targetSdkVersion ?: 0)
     private val PackageInfo.apkPath get() = applicationInfo.publicSourceDir?.takeIf { it.isNotEmpty() } ?: applicationInfo.sourceDir
+    private val PackageInfo.isPermissionMasked get() = permissions?.let { permissions ->
+        permissions.any { permission -> permission.name?.startsWith(AppConfig.PACKAGE_MASKED_PREFIX) == true }
+    }
 
-    private fun getRelatedPackages(pkg: String, exact: Boolean): Set<String> {
-        return if (!exact && pkg in AppConfig.DEFAULT_FB_PACKAGES) AppConfig.DEFAULT_FB_PACKAGES else setOf(pkg)
+    private fun getRelatedPackages(pkg: String): Set<String> {
+        return if (pkg in AppConfig.DEFAULT_FB_PACKAGES) AppConfig.DEFAULT_FB_PACKAGES else setOf(pkg)
     }
 
     private fun getSignatures(file: File): Array<out Signature> {
@@ -166,10 +171,14 @@ object ApkUtil {
     private fun getPackageInfo(file: File, cert: Boolean = false) = getPackageInfo(file, getFlags(cert, false))
 
     @Suppress("SameParameterValue")
-    private fun getPackageInfo(pkg: String, cert: Boolean, meta: Boolean) = getPackageInfo(pkg, getFlags(cert, meta))
+    private fun getPackageInfo(pkg: String, cert: Boolean, meta: Boolean, perm: Boolean = false) = getPackageInfo(
+        pkg, getFlags(cert, meta, perm)
+    )
 
     @Suppress("SameParameterValue")
-    private fun getPackageInfo(file: File, cert: Boolean, meta: Boolean) = getPackageInfo(file, getFlags(cert, meta))
+    private fun getPackageInfo(file: File, cert: Boolean, meta: Boolean, perm: Boolean = false) = getPackageInfo(
+        file, getFlags(cert, meta, perm)
+    )
 
     @Suppress("Deprecation", "SameParameterValue")
     private fun getPackageInfo(pkg: String, flags: Int): PackageInfo? = try {
@@ -182,9 +191,10 @@ object ApkUtil {
     }
 
     @Suppress("Deprecation")
-    private fun getFlags(cert: Boolean, meta: Boolean): Int {
+    private fun getFlags(cert: Boolean, meta: Boolean, perm: Boolean = false): Int {
         var flag = 0
         if (meta) flag = flag or GET_META_DATA
+        if (perm) flag = flag or GET_PERMISSIONS
         if (cert) flag = flag or GET_SIGNING_CERTIFICATES or GET_SIGNATURES
         return flag
     }

@@ -27,6 +27,7 @@ class PatchedViewModel : ViewModel() {
 
     val intentEvent = SingleEvent<Intent>()
     val dialogEvent = SingleEvent<String>()
+    val installEvent = SingleEvent<File>()
     val saveFilesEvent = SingleEvent<Intent>()
     val confirmationEvent = ConfirmationEvent()
     val progressState = MutableLiveData<Boolean>()
@@ -50,7 +51,7 @@ class PatchedViewModel : ViewModel() {
         pendingSaveFiles.clear()
         val message = "Save ${getSelectedFilesMsg(items)}?"
         viewModelScope.launch {
-            if (confirmationEvent.ask("Save", message)) {
+            if (confirmationEvent.ask(null, message, "Save")) {
                 pendingSaveFiles.addAll(items.map { it.path })
                 saveFilesEvent.post(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
             }
@@ -88,7 +89,7 @@ class PatchedViewModel : ViewModel() {
         if (items.isEmpty()) return
         val message = "Delete ${getSelectedFilesMsg(items)}?"
         viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO) {
-            if (confirmationEvent.ask("Delete", message)) {
+            if (confirmationEvent.ask(null, message, "Delete")) {
                 progressState.postValue(true)
                 items.forEach {
                     File(it.path).delete()
@@ -139,6 +140,23 @@ class PatchedViewModel : ViewModel() {
             ApkUtil.getApkDetails(items.take(4).map { File(it.path) }).let {
                 dialogEvent.post(it)
             }
+        }
+    }
+
+    fun installApk(item: ApkFileData) {
+        viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO) {
+            progressState.postValue(true)
+            val file = File(item.path)
+            val conflicted = ApkUtil.getConflictedApps(file)
+            if (conflicted.isEmpty() || confirmationEvent.ask(null,
+                    "Apps with different signatures were found, installation may fail.\n" +
+                            "Please uninstall these first:\n" + "[${conflicted.values.joinToString(", ")}]",
+                    "Install Anyway"
+                )) {
+                installEvent.post(file)
+            }
+        }.invokeOnCompletion {
+            progressState.postValue(false)
         }
     }
 
