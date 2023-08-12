@@ -10,6 +10,8 @@
     <string name="delete_menu_title">Delete</string>
     <string name="share_menu_title">Share</string>
     <string name="details_menu_title">Details</string>
+    <string name="manual_apk_menu_title">APK Files</string>
+    <string name="manual_app_menu_title">Installed Apps</string>
     <string name="select_all_menu_title">Select All</string>
     <string name="patcher_title">Patcher</string>
     <string name="patch_button_title">Patch</string>
@@ -27,6 +29,7 @@
     <string name="patcher_manual">Manual</string>
     <string name="no_patched_apps">No patched apps</string>
     <string name="patched_apk_placeholder">Patched apk file info</string>
+    <string name="manual_installed_app_title">Patch an installed app:</string>
 
     <string name="text_confirmation">Confirmation</string>
     <string name="text_warning">Warning!</string>
@@ -104,7 +107,7 @@
         It is intended for those who cannot remove the original messenger app.
         \nBe aware that enabling this option may affect some functionality and cause minor issues (ignorable).
         Please make every effort to remove the original Messenger before considering this option.
-        \n[If you can remove the original Messenger app, you should check the \"Resolve apk conflicts\" option instead.]
+        \n[See the \"Resolve apk conflicts\" option]
     </string>
     <string name="pref_fallback_mode_confirm_message">Do you really want to enable fallback mode?
         \n[Apps patched in fallback mode may launch a little slowly]

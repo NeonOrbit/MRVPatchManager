@@ -12,17 +12,22 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.appcompat.widget.PopupMenu
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
+import app.neonorbit.mrvpatchmanager.data.AppFileData
 import app.neonorbit.mrvpatchmanager.data.AppItemData
-import app.neonorbit.mrvpatchmanager.databinding.ApkVersionDialogBinding
 import app.neonorbit.mrvpatchmanager.databinding.FragmentHomeBinding
+import app.neonorbit.mrvpatchmanager.databinding.InstalledAppsDialogBinding
+import app.neonorbit.mrvpatchmanager.databinding.VersionInputDialogBinding
 import app.neonorbit.mrvpatchmanager.event.UpdateEvent
 import app.neonorbit.mrvpatchmanager.observeOnUI
 import app.neonorbit.mrvpatchmanager.ui.AutoProgressDialog
@@ -112,15 +117,25 @@ class HomeFragment : Fragment(),
         }
 
         binding.versionButton.setOnClickListener {
-            ApkVersionDialogBinding.inflate(LayoutInflater.from(requireContext()), null, false).let { avd ->
-                MaterialAlertDialogBuilder(requireContext()).setView(avd.root).create().also { dialog ->
-                    avd.patchButton.setOnClickListener {
-                        dialog.dismiss()
-                        selectedApp?.let {
-                            model.patchVersion(it.type, avd.apkVersion.editText!!.text!!.toString())
-                        }
+            showVersionInputDialog()
+        }
+
+        binding.patcherManual.setOnClickListener {
+            PopupMenu(requireContext(), it).apply {
+                menuInflater.inflate(R.menu.manual_patch_menu, menu)
+                setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.pick_apk -> model.manualRequest(true)
+                        R.id.pick_app -> model.manualRequest(false)
                     }
-                }.show()
+                    true
+                }
+            }.show()
+        }
+
+        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
+            model.appPickerEvent.observe { apps ->
+                showInstalledAppPickerDialog(apps)
             }
         }
 
@@ -175,13 +190,39 @@ class HomeFragment : Fragment(),
             } ?: { binding.noticeCard.isVisible = false }
         }
 
-        binding.patcherManual.setOnClickListener { model.manualRequest() }
         binding.managerButton.setOnClickListener { model.installManager() }
         binding.moduleInfoButton.setOnClickListener { model.showModuleInfo() }
         binding.moduleUpdateButton.setOnClickListener { model.installModule() }
         binding.moduleInstallButton.setOnClickListener { model.installModule(true) }
         binding.managerChangelogButton.setOnClickListener { model.visitManager() }
         binding.moduleChangelogButton.setOnClickListener { model.visitModule() }
+    }
+
+    private fun showVersionInputDialog() {
+        VersionInputDialogBinding.inflate(LayoutInflater.from(requireContext()), null, false).let { bind ->
+            MaterialAlertDialogBuilder(requireContext()).setView(bind.root).create().also { dialog ->
+                bind.patchButton.setOnClickListener {
+                    dialog.dismiss()
+                    selectedApp?.let {
+                        viewModel?.patchVersion(it.type, bind.apkVersion.editText!!.text!!.toString())
+                    }
+                }
+            }.show()
+        }
+    }
+
+    private fun showInstalledAppPickerDialog(apps: List<AppFileData>) {
+        InstalledAppsDialogBinding.inflate(LayoutInflater.from(requireContext()), null, false).let { bind ->
+            MaterialAlertDialogBuilder(requireContext()).setView(bind.root).create().also { dialog ->
+                bind.list.layoutManager = LinearLayoutManager(requireContext())
+                bind.list.adapter = InstalledAppAdapter(apps).apply {
+                    setItemClickListener { item ->
+                        dialog.dismiss()
+                        viewModel?.patch(uri = item.file.toUri())
+                    }
+                }
+            }.show()
+        }
     }
 
     private val selectedApp: AppItemData? get() = viewModel!!.fbAppList.find {

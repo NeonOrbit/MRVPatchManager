@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.compareVersion
+import app.neonorbit.mrvpatchmanager.data.AppFileData
 import app.neonorbit.mrvpatchmanager.util.Utils
 import java.io.File
 import java.util.StringJoiner
@@ -24,16 +25,6 @@ object ApkUtil {
 
     private fun PackageInfo.matchSignature(other: PackageInfo): Boolean {
         return this.getSignatures().any { it in other.getSignatures() }
-    }
-
-    fun isMessenger(app: AppType?): Boolean {
-        return app?.getPackage() == AppConfig.MESSENGER_PACKAGE
-    }
-
-    fun isMessenger(file: File?): Boolean {
-        return file?.let {
-            getPackageInfo(it)
-        }?.packageName == AppConfig.MESSENGER_PACKAGE
     }
 
     fun verifySignature(file: File, sig: String): Boolean {
@@ -114,15 +105,15 @@ object ApkUtil {
         files.forEach { file ->
             val details = StringJoiner("\n")
             getPackageInfo(file, flags)?.also { info ->
-                details.add("Name: ${info.getAppName()}")
-                details.add("Patch: ${if (info.isPatched()) "Patched" else "Signed Only"}")
+                details.add("Apk: ${info.getAppName()}")
+                details.add("Status: ${if (info.isPatched()) "Patched" else "Signed Only"}")
                 details.add("Signature: ${
                     if (info.matchSignature(AppConfig.MRV_PUBLIC_SIGNATURE)) "Default" else "Custom"
                 }")
                 details.add("Version: ${info.versionName}")
                 details.add("Version Code: ${info.longVersionCode}")
-                details.add("Min Support: ${info.minAndroidName}")
-                details.add("Max Support: ${info.maxAndroidName}")
+                details.add("Min Version: ${info.minAndroidName}")
+                details.add("Target Version: ${info.maxAndroidName}")
                 details.add("Architecture: ${ApkParser.getABI(file) ?: "unknown"}")
                 ApkParser.getPatchedConfig(file)?.let { config ->
                     details.add("Fallback Mode: ${config.fallback}")
@@ -133,10 +124,26 @@ object ApkUtil {
         return result.toString()
     }
 
+    @Suppress("Deprecation", "QueryPermissionsNeeded")
+    fun getInstalledAppList() = AppServices.packageManager.getInstalledApplications(0).filter {
+        it.packageName.startsWith("com.facebook.") || it.packageName.startsWith("com.instagram.")
+    }.mapNotNull { getPackageInfo(it.packageName) }.sortedWith(Comparator.comparing {
+       AppConfig.FB_ORDERED_PKG_LIST.indexOf(it.packageName).takeIf { i -> i >= 0 } ?:
+       AppConfig.FB_ORDERED_PKG_LIST.size
+    }).map { AppFileData(it.getAppName(), File(it.apkPath)) }
+
+    fun isPatched(file: File?) = file?.let { getPackageInfo(it) }?.isPatched() == true
+    fun isMessenger(app: AppType?) = app?.getPackage() == AppConfig.MESSENGER_PACKAGE
+    fun isMessenger(file: File?) = file?.let { getPackageInfo(it) }?.packageName == AppConfig.MESSENGER_PACKAGE
+    fun isRecommendedForResolveConflicts(file: File) = getPackageInfo(file)?.packageName?.let {
+        it == AppType.FACEBOOK.getPackage() || it == AppType.MESSENGER.getPackage()
+    } != false
+
     private fun PackageInfo.isMasked() = packageName.startsWith(AppConfig.PACKAGE_MASKED_PREFIX)
     private fun PackageInfo.isPatched() = applicationInfo?.appComponentFactory == AppConfig.PATCHED_APK_PROXY_CLASS
     private val PackageInfo.minAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.minSdkVersion ?: 0)
     private val PackageInfo.maxAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.targetSdkVersion ?: 0)
+    private val PackageInfo.apkPath get() = applicationInfo.publicSourceDir?.takeIf { it.isNotEmpty() } ?: applicationInfo.sourceDir
 
     private fun getRelatedPackages(pkg: String, exact: Boolean): Set<String> {
         return if (!exact && pkg in AppConfig.DEFAULT_FB_PACKAGES) AppConfig.DEFAULT_FB_PACKAGES else setOf(pkg)

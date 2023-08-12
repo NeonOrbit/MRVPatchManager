@@ -13,6 +13,7 @@ import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.compareVersion
+import app.neonorbit.mrvpatchmanager.data.AppFileData
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
@@ -46,6 +47,7 @@ class HomeViewModel : ViewModel() {
     val messageEvent = SingleEvent<String>()
     val installEvent = SingleEvent<File>()
     val uninstallEvent = SingleEvent<Set<String>>()
+    val appPickerEvent = SingleEvent<List<AppFileData>>()
 
     val confirmationEvent = ConfirmationEvent()
 
@@ -137,9 +139,16 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun manualRequest() {
-        if (patchingJob == null) intentEvent.post(viewModelScope, filePickerIntent)
-        else messageEvent.post(viewModelScope, "A patching task is already in progress.")
+    fun manualRequest(storage: Boolean) {
+        if (patchingJob != null) {
+            messageEvent.post(viewModelScope, "A patching task is already in progress.")
+        } else if (storage) {
+            intentEvent.post(viewModelScope, filePickerIntent)
+        } else {
+            viewModelScope.launch {
+                appPickerEvent.post(ApkUtil.getInstalledAppList())
+            }
+        }
     }
 
     fun patchVersion(app: AppType, target: String) {
@@ -211,11 +220,17 @@ class HomeViewModel : ViewModel() {
 
     private suspend fun checkPreconditions(file: File, isManual: Boolean): Boolean {
         if (!checkMaskPackage(file = file)) return false
-        val passed = !currentOptions.fixConflict || ApkUtil.isMessenger(file) || confirmationEvent.ask(
-            "'Resolve apk conflicts' option is currently enabled, there's no need to patch any other apps besides Messenger. Patch anyway?"
+        if (isManual && ApkUtil.isPatched(file)) {
+            messageEvent.post("The selected apk has already been patched.")
+            return false
+        }
+        val passed = !currentOptions.fixConflict || ApkUtil.isRecommendedForResolveConflicts(file) || confirmationEvent.ask(
+            "'Resolve apk conflicts' option is currently enabled, there's no need to patch any other apps besides Facebook and Messenger. " +
+                    "Patch anyway?"
         )
         if (!isManual || !passed) return passed
-        return ApkUtil.verifyFbSignature(file, false) || confirmationEvent.ask("Warning!", "This apk isn't official, continue?") &&
+        return ApkUtil.verifyFbSignature(file, false) ||
+                confirmationEvent.ask("Warning!", "The selected apk does not appear to be original, patch anyway?") &&
                 (!ApkUtil.hasLatestMrvSignedApp(file, currentOptions.customKeystore?.keySignature) ||
                         confirmationEvent.ask("Already on the latest version, patch anyway?")
                 )

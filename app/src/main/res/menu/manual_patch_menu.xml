@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/pick_apk"
+        android:title="@string/manual_apk_menu_title" />
+
+    <item
+        android:id="@+id/pick_app"
+        android:title="@string/manual_app_menu_title" />
+</menu>

@@ -106,4 +106,8 @@ object AppConfig {
             AppItemData("Business Suite", AppType.BUSINESS_SUITE, R.drawable.ic_fb_page),
         )
     }
+
+    val FB_ORDERED_PKG_LIST = listOf(
+        "com.facebook.katana", "com.facebook.orca", "com.facebook.lite", "com.facebook.mlite", "com.facebook.pages.app"
+    )
 }
