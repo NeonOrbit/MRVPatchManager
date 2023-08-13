@@ -7,10 +7,9 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.NavigationUI
 import app.neonorbit.mrvpatchmanager.databinding.AboutDialogBinding
 import app.neonorbit.mrvpatchmanager.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
@@ -22,30 +21,29 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
-        setSupportActionBar(findViewById(R.id.toolbar))
+        setSupportActionBar(binding.toolbar)
+        binding.icon.setOnClickListener { showAboutDialog() }
 
-        val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-        val navController = (navHost as NavHostFragment).navController
-        binding.navView.setupWithNavController(navController)
-
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.navigation_home, R.id.navigation_patched, R.id.navigation_settings)
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
+        val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment).let {
+            (it as NavHostFragment).navController
+        }
+        NavigationUI.setupWithNavController(binding.navView, navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination.id == R.id.navigation_home) {
-                supportActionBar?.title = null
-                supportActionBar?.setDisplayHomeAsUpEnabled(true)
-                supportActionBar?.setHomeAsUpIndicator(R.drawable.home_top_icon)
-                if (binding.toolbar.navigationContentDescription != null) {
-                    binding.toolbar.navigationContentDescription = null
-                }
+                binding.icon.isClickable = true
+                binding.title.animate().setDuration(300).alpha(0.0f)
+                binding.icon.animate().setDuration(300).alpha(1.0f)
+            } else {
+                binding.icon.isClickable = false
+                binding.title.text = destination.label
+                binding.icon.animate().setDuration(300).alpha(0.0f)
+                binding.title.animate().setDuration(300).alpha(1.0f)
             }
+            if (!binding.title.isVisible) binding.title.isVisible = true
         }
         theme.applyStyle(
             rikka.material.preference.R.style.ThemeOverlay_Rikka_Material3_Preference, true
@@ -59,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.about, android.R.id.home -> {
+            R.id.about -> {
                 showAboutDialog()
                 true
             }
