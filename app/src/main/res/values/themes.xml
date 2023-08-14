@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.MRVPatchManager" parent="Theme.Material3.DayNight">
-
         <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.ActionBar</item>
         <item name="android:layoutDirection">ltr</item>
         <item name="android:colorBackground">?colorSurface</item>
@@ -15,7 +14,6 @@
         <item name="textAppearanceTitleMedium">@style/TextAppearance.Material3.TitleMedium</item>
 
         <item name="colorSurface">@color/background</item>
-
         <item name="colorPrimary">@color/primary</item>
         <item name="colorOnPrimary">@color/primary_foreground</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>
@@ -31,9 +29,12 @@
         <item name="colorOnSurfaceVariant">@color/surface_foreground_variant</item>
 
         <item name="colorOutline">@color/outline</item>
-
         <item name="colorControlHighlight">@color/ripple_color</item>
-
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
+    </style>
+
+    <style name="Theme.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.MRVPatchManager</item>
     </style>
 </resources>

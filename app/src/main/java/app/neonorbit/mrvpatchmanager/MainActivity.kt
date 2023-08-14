@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
@@ -20,18 +21,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        this.installSplashScreen()
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
 
-        setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-        binding.icon.setOnClickListener { showAboutDialog() }
+        binding = ActivityMainBinding.inflate(layoutInflater).also {
+            setContentView(it.root)
+            setSupportActionBar(it.toolbar)
+        }
 
         val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment).let {
             (it as NavHostFragment).navController
         }
         NavigationUI.setupWithNavController(binding.navView, navController)
 
+        binding.icon.setOnClickListener { showAboutDialog() }
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination.id == R.id.navigation_home) {
                 binding.icon.isClickable = true
