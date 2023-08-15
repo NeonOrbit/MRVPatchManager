@@ -41,6 +41,13 @@ object ApkUtil {
         }
     }
 
+    fun verifyFbSignatureWithVersion(file: File, version: String?): Boolean {
+        return getPackageInfo(file, true)?.takeIf {
+            ApkConfigs.isValidVersion(it.versionName, version) &&
+            AppConfig.DEFAULT_FB_PACKAGES.contains(it.packageName)
+        }?.matchSignature(AppConfig.DEFAULT_FB_SIGNATURE) == true
+    }
+
     fun hasLatestMrvSignedApp(file: File, sig: String? = null): Boolean {
         return getPackageInfo(file)?.let { apk ->
             hasLatestMrvSignedApp(apk.packageName, apk.versionName, sig)

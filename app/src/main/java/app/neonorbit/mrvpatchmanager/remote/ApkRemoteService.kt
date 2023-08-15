@@ -10,24 +10,24 @@ interface ApkRemoteService {
     fun server(): String
     suspend fun fetch(type: AppType, abi: String, ver: String?): RemoteApkInfo
 
-    fun Exception.handleApkServiceException(ver: String?): Nothing {
+    fun Exception.handleApkServiceException(type: AppType, ver: String?): Nothing {
         handleUnrelated()
-        throwServiceException(ver)
+        throwServiceException(type, ver)
     }
 
-    fun Exception.handleApkServiceException(ver: String?, skip: Boolean) {
+    fun Exception.handleApkServiceException(type: AppType, ver: String?, skip: Boolean) {
         this.handleUnrelated()
-        if (ver != null || !skip) throwServiceException(ver)
+        if (ver != null || !skip) throwServiceException(type, ver)
     }
 
     private fun Exception.handleUnrelated() {
         if (this is CancellationException || this.isConnectError) throw this
     }
 
-    private fun Exception.throwServiceException(ver: String?): Nothing {
+    private fun Exception.throwServiceException(type: AppType, ver: String?): Nothing {
         this.message?.let { Utils.warn(it, this) }
         throw Exception(
-            ver?.let { "$it version not found"} ?:
+            ver?.let { "${type.getName()} apk not found for version '$it'"} ?:
             "Couldn't fetch apk info from the server"
         )
     }

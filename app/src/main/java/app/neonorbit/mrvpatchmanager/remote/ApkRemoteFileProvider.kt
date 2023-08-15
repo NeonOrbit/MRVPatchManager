@@ -54,10 +54,9 @@ class ApkRemoteFileProvider {
 
     fun getFbApk(type: AppType, abi: String, version: String?): Flow<DownloadStatus> {
         val file = AppConfig.getDownloadApkFile(type, version)
-        if (hasValidFile(file)) {
-            if (version != null) file.delete()
-            else return flowOf(DownloadStatus.FINISHED(file))
-        }
+        if (hasValidFile(file, version)) {
+            return flowOf(DownloadStatus.FINISHED(file))
+        } else if (version != null) file.delete()
         val iterator = getServices()
         var service: ApkRemoteService = iterator.next()
         return flow {
@@ -85,11 +84,11 @@ class ApkRemoteFileProvider {
         }
     }
 
-    private fun hasValidFile(file: File): Boolean {
+    private fun hasValidFile(file: File, version: String?): Boolean {
         val last = file.lastModified()
         val current = System.currentTimeMillis()
         return file.exists() && (current - last < CACHED_THRESHOLD) && try {
-            ApkUtil.verifyFbSignature(file)
+            ApkUtil.verifyFbSignatureWithVersion(file, version)
         } catch (_: Exception) { false }
     }
 }

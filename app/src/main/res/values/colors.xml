@@ -16,18 +16,23 @@
     <color name="secondary">#2E9187</color>
     <color name="secondary_foreground">#576363</color>
 
-    <color name="outline">#B2DAD5</color>
+    <color name="outline">#71A19C</color>
     <color name="background_overlay">#EDFAF5</color>
     <color name="background_overlay_variant">#D9EDE5</color>
 
     <color name="surface_foreground">#315752</color>
     <color name="surface_foreground_variant">#3F6863</color>
+    <color name="surface_background_variant">#EDF8F7</color>
 
+    <color name="primary_container">#B4E4E0</color>
+    <color name="primary_container_foreground">#598781</color>
     <color name="secondary_container">#8ECFCF</color>
     <color name="secondary_container_foreground">#315752</color>
 
     <color name="secondary_button_stroke">#A4CDCD</color>
 
-    <color name="notice_color">#B7E8E3</color>
+    <color name="notice_color">#C9EFEB</color>
     <color name="warning_color">#FBE1D0</color>
+    <color name="primary_card_stroke">#A8DCD6</color>
+    <color name="pale_icon_foreground">#A6D5CF</color>
 </resources>

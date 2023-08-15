@@ -27,15 +27,15 @@ object ApkPureService : ApkRemoteService {
 
     override suspend fun fetch(type: AppType, abi: String, ver: String?): RemoteApkInfo {
         return when (type) {
-            AppType.FACEBOOK -> fetchInfo(FB_APP_URL, abi, ver) ?: hardcodedInfo("katana")
-            AppType.MESSENGER -> fetchInfo(MSG_APP_URL, abi, ver) ?: hardcodedInfo("orca")
-            AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL, abi, ver) ?: hardcodedInfo("lite")
-            AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL, abi, ver) ?: hardcodedInfo("mlite")
-            AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi, ver) ?: hardcodedInfo("pages.app")
+            AppType.FACEBOOK -> fetchInfo(type, FB_APP_URL, abi, ver) ?: hardcodedInfo("katana")
+            AppType.MESSENGER -> fetchInfo(type, MSG_APP_URL, abi, ver) ?: hardcodedInfo("orca")
+            AppType.FACEBOOK_LITE -> fetchInfo(type, FB_LITE_URL, abi, ver) ?: hardcodedInfo("lite")
+            AppType.MESSENGER_LITE -> fetchInfo(type, MSG_LITE_URL, abi, ver) ?: hardcodedInfo("mlite")
+            AppType.BUSINESS_SUITE -> fetchInfo(type, BSN_SUITE_URL, abi, ver) ?: hardcodedInfo("pages.app")
         }
     }
 
-    private suspend fun fetchInfo(from: String, abi: String, ver: String?): RemoteApkInfo? {
+    private suspend fun fetchInfo(type: AppType, from: String, abi: String, ver: String?): RemoteApkInfo? {
         return try {
             RetrofitClient.SERVICE.getApkPureRelease(from).result().releases.LOG("Releases").filter {
                 it.isValidType && ApkConfigs.isValidRelease(it.name) && ApkConfigs.isValidVersion(it.name, ver)
@@ -43,7 +43,7 @@ object ApkPureService : ApkRemoteService {
                 RemoteApkInfo(it.link, it.version)
             } ?: throw Exception()
         } catch (exception: Exception) {
-            exception.handleApkServiceException(ver, abi == ApkConfigs.ARM_64)
+            exception.handleApkServiceException(type, ver, abi == ApkConfigs.ARM_64)
             null
         }
     }

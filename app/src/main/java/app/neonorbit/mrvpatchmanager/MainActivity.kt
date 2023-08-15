@@ -9,6 +9,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import app.neonorbit.mrvpatchmanager.databinding.AboutDialogBinding
@@ -33,7 +34,13 @@ class MainActivity : AppCompatActivity() {
             (it as NavHostFragment).navController
         }
         NavigationUI.setupWithNavController(binding.navView, navController)
+        setupActionBarWithNavController(navController)
+        theme.applyStyle(
+            rikka.material.preference.R.style.ThemeOverlay_Rikka_Material3_Preference, true
+        )
+    }
 
+    private fun setupActionBarWithNavController(navController: NavController) {
         binding.icon.setOnClickListener { showAboutDialog() }
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination.id == R.id.navigation_home) {
@@ -48,9 +55,6 @@ class MainActivity : AppCompatActivity() {
             }
             if (!binding.title.isVisible) binding.title.isVisible = true
         }
-        theme.applyStyle(
-            rikka.material.preference.R.style.ThemeOverlay_Rikka_Material3_Preference, true
-        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

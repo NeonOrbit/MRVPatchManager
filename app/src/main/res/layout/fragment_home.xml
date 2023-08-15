@@ -56,25 +56,25 @@
                         android:text="@string/manager_title" />
 
                     <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/manager_latest_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@id/manager_title"
-                        android:textColor="@color/highlight_color"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:text="@string/latest_version" />
-
-                    <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/manager_installed_subtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:layout_alignParentStart="true"
-                        android:layout_below="@id/manager_latest_subtitle"
+                        android:layout_below="@id/manager_title"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                         android:text="@string/installed_version" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/manager_latest_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@id/manager_installed_subtitle"
+                        android:textColor="@color/highlight_color"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:text="@string/latest_version" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/manager_button"
@@ -129,26 +129,26 @@
                         android:text="@string/module_title" />
 
                     <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/module_latest_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@id/module_title"
-                        android:textColor="@color/highlight_color"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:visibility="gone"
-                        android:text="@string/latest_version" />
-
-                    <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/module_installed_subtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:layout_alignParentStart="true"
-                        android:layout_below="@id/module_latest_subtitle"
+                        android:layout_below="@id/module_title"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                         android:text="@string/installed_version" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/module_latest_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@id/module_installed_subtitle"
+                        android:textColor="@color/highlight_color"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:visibility="gone"
+                        android:text="@string/latest_version" />
 
                     <FrameLayout
                         android:id="@+id/module_button_holder"
@@ -294,16 +294,17 @@
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/version_button"
-                        android:padding="12dp"
-                        android:layout_width="wrap_content"
+                        android:paddingHorizontal="4dp"
+                        android:paddingVertical="14dp"
+                        android:layout_width="44dp"
                         android:layout_height="wrap_content"
                         android:layout_alignTop="@+id/patch_button"
                         android:layout_alignBottom="@+id/patch_button"
                         android:layout_centerVertical="true"
                         android:layout_alignParentStart="true"
-                        style="@style/Widget.Material3.Button.IconButton.Outlined"
-                        app:tint="@color/secondary_container"
-                        android:src="@drawable/ic_pref_config" />
+                        style="@style/MaterialCustomIconButton"
+                        app:tint="@color/pale_icon_foreground"
+                        android:src="@drawable/ic_patch_version" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/patch_button"

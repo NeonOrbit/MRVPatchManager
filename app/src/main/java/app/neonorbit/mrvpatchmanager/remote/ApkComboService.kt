@@ -32,7 +32,7 @@ object ApkComboService : ApkRemoteService {
                 AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi, ver)
             }
         } catch (exception: Exception) {
-            exception.handleApkServiceException(ver)
+            exception.handleApkServiceException(type, ver)
         }
     }
 

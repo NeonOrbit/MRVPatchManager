@@ -13,7 +13,6 @@
         <item name="textAppearanceTitleLarge">@style/TextAppearance.Material3.TitleLarge</item>
         <item name="textAppearanceTitleMedium">@style/TextAppearance.Material3.TitleMedium</item>
 
-        <item name="colorSurface">@color/background</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorOnPrimary">@color/primary_foreground</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>
@@ -22,10 +21,14 @@
         <item name="colorOnSecondary">@color/secondary_foreground</item>
         <item name="colorSecondaryVariant">?colorPrimaryVariant</item>
 
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/primary_container_foreground</item>
         <item name="colorSecondaryContainer">@color/secondary_container</item>
         <item name="colorOnSecondaryContainer">@color/secondary_container_foreground</item>
 
+        <item name="colorSurface">@color/background</item>
         <item name="colorOnSurface">@color/surface_foreground</item>
+        <item name="colorSurfaceVariant">@color/surface_background_variant</item>
         <item name="colorOnSurfaceVariant">@color/surface_foreground_variant</item>
 
         <item name="colorOutline">@color/outline</item>

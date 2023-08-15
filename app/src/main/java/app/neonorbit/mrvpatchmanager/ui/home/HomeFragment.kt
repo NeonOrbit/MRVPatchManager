@@ -148,7 +148,7 @@ class HomeFragment : Fragment(),
         viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
             model.confirmationEvent.observe { event ->
                 ConfirmationDialog.show(
-                    this@HomeFragment, event.title, event.message
+                    this@HomeFragment, event.title, event.message, event.action
                 )
             }
         }
@@ -201,6 +201,7 @@ class HomeFragment : Fragment(),
     private fun showVersionInputDialog() {
         VersionInputDialogBinding.inflate(LayoutInflater.from(requireContext()), null, false).let { bind ->
             MaterialAlertDialogBuilder(requireContext()).setView(bind.root).create().also { dialog ->
+                bind.apkVersion.editText!!.setText(viewModel?.lastSelectedVersion)
                 bind.patchButton.setOnClickListener {
                     dialog.dismiss()
                     selectedApp?.let {

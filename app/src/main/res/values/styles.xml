@@ -13,10 +13,15 @@
 
     <style name="MaterialCardSimpleOutlined" parent="Widget.Material3.CardView.Outlined">
         <item name="cardBackgroundColor">@color/background_overlay</item>
+        <item name="strokeColor">@color/primary_card_stroke</item>
     </style>
 
     <style name="MaterialButtonSecondary" parent="Widget.Material3.Button.OutlinedButton">
         <item name="strokeColor">@color/secondary_button_stroke</item>
         <item name="strokeWidth">1.5dp</item>
+    </style>
+
+    <style name="MaterialCustomIconButton" parent="Widget.Material3.Button.IconButton.Outlined">
+        <item name="strokeColor">@color/pale_icon_foreground</item>
     </style>
 </resources>

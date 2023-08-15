@@ -36,7 +36,7 @@ object ApkMirrorService : ApkRemoteService {
         try {
             return fetchInfo(buildFeedUrl(type, abi), abi, ver)
         } catch (exception: Exception) {
-            exception.handleApkServiceException(ver)
+            exception.handleApkServiceException(type, ver)
         }
     }
 

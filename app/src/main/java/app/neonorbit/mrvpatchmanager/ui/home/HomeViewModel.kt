@@ -57,6 +57,8 @@ class HomeViewModel : ViewModel() {
     val quickDownloadJob = MutableStateFlow<Job?>(null)
     val quickDownloadProgress = MutableStateFlow<Int?>(null)
 
+    var lastSelectedVersion: String? = null; private set
+
     private var moduleLatest: String? = null
     val moduleStatus: MutableStateFlow<VersionStatus> by lazy {
         MutableStateFlow(VersionStatus(null, null))
@@ -155,6 +157,7 @@ class HomeViewModel : ViewModel() {
             messageEvent.post(viewModelScope, "A patching task is already in progress.")
         } else {
             target.trim().trim('"', '.').takeIf { ApkConfigs.isValidVersionString(it) }?.let {
+                lastSelectedVersion = it
                 patch(app = app, target = it)
             } ?: messageEvent.post(viewModelScope, "Invalid version: $target")
         }
@@ -229,7 +232,7 @@ class HomeViewModel : ViewModel() {
         )
         if (!isManual || !passed) return passed
         return ApkUtil.verifyFbSignature(file, false) ||
-                confirmationEvent.ask("Warning!", "The selected apk does not appear to be original, patch anyway?") &&
+                confirmationEvent.ask("Warning!", "The selected apk is either not original or has already been patched, patch anyway?") &&
                 (!ApkUtil.hasLatestMrvSignedApp(file, currentOptions.customKeystore?.keySignature) ||
                         confirmationEvent.ask("Already on the latest version, patch anyway?")
                 )
@@ -337,8 +340,10 @@ class HomeViewModel : ViewModel() {
         val conflicted = ApkUtil.getConflictedApps(file)
         if (conflicted.isEmpty()) {
             if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
-        } else if (confirmationEvent.ask("Apps with different signatures were found.\n" +
-                    "Please uninstall these first:\n" + "[${conflicted.values.joinToString(", ")}]")) {
+        } else if (confirmationEvent.ask(msg = "Apps with different signatures were found.\n" +
+                    "Please uninstall these first:\n" + "[${conflicted.values.joinToString(", ")}]",
+                action = "Uninstall")
+            ) {
             uninstallEvent.post(conflicted.keys)
             if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
         }
