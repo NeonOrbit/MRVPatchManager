@@ -142,7 +142,8 @@ object ApkUtil {
 
     @Suppress("Deprecation", "QueryPermissionsNeeded")
     fun getInstalledAppList() = AppServices.packageManager.getInstalledApplications(0).filter {
-        it.packageName.startsWith("com.facebook.") || it.packageName.startsWith("com.instagram.")
+        (it.packageName.startsWith("com.facebook.") && it.packageName !in AppConfig.FB_EXCLUDED_PKG_LIST) ||
+                it.packageName.startsWith("com.instagram.")
     }.mapNotNull { getPackageInfo(it.packageName) }.sortedWith(Comparator.comparing {
        AppConfig.FB_ORDERED_PKG_LIST.indexOf(it.packageName).takeIf { i -> i >= 0 } ?:
        AppConfig.FB_ORDERED_PKG_LIST.size

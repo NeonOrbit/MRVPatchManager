@@ -8,7 +8,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.resume
 
-class ConfirmationEvent {
+class ConfirmationEvent : ChannelEvent<ConfirmationEvent.Event> {
     private var pending: Event? = null
     private val mutex: Mutex = Mutex()
     private val channel = Channel<Event>(Channel.CONFLATED)
@@ -36,7 +36,7 @@ class ConfirmationEvent {
         pending?.response?.invoke(result)
     }
 
-    suspend fun observe(observer: FlowCollector<Event>) {
+    override suspend fun observe(observer: FlowCollector<Event>) {
         channel.receiveAsFlow().collect(observer)
     }
 

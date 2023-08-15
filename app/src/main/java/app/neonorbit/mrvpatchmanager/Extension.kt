@@ -8,23 +8,8 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.text.HtmlCompat
 import androidx.documentfile.provider.DocumentFile
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.Closeable
@@ -33,8 +18,6 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.Locale
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -63,11 +46,25 @@ inline fun <T> Response<T>.useResponse(block: (Response<T>) -> Unit) {
     }
 }
 
-fun File.size(): Long {
+fun List<File>.existAnyIn(dir: DocumentFile): Boolean = any { file ->
+    dir.listFiles().any { file.name.equals(it.name, true) }
+}
+
+fun File.totalSize(): Long {
     return if (isFile) length()
     else listFiles()?.sumOf { sub ->
-        sub.size()
+        sub.totalSize()
     } ?: 0L
+}
+
+fun Long.toSizeString(withSpace: Boolean = false): String {
+    val space = (if (withSpace) " " else "")
+    if (this <= 0) return "0${space}Bytes"
+    val units = arrayOf("B", "KB", "MB", "GB", "TB")
+    val digit = (log10(this.toDouble()) / log10(1024.0)).toInt()
+    return String.format("%.2f", (this.toDouble() / 1024.0.pow(digit))).let {
+        "$it${space}${units[digit]}"
+    }
 }
 
 fun Uri.toTempFile(): File = File.createTempFile(
@@ -81,10 +78,6 @@ fun Uri.copyTo(file: File): File {
         }
     } ?: throw Exception("Failed to resolve uri: $this")
     return file
-}
-
-fun List<File>.existAnyIn(dir: DocumentFile): Boolean = any { file ->
-    dir.listFiles().any { file.name.equals(it.name, true) }
 }
 
 val Throwable.error: String; get() = this.message ?: this.javaClass.simpleName
@@ -101,58 +94,6 @@ fun Throwable.toNetworkError(isOnline: Boolean, length: Int = 100): String {
         else -> this.error
     }.take(length).let {
         if (it.length > length) "${it}..." else it
-    }
-}
-
-fun LifecycleOwner.withLifecycle(
-    state: Lifecycle.State,
-    block: suspend CoroutineScope.() -> Unit
-) = lifecycleScope.launch(Dispatchers.Main.immediate) {
-    repeatOnLifecycle(state, block)
-}
-
-fun <T> Flow<T>.observeOnUI(
-    owner: LifecycleOwner,
-    collector: FlowCollector<T>
-) = owner.lifecycleScope.launch(Dispatchers.Main.immediate) {
-    owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-        this@observeOnUI.collect(collector)
-    }
-}
-
-fun <T> MutableStateFlow<T>.post(
-    value: T,
-    with: ViewModel
-) = with.viewModelScope.launch { emit(value) }
-
-fun <T> MutableStateFlow<T>.postNow(
-    value: T,
-    with: ViewModel
-) = with.viewModelScope.launch(Dispatchers.Main.immediate) { emit(value) }
-
-/**
- * Launches a coroutine and immediately returns the Job,
- * then executes the given action under the mutex's lock.
- */
-fun CoroutineScope.launchSyncedBlock(
-    mutex: Mutex,
-    context: CoroutineContext = EmptyCoroutineContext,
-    block: suspend CoroutineScope.() -> Unit
-): Job {
-    return this.launch(context) {
-        mutex.withLock {
-            block()
-        }
-    }
-}
-
-fun Long.toSize(withSpace: Boolean = false): String {
-    val space = (if (withSpace) " " else "")
-    if (this <= 0) return "0${space}Bytes"
-    val units = arrayOf("B", "KB", "MB", "GB", "TB")
-    val digit = (log10(this.toDouble()) / log10(1024.0)).toInt()
-    return String.format("%.2f", (this.toDouble() / 1024.0.pow(digit))).let {
-        "$it${space}${units[digit]}"
     }
 }
 

@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -17,7 +16,6 @@ import app.neonorbit.mrvpatchmanager.isValidJavaName
 import app.neonorbit.mrvpatchmanager.keystore.KeystoreInputData
 import app.neonorbit.mrvpatchmanager.observeOnUI
 import app.neonorbit.mrvpatchmanager.util.AppUtil
-import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
 class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFragment.ResponseListener {
@@ -37,19 +35,15 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
                 else getString(R.string.pref_custom_keystore_keystore, keyName)
             }
         }
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel!!.keystoreSaved.observe { data ->
-                DefaultPreference.setString(KEY_PREF_CUSTOM_KEYSTORE, data?.toJson())
-                KeystoreDialogFragment.finish(this@PreferenceAdvancedFragment)
-                AppServices.showToast(getString(
-                    if (data != null) R.string.text_saved else R.string.text_cleared
-                ))
-            }
+        viewModel!!.keystoreSaved.observeOnUI(viewLifecycleOwner) { data ->
+            DefaultPreference.setString(KEY_PREF_CUSTOM_KEYSTORE, data?.toJson())
+            KeystoreDialogFragment.finish(this@PreferenceAdvancedFragment)
+            AppServices.showToast(getString(
+                if (data != null) R.string.text_saved else R.string.text_cleared
+            ))
         }
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel!!.ksSaveFailed.observe {
-                KeystoreDialogFragment.failed(this@PreferenceAdvancedFragment, it)
-            }
+        viewModel!!.ksSaveFailed.observeOnUI(viewLifecycleOwner) {
+            KeystoreDialogFragment.failed(this@PreferenceAdvancedFragment, it)
         }
         viewModel!!.loadKeystoreName()
         return super.onCreateView(inflater, container, savedInstanceState)

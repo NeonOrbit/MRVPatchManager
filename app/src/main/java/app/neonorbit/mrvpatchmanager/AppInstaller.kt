@@ -35,7 +35,7 @@ object AppInstaller {
         })
     }
 
-    @Suppress("deprecation")
+    @Suppress("Deprecation")
     fun install(context: Context, file: File) {
         val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -44,7 +44,7 @@ object AppInstaller {
         context.launch(intent)
     }
 
-    @Suppress("deprecation")
+    @Suppress("Deprecation")
     fun uninstall(context: Context, pkg: String) {
         val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE).apply {
             data = Uri.fromParts("package", pkg, null)

@@ -110,4 +110,5 @@ object AppConfig {
     val FB_ORDERED_PKG_LIST = listOf(
         "com.facebook.katana", "com.facebook.orca", "com.facebook.lite", "com.facebook.mlite", "com.facebook.pages.app"
     )
+    val FB_EXCLUDED_PKG_LIST = listOf("com.facebook.services", "com.facebook.system", "com.facebook.appmanager")
 }

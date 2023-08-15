@@ -7,15 +7,13 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.observeOnUI
-import app.neonorbit.mrvpatchmanager.toSize
+import app.neonorbit.mrvpatchmanager.toSizeString
 import app.neonorbit.mrvpatchmanager.util.AppUtil
-import app.neonorbit.mrvpatchmanager.withLifecycle
 import rikka.preference.SimpleMenuPreference
 
 class PreferenceFragment : PreferenceFragmentCompat() {
@@ -33,14 +31,13 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         viewModel = viewModels<SettingsViewModel>(
             { requireParentFragment() }
         ).value
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            viewModel!!.uriEvent.observe {
-                uriLauncher.launchUrl(requireContext(), it)
-            }
+        viewModel!!.uriEvent.observeOnUI(viewLifecycleOwner) {
+            uriLauncher.launchUrl(requireContext(), it)
         }
         viewModel!!.cacheSize.observeOnUI(viewLifecycleOwner) { size ->
             findPreference<Preference>(KEY_PREF_CLEAR_CACHE)?.let {
-                it.summary = size?.toSize(true) ?: getString(R.string.pref_clear_cache_summery)
+                it.summary = size?.toSizeString(true) ?:
+                getString(R.string.pref_clear_cache_summery)
             }
         }
         viewModel!!.loadCacheSize()

@@ -58,8 +58,8 @@ class PatchedViewModel : ViewModel() {
         }
     }
 
-    fun onSaveDirectoryPicked(intent: Intent?) {
-        if (pendingSaveFiles.isEmpty() || intent == null) return
+    fun onSaveDirectoryPicked(intent: Intent) {
+        if (pendingSaveFiles.isEmpty()) return
         val outDir = intent.data?.let { AppServices.resolveDocumentTree(it)}
         if (outDir != null) {
             saveFilesToDisk(outDir, pendingSaveFiles.map { File(it) })
@@ -137,9 +137,12 @@ class PatchedViewModel : ViewModel() {
     fun showDetails(items: List<ApkFileData>) {
         if (items.isEmpty()) return
         viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO) {
+            progressState.postValue(true)
             ApkUtil.getApkDetails(items.take(4).map { File(it.path) }).let {
                 dialogEvent.post(it)
             }
+        }.invokeOnCompletion {
+            progressState.postValue(false)
         }
     }
 
@@ -149,8 +152,8 @@ class PatchedViewModel : ViewModel() {
             val file = File(item.path)
             val conflicted = ApkUtil.getConflictedApps(file)
             if (conflicted.isEmpty() || confirmationEvent.ask(null,
-                    "Apps with different signatures were found, installation may fail.\n" +
-                            "Please uninstall these first:\n" + "[${conflicted.values.joinToString(", ")}]",
+                    "Installation may fail due to conflicting apk signatures with the following apps:\n" +
+                            "[${conflicted.values.joinToString(", ")}]",
                     "Install Anyway"
                 )) {
                 installEvent.post(file)

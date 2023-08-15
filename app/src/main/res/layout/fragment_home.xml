@@ -185,7 +185,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginTop="@dimen/secondary_item_gap"
-                    android:backgroundTint="@android:color/holo_red_light"
+                    android:backgroundTint="@color/warning_color"
                     app:strokeWidth="0dp"
                     android:visibility="gone">
                     <com.google.android.material.textview.MaterialTextView

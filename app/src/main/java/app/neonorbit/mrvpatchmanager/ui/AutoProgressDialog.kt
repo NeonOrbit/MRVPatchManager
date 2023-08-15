@@ -37,7 +37,7 @@ class AutoProgressDialog : DialogFragment() {
             .setTitle(arguments?.getString(TITLE))
             .setView(binding.root)
             .setNegativeButton(getString(android.R.string.cancel)) { _,_->
-                listener?.onCancel()
+                listener?.onProgressCancelled()
             }.create()
     }
 
@@ -47,7 +47,7 @@ class AutoProgressDialog : DialogFragment() {
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        listener?.onCancel()
+        listener?.onProgressCancelled()
     }
 
     private fun setTitle(title: String) {
@@ -59,7 +59,7 @@ class AutoProgressDialog : DialogFragment() {
     }
 
     interface OnCancelListener {
-        fun onCancel()
+        fun onProgressCancelled()
     }
 
     private val listener: OnCancelListener? get() = parentFragment?.let {

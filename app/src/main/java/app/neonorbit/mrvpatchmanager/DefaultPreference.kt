@@ -5,7 +5,7 @@ import app.neonorbit.mrvpatchmanager.keystore.KeystoreData
 import app.neonorbit.mrvpatchmanager.ui.settings.PreferenceAdvancedFragment
 import app.neonorbit.mrvpatchmanager.ui.settings.PreferenceFragment
 
-@Suppress("unused")
+@Suppress("Unused", "SameParameterValue")
 object DefaultPreference {
     private val preferences: SharedPreferences get() = AppServices.preferences
 
@@ -21,7 +21,7 @@ object DefaultPreference {
     fun isFixConflictEnabled(): Boolean = getBoolean(KEY_PREF_FIX_CONFLICT)
     fun isPackageMaskEnabled(): Boolean = getBoolean(KEY_PREF_MASK_PACKAGE)
     fun isFallbackModeEnabled(): Boolean = getBoolean(KEY_PREF_FALLBACK_MODE)
-    fun getExtraModules(): List<String>? = getString(KEY_PREF_EXTRA_MODULES)?.split(',')
+    fun getExtraModules(): List<String>? = getStringList(KEY_PREF_EXTRA_MODULES, ',')
     fun getCustomKeystore(): KeystoreData? = getString(KEY_PREF_CUSTOM_KEYSTORE)?.parseJson()
     fun getPreferredABI(): String = getString(KEY_PREF_APK_ABI_TYPE).let {
         if (it != null && it != PreferenceAdvancedFragment.APK_ABI_AUTO) it else AppConfig.DEVICE_ABI
@@ -34,6 +34,10 @@ object DefaultPreference {
     fun setString(key: String, value: String?) {
         if (value == null) remove(key)
         else preferences.edit().putString(key, value).apply()
+    }
+
+    private fun getStringList(key: String, del: Char): List<String>? {
+        return getString(key)?.takeIf { it.isNotEmpty() }?.split(del)
     }
 
     private fun getBoolean(key: String): Boolean {

@@ -32,7 +32,7 @@ object AppServices {
     @WorkerThread
     fun isNetworkOnline() = SystemServices.Network.isOnline(application)
 
-    fun getAppCacheSize() = application.cacheDir.size()
+    fun getAppCacheSize() = application.cacheDir.totalSize()
 
     fun clearAppCache() = application.cacheDir.deleteRecursively()
 

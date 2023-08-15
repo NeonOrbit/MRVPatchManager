@@ -8,12 +8,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,7 +23,6 @@ import app.neonorbit.mrvpatchmanager.glide.RecyclerPreloadProvider
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import app.neonorbit.mrvpatchmanager.ui.ConfirmationDialog
 import app.neonorbit.mrvpatchmanager.util.AppUtil
-import app.neonorbit.mrvpatchmanager.withLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
 import com.bumptech.glide.util.ViewPreloadSizeProvider
@@ -37,7 +35,7 @@ class PatchedFragment : Fragment(),
     private var viewModel: PatchedViewModel? = null
     private var tracker: SelectionTracker<Long>? = null
     private var actionMode: ActionMode? = null
-    private var saveDirPicker: ActivityResultLauncher<Intent>? = null
+    private lateinit var saveDirPicker: ActivityResultLauncher<Intent>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,8 +44,8 @@ class PatchedFragment : Fragment(),
     ): View {
         binding = FragmentPatchedBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this)[PatchedViewModel::class.java]
-        saveDirPicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            viewModel?.onSaveDirectoryPicked(it.data)
+        saveDirPicker = registerForActivityResult(StartActivityForResult()) { result ->
+            result?.data?.let { viewModel?.onSaveDirectoryPicked(it) }
         }
         binding!!.progressBar.isVisible = true
 
@@ -72,64 +70,54 @@ class PatchedFragment : Fragment(),
         )
         recyclerView.addOnScrollListener(viewPreLoader)
 
-        initializeFragment(binding!!, viewModel!!)
+        initializeFragment()
         viewModel?.reloadPatchedApks()
         return binding!!.root
     }
 
-    private fun initializeFragment(binding: FragmentPatchedBinding, model: PatchedViewModel) {
-        model.patchedApkList.observe(viewLifecycleOwner) {
+    private fun initializeFragment() {
+        viewModel!!.patchedApkList.observe(viewLifecycleOwner) {
             recyclerAdapter?.reloadItems(it)
-            binding.progressBar.isVisible = false
-            binding.emptyView.isVisible = it.isEmpty()
-            binding.swipeRefreshLayout.isRefreshing = false
+            binding!!.progressBar.isVisible = false
+            binding!!.emptyView.isVisible = it.isEmpty()
+            binding!!.swipeRefreshLayout.isRefreshing = false
         }
 
-        model.progressState.observe(viewLifecycleOwner) {
-            binding.progressBar.isVisible = it
+        viewModel!!.progressState.observe(viewLifecycleOwner) {
+            binding!!.progressBar.isVisible = it
         }
 
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            model.dialogEvent.observe { message ->
-                AppUtil.show(requireContext(), message)
-            }
+        viewModel!!.dialogEvent.observeOnUI(viewLifecycleOwner) { message ->
+            AppUtil.show(requireContext(), message)
         }
 
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            model.intentEvent.observe { intent ->
-                startActivity(intent)
-            }
+        viewModel!!.intentEvent.observeOnUI(viewLifecycleOwner) { intent ->
+            startActivity(intent)
         }
 
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            model.installEvent.observe { file ->
-                AppInstaller.install(requireContext(), file)
-            }
+        viewModel!!.installEvent.observeOnUI(viewLifecycleOwner) { file ->
+            AppInstaller.install(requireContext(), file)
         }
 
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            model.saveFilesEvent.observe { intent ->
-                saveDirPicker?.launch(intent)
-            }
+        viewModel!!.saveFilesEvent.observeOnUI(viewLifecycleOwner) { intent ->
+            saveDirPicker.launch(intent)
         }
 
-        viewLifecycleOwner.withLifecycle(Lifecycle.State.STARTED) {
-            model.confirmationEvent.observe { event ->
-                ConfirmationDialog.show(
-                    this@PatchedFragment, event.title, event.message, event.action
-                )
-            }
+        viewModel!!.confirmationEvent.observeOnUI(viewLifecycleOwner) { event ->
+            ConfirmationDialog.show(
+                this@PatchedFragment, event.title, event.message, event.action
+            )
         }
 
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            model.reloadPatchedApks()
+        binding!!.swipeRefreshLayout.setOnRefreshListener {
+            viewModel!!.reloadPatchedApks()
         }
 
-        binding.swipeRefreshLayout.setColorSchemeColors(
+        binding!!.swipeRefreshLayout.setColorSchemeColors(
             requireContext().getColor(R.color.secondary_container_foreground)
         )
 
-        binding.swipeRefreshLayout.setProgressBackgroundColorSchemeColor(
+        binding!!.swipeRefreshLayout.setProgressBackgroundColorSchemeColor(
             requireContext().getColor(R.color.secondary_container)
         )
     }
@@ -161,35 +149,18 @@ class PatchedFragment : Fragment(),
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.selectAll -> {
-                recyclerAdapter?.let { adapter ->
-                    tracker?.setItemsSelected(adapter.getItemIds(), true)
-                    adapter.refresh()
-                }
-                true
+            R.id.selectAll -> recyclerAdapter?.let { adapter ->
+                tracker?.setItemsSelected(adapter.getItemIds(), true)
+                adapter.refresh()
             }
-            R.id.save -> {
-                viewModel?.saveSelectedApks(getSelectedFiles())
-                tracker?.clearSelection()
-                true
-            }
-            R.id.share -> {
-                viewModel?.shareSelectedApks(getSelectedFiles())
-                tracker?.clearSelection()
-                true
-            }
-            R.id.delete -> {
-                viewModel?.deleteSelectedApks(getSelectedFiles())
-                tracker?.clearSelection()
-                true
-            }
-            R.id.details -> {
-                viewModel?.showDetails(getSelectedFiles())
-                tracker?.clearSelection()
-                true
-            }
-            else -> false
-        }
+            R.id.save -> viewModel?.saveSelectedApks(getSelectedFiles())
+            R.id.share -> viewModel?.shareSelectedApks(getSelectedFiles())
+            R.id.delete -> viewModel?.deleteSelectedApks(getSelectedFiles())
+            R.id.details -> viewModel?.showDetails(getSelectedFiles())
+            else -> null
+        }?.let {
+            if (item.itemId != R.id.selectAll) tracker?.clearSelection()
+        } != null
     }
 
     private fun getSelectedFiles(): List<ApkFileData> {

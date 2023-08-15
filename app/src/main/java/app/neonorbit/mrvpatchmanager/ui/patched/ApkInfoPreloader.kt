@@ -50,22 +50,20 @@ class ApkInfoPreloader(private val lifecycleOwner: LifecycleOwner,
         if (onReload) return
         else onReload = true
         requests.clear()
-        lifecycleScope.launch {
-            preloadJob?.cancel()
+        preloadJob?.cancel()
+        lifecycleScope.launch(Dispatchers.Main.immediate) {
             mutex.withLock {
-                withContext(Dispatchers.Main) {
-                    items.clear()
-                    cached.clear()
-                    items.addAll(dataSource)
-                    onReload = false
-                }
+                items.clear()
+                cached.clear()
+                items.addAll(dataSource)
+                onReload = false
             }
             triggerPreload()
         }
     }
 
     private fun enqueue(view: TextView, position: Int) {
-        view.text = items[position].version
+        view.placeholder(position)
         requests[view] = position
         if (!onReload) triggerPreload()
     }
@@ -116,6 +114,10 @@ class ApkInfoPreloader(private val lifecycleOwner: LifecycleOwner,
                 it.key?.text = info
             } != null
         }
+    }
+
+    private fun TextView.placeholder(position: Int) {
+        text = items.getOrNull(position)?.version
     }
 
     private suspend fun runOnUI(block: suspend () -> Unit) {

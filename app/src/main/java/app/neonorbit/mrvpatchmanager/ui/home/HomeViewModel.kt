@@ -22,7 +22,7 @@ import app.neonorbit.mrvpatchmanager.post
 import app.neonorbit.mrvpatchmanager.postNow
 import app.neonorbit.mrvpatchmanager.remote.GithubService
 import app.neonorbit.mrvpatchmanager.repository.ApkRepository
-import app.neonorbit.mrvpatchmanager.toSize
+import app.neonorbit.mrvpatchmanager.toSizeString
 import app.neonorbit.mrvpatchmanager.toTempFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -47,6 +47,7 @@ class HomeViewModel : ViewModel() {
     val messageEvent = SingleEvent<String>()
     val installEvent = SingleEvent<File>()
     val uninstallEvent = SingleEvent<Set<String>>()
+    val apkPickerEvent = SingleEvent<Intent>()
     val appPickerEvent = SingleEvent<List<AppFileData>>()
     val confirmationEvent = ConfirmationEvent()
 
@@ -73,7 +74,9 @@ class HomeViewModel : ViewModel() {
     )
     private var currentOptions: DefaultPatcher.Options = getPatcherOptions()
     private val preferredAbi: String get() = DefaultPreference.getPreferredABI()
+    val hideModuleWarn get() = DefaultPreference.getExtraModules() != null
 
+    private var skipCheck = false
     private var patchingJob: Job? = null
 
     private val moduleInfoIntent: Intent by lazy {
@@ -144,7 +147,7 @@ class HomeViewModel : ViewModel() {
         if (patchingJob != null) {
             messageEvent.post(viewModelScope, "A patching task is already in progress.")
         } else if (storage) {
-            intentEvent.post(viewModelScope, filePickerIntent)
+            apkPickerEvent.post(viewModelScope, filePickerIntent)
         } else {
             viewModelScope.launch {
                 appPickerEvent.post(ApkUtil.getInstalledAppList())
@@ -169,6 +172,7 @@ class HomeViewModel : ViewModel() {
             patchingJob?.cancel()
             return
         }
+        skipCheck = false
         var manual: File? = null
         currentOptions = getPatcherOptions()
         viewModelScope.launch(Dispatchers.Default + catcher) {
@@ -209,40 +213,11 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun checkMaskPackage(app: AppType? = null, file: File? = null): Boolean {
-        if (currentOptions.maskPackage && !(ApkUtil.isMessenger(app) || ApkUtil.isMessenger(file))) {
-            messageEvent.post("!!NOT ALLOWED!! 'Mask package name' option is currently enabled, " +
-                    "only Messenger is allowed to be patched in this mode."
-            )
-            progressStatus.emit(null)
-            return false
-        }
-        return true
-    }
-
-    private suspend fun checkPreconditions(file: File, isManual: Boolean): Boolean {
-        if (!checkMaskPackage(file = file)) return false
-        if (isManual && ApkUtil.isPatched(file)) {
-            messageEvent.post("The selected apk has already been patched.")
-            return false
-        }
-        val passed = !currentOptions.fixConflict || ApkUtil.isRecommendedForResolveConflicts(file) || confirmationEvent.ask(
-            "'Resolve apk conflicts' option is currently enabled, there's no need to patch any other apps besides Facebook and Messenger. " +
-                    "Patch anyway?"
-        )
-        if (!isManual || !passed) return passed
-        return ApkUtil.verifyFbSignature(file, false) ||
-                confirmationEvent.ask("Warning!", "The selected apk is either not original or has already been patched, patch anyway?") &&
-                (!ApkUtil.hasLatestMrvSignedApp(file, currentOptions.customKeystore?.keySignature) ||
-                        confirmationEvent.ask("Already on the latest version, patch anyway?")
-                )
-    }
-
     private suspend fun patchApk(input: File): File? {
         val patched = AppConfig.getPatchedApkFile(input) ?: throw Exception(
             "Failed to retrieve apk file info"
         )
-        if (patched.exists() && !confirmationEvent.ask(
+        if (!skipCheck && patched.exists() && !confirmationEvent.ask(
                 "${patched.name} already exists in the patched apk list, patch again?"
             )) {
             progressStatus.emit(null)
@@ -280,8 +255,9 @@ class HomeViewModel : ViewModel() {
                 }
                 is DownloadStatus.FETCHED -> {
                     version = status.version
-                    if (ApkUtil.hasLatestMrvSignedApp(type.getPackage(), version, customSig) &&
-                        !confirmationEvent.ask("Already on the latest version, download anyway?")) {
+                    if (ApkUtil.hasLatestMrvSignedApp(type.getPackage(), version, customSig) && !confirmationEvent.ask(
+                            "Already on the latest version, download anyway?"
+                    ).also { skipCheck = it }) {
                         coroutineContext[Job]?.cancel() ?: throw CancellationException()
                     }
                 }
@@ -293,7 +269,7 @@ class HomeViewModel : ViewModel() {
                         progressTracker.emit(ProgressTrack())
                     } else {
                         val percent = getPercentage(status.current, status.total)
-                        val details = "${status.current.toSize()}/${status.total.toSize()}"
+                        val details = "${status.current.toSizeString()}/${status.total.toSizeString()}"
                         progressTracker.emit(ProgressTrack(percent, details))
                     }
                 }
@@ -340,13 +316,46 @@ class HomeViewModel : ViewModel() {
         val conflicted = ApkUtil.getConflictedApps(file)
         if (conflicted.isEmpty()) {
             if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
-        } else if (confirmationEvent.ask(msg = "Apps with different signatures were found.\n" +
-                    "Please uninstall these first:\n" + "[${conflicted.values.joinToString(", ")}]",
+        } else if (confirmationEvent.ask(msg = "Apps with different signatures have been detected.\n" +
+                    "Please uninstall the following apps first:\n" + "[${conflicted.values.joinToString(", ")}]",
                 action = "Uninstall")
             ) {
             uninstallEvent.post(conflicted.keys)
             if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
         }
+    }
+
+    private suspend fun checkMaskPackage(app: AppType? = null, file: File? = null): Boolean {
+        if (currentOptions.maskPackage && !(ApkUtil.isMessenger(app) || ApkUtil.isMessenger(file))) {
+            messageEvent.post("!!NOT ALLOWED!! 'Mask package name' option is currently enabled, " +
+                    "only Messenger is allowed to be patched in this mode."
+            )
+            progressStatus.emit(null)
+            return false
+        }
+        return true
+    }
+
+    private suspend fun checkPreconditions(file: File, isManual: Boolean): Boolean {
+        if (!checkMaskPackage(file = file)) return false
+        if (isManual && ApkUtil.isPatched(file)) {
+            messageEvent.post("The selected apk has already been patched.")
+            return false
+        }
+        val passed = !currentOptions.fixConflict || ApkUtil.isRecommendedForResolveConflicts(file) || confirmationEvent.ask(
+            "'Resolve apk conflicts' option is currently enabled, " +
+                    "there's no need to patch any other apps besides Facebook and Messenger. " +
+                    "Patch anyway?"
+        ).also { skipCheck = it }
+        if (!isManual || !passed) return passed
+        if (!ApkUtil.verifyFbSignature(file, false)) {
+            return confirmationEvent.ask("Warning!",
+                "The selected apk is either not original or has already been patched, proceed anyway?"
+            ).also { skipCheck = it }
+        }
+        return skipCheck || !ApkUtil.hasLatestMrvSignedApp(file, currentOptions.customKeystore?.keySignature) || confirmationEvent.ask(
+            "Already on the latest version, patch anyway?"
+        ).also { skipCheck = it }
     }
 
     private fun getPercentage(current: Long, total: Long): Int {

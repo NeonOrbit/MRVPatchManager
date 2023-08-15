@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-class SingleEvent<T> {
+class SingleEvent<T> : ChannelEvent<T> {
     private val channel = Channel<T>(Channel.CONFLATED)
 
     suspend fun post(event: T) {
@@ -19,7 +19,7 @@ class SingleEvent<T> {
         }
     }
 
-    suspend fun observe(observer: FlowCollector<T>) {
+    override suspend fun observe(observer: FlowCollector<T>) {
         channel.receiveAsFlow().collect(observer)
     }
 }

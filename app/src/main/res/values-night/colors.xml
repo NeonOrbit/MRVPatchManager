@@ -32,7 +32,7 @@
     <color name="secondary_button_stroke">#0D7E7D</color>
 
     <color name="notice_color">#2D4E49</color>
-    <color name="warning_color">#656232</color>
+    <color name="warning_color">#DE643D</color>
     <color name="primary_card_stroke">#455754</color>
     <color name="pale_icon_foreground">#5E7872</color>
 </resources>
