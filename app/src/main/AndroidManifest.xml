@@ -11,7 +11,11 @@
         <package android:name="com.facebook.orca" />
         <package android:name="com.facebook.katana" />
         <package android:name="com.facebook.lite" />
+        <package android:name="com.facebook.mlite" />
         <package android:name="com.facebook.pages.app" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.instagram.lite" />
+        <package android:name="mrv.masked.com.facebook.orca" />
         <package android:name="app.neonorbit.chatheadenabler" />
     </queries>
 
