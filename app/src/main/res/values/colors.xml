@@ -22,12 +22,18 @@
 
     <color name="surface_foreground">#315752</color>
     <color name="surface_foreground_variant">#3F6863</color>
-    <color name="surface_background_variant">#EDF8F7</color>
+    <color name="surface_background_variant">#DCEBE6</color>
 
     <color name="primary_container">#B4E4E0</color>
     <color name="primary_container_foreground">#598781</color>
     <color name="secondary_container">#8ECFCF</color>
     <color name="secondary_container_foreground">#315752</color>
+
+    <color name="surface_container_lowest">#FFFFFFFF</color>
+    <color name="surface_container_low">#EEFDF8</color>
+    <color name="surface_container">#E8F7F2</color>
+    <color name="surface_container_high">#E2F1EC</color>
+    <color name="surface_container_highest">#DCEBE6</color>
 
     <color name="secondary_button_stroke">#A4CDCD</color>
 

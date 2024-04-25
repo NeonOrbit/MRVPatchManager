@@ -21,19 +21,27 @@
         <item name="colorOnSecondary">@color/secondary_foreground</item>
         <item name="colorSecondaryVariant">?colorPrimaryVariant</item>
 
-        <item name="colorPrimaryContainer">@color/primary_container</item>
-        <item name="colorOnPrimaryContainer">@color/primary_container_foreground</item>
-        <item name="colorSecondaryContainer">@color/secondary_container</item>
-        <item name="colorOnSecondaryContainer">@color/secondary_container_foreground</item>
-
         <item name="colorSurface">@color/background</item>
         <item name="colorOnSurface">@color/surface_foreground</item>
         <item name="colorSurfaceVariant">@color/surface_background_variant</item>
         <item name="colorOnSurfaceVariant">@color/surface_foreground_variant</item>
 
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/primary_container_foreground</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/secondary_container_foreground</item>
+
+        <item name="colorSurfaceContainerLowest">@color/surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/surface_container_highest</item>
+
         <item name="colorOutline">@color/outline</item>
         <item name="colorControlHighlight">@color/ripple_color</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
+
+        <item name="popupMenuBackground">@color/surface_container</item>
     </style>
 
     <style name="Theme.Splash" parent="Theme.SplashScreen">

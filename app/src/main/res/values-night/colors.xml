@@ -22,12 +22,18 @@
 
     <color name="surface_foreground">#C7EDE9</color>
     <color name="surface_foreground_variant">#C1DFDC</color>
-    <color name="surface_background_variant">#38403E</color>
+    <color name="surface_background_variant">#2E3E3B</color>
 
     <color name="primary_container">#024C3B</color>
     <color name="primary_container_foreground">#B0D8D3</color>
     <color name="secondary_container">#476B6B</color>
     <color name="secondary_container_foreground">#C4E6E2</color>
+
+    <color name="surface_container_lowest">#011109</color>
+    <color name="surface_container_low">#152522</color>
+    <color name="surface_container">#192926</color>
+    <color name="surface_container_high">#233330</color>
+    <color name="surface_container_highest">#2E3E3B</color>
 
     <color name="secondary_button_stroke">#0D7E7D</color>
 
