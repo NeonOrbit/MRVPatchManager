@@ -8,25 +8,25 @@ import java.security.KeyStore
 import java.security.UnrecoverableKeyException
 
 object KeystoreManager {
-    fun getVerifiedData(file: File, password: String, keyAlias: String?, aliasPassword: String?): KeystoreData {
+    fun readKeyData(input: File, path: String, password: String, inAlias: String?, inAliasPass: String?): KeystoreData {
         try {
             var sig: String? = null
-            var alias: String? = keyAlias
-            var alsPass: String? = aliasPassword
+            var alias: String? = inAlias
+            var aliasPass: String? = inAliasPass
             val keystore = KeyStore.getInstance(KeyStore.getDefaultType())
-            file.inputStream().use { input ->
-                keystore.load(input, password.toCharArray())
+            input.inputStream().use { stream ->
+                keystore.load(stream, password.toCharArray())
                 if (alias?.isNotBlank() != true) {
                     alias = keystore.aliases().nextElement()
                 }
-                if (alsPass?.isNotEmpty() != true) {
-                    alsPass = password
+                if (aliasPass?.isNotEmpty() != true) {
+                    aliasPass = password
                 }
                 if (!keystore.containsAlias(alias!!)) {
                     throw Exception("Wrong key alias: $alias")
                 }
                 try {
-                    keystore.getKey(alias!!, alsPass!!.toCharArray()) ?: throw Exception(
+                    keystore.getKey(alias!!, aliasPass!!.toCharArray()) ?: throw Exception(
                         "Failed to retrieve key entry!"
                     )
                     keystore.getCertificate(alias!!)?.encoded?.let {
@@ -36,7 +36,7 @@ object KeystoreManager {
                     throw Exception("Wrong alias password!")
                 }
             }
-            return KeystoreData(file.absolutePath, password, alias!!, alsPass!!, sig!!)
+            return KeystoreData(path, password, alias!!, aliasPass!!, sig!!)
         } catch (e: IOException) {
             throw when {
                 e.message?.contains("KeyStore integrity check failed") == true -> "Wrong keystore password!"

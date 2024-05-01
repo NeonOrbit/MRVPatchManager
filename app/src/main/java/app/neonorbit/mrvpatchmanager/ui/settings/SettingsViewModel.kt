@@ -6,19 +6,19 @@ import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppConfig
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPreference
-import app.neonorbit.mrvpatchmanager.copyTo
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.SingleEvent
 import app.neonorbit.mrvpatchmanager.keystore.KeystoreData
 import app.neonorbit.mrvpatchmanager.keystore.KeystoreInputData
 import app.neonorbit.mrvpatchmanager.keystore.KeystoreManager
 import app.neonorbit.mrvpatchmanager.post
-import kotlinx.coroutines.CoroutineExceptionHandler
+import app.neonorbit.mrvpatchmanager.toTempFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class SettingsViewModel : ViewModel() {
     val uriEvent = SingleEvent<Uri>()
@@ -59,22 +59,27 @@ class SettingsViewModel : ViewModel() {
 
     fun saveKeystore(input: KeystoreInputData?) {
         if (input == null) {
+            SettingsData.CUSTOM_KEY_FILE.delete()
             keystoreName.post(null, with = this)
             keystoreSaved.post(viewModelScope, null)
-            SettingsData.CUSTOM_KEY_FILE.delete()
             return
         }
-        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, t ->
-            SettingsData.CUSTOM_KEY_FILE.delete()
-            ksSaveFailed.post(viewModelScope, t.error)
-        }) {
-            input.uri.copyTo(SettingsData.CUSTOM_KEY_FILE).let { file ->
-                KeystoreManager.getVerifiedData(
-                    file, input.password, input.aliasName, input.aliasPassword
+        viewModelScope.launch(Dispatchers.IO) {
+            var keyfile: File? = null
+            try {
+                keyfile = input.uri.toTempFile()
+                KeystoreManager.readKeyData(
+                    keyfile, SettingsData.CUSTOM_KEY_FILE.absolutePath,
+                    input.password, input.aliasName, input.aliasPassword
                 ).let { data ->
-                    keystoreSaved.post(data)
+                    keyfile.copyTo(File(data.path), true)
                     keystoreName.emit(data.aliasName)
+                    keystoreSaved.post(data)
                 }
+            } catch (e: Exception) {
+                ksSaveFailed.post(viewModelScope, e.error)
+            } finally {
+                keyfile?.delete()
             }
         }
     }
