@@ -50,6 +50,7 @@ class KeystoreDialogFragment : DialogFragment() {
             .create().also {
                 it.setOnShowListener { _ ->
                     it.getButton(AlertDialog.BUTTON_POSITIVE)!!.setOnClickListener {
+                        if (getKeystore() == null) binding!!.keyfile.value = null
                         save()
                     }
                 }
