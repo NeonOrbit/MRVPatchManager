@@ -33,7 +33,7 @@
 
     <string name="text_confirmation">Confirmation</string>
     <string name="text_warning">Warning!</string>
-    <string name="text_default">Default</string>
+    <string name="text_reset">Reset</string>
     <string name="text_save">Save</string>
     <string name="text_saved">Saved</string>
     <string name="text_enable">Enable</string>

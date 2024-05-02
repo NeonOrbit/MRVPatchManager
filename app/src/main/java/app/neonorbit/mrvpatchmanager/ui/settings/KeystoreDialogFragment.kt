@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.databinding.KeystoreDialogBinding
 import app.neonorbit.mrvpatchmanager.keystore.KeystoreInputData
+import app.neonorbit.mrvpatchmanager.util.AppUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 
@@ -44,10 +45,13 @@ class KeystoreDialogFragment : DialogFragment() {
             .setView(binding!!.root)
             .setPositiveButton(getString(R.string.text_save), null)
             .setNegativeButton(getString(android.R.string.cancel), null)
-            .setNeutralButton(getString(R.string.text_default)) { _, _ ->
-                reset()
-            }
-            .create().also {
+            .setNeutralButton(getString(R.string.text_reset)) { _, _ ->
+                parentFragment?.let { fragment ->
+                    AppUtil.prompt(requireContext(), message = "Reset keystore to default?") {
+                        if (it && fragment is ResponseListener) fragment.onKeystoreInput(null)
+                    }
+                }
+            }.create().also {
                 it.setOnShowListener { _ ->
                     it.getButton(AlertDialog.BUTTON_POSITIVE)!!.setOnClickListener {
                         if (getKeystore() == null) binding!!.keyfile.value = null
@@ -73,12 +77,6 @@ class KeystoreDialogFragment : DialogFragment() {
                     )
                 )
             }
-        }
-    }
-
-    private fun reset() {
-        parentFragment?.let {
-            if (it is ResponseListener) it.onKeystoreInput(null)
         }
     }
 
