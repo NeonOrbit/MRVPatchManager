@@ -21,7 +21,7 @@ import java.io.File
 
 class ApkRemoteFileProvider {
     companion object {
-        val services = listOf(ApkMirrorService, ApkComboService, ApkPureService)
+        val services = listOf(ApkMirrorService, ApkComboService, ApkFlashService, ApkPureService)
         private const val CACHED_THRESHOLD = 20L * 60 * 60 * 1000
         private val TAG = ApkRemoteFileProvider::class.simpleName
     }

@@ -5,6 +5,8 @@ import app.neonorbit.mrvpatchmanager.network.parser.JsonParser
 import app.neonorbit.mrvpatchmanager.network.parser.XmlParser
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboVariantData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkFlashReleaseData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkFlashVariantData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorItemData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorIFormData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorReleaseData
@@ -69,6 +71,14 @@ interface ApiService {
     @GET
     @HtmlParser
     suspend fun getApkComboVariant(@Url url: String): Response<ApkComboVariantData>
+
+    @GET
+    @HtmlParser
+    suspend fun getApkFlashRelease(@Url url: String): Response<ApkFlashReleaseData>
+
+    @GET
+    @HtmlParser
+    suspend fun getApkFlashVariant(@Url url: String): Response<ApkFlashVariantData>
 
     @GET
     @HtmlParser
