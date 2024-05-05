@@ -1,5 +1,6 @@
 package app.neonorbit.mrvpatchmanager.remote.data
 
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.remote.ApkPureService
 import app.neonorbit.mrvpatchmanager.util.Utils
 import pl.droidsonroids.jspoon.annotation.Selector
@@ -16,19 +17,19 @@ class ApkPureReleaseData {
         @Selector(".ver-item-type", defValue = "")
         private lateinit var type: String
 
+        @Selector("a.ver_download_link", attr = "href")
+        private lateinit var href: String
+
         @Selector(".ver-item-n", defValue = "")
         lateinit var name: String
 
-        @Selector("a.ver_download_link", attr = "href")
-        private lateinit var _link: String
+        val version: String? get() = ApkConfigs.extractVersionName(name)
 
-        val link: String get() = Utils.absoluteUrl(
-            ApkPureService.BASE_URL, _link
-        )
+        val link: String get() = Utils.absoluteUrl(ApkPureService.BASE_URL, href)
 
-        val isVariant: Boolean get() = _link.contains("/variant/")
-
-        val isValidType: Boolean get() = type.trim().lowercase().let { it == "apk" || "xapk" !in it }
+        val isValidType: Boolean get() = type.lowercase().let {
+            "xapk" !in it || "apk" in it.replace("xapk", "")
+        }
 
         override fun toString(): String {
             return "type: $type, name: $name, link: $link"

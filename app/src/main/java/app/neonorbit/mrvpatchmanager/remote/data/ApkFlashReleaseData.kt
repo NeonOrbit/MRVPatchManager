@@ -1,5 +1,6 @@
 package app.neonorbit.mrvpatchmanager.remote.data
 
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.remote.ApkFlashService
 import app.neonorbit.mrvpatchmanager.util.Utils
 import pl.droidsonroids.jspoon.annotation.Selector
@@ -16,15 +17,15 @@ class ApkFlashReleaseData {
         @Selector(".vtype", defValue = "")
         private lateinit var type: String
 
+        @Selector("a.version", attr = "href")
+        private lateinit var href: String
+
         @Selector(".vername", defValue = "")
         lateinit var name: String
 
-        @Selector("a.version", attr = "href")
-        private lateinit var _link: String
+        val version: String? get() = ApkConfigs.extractVersionName(name)
 
-        val link: String get() = Utils.absoluteUrl(
-            ApkFlashService.BASE_URL, _link
-        )
+        val link: String get() = Utils.absoluteUrl(ApkFlashService.BASE_URL, href)
 
         val isValidType: Boolean get() = type.lowercase().let {
             "xapk" !in it || "apk" in it.replace("xapk", "")

@@ -6,17 +6,15 @@ import pl.droidsonroids.jspoon.annotation.Selector
 
 class ApkMirrorIFormData {
     @Selector(value = "#filedownload", attr = "action")
-    lateinit var action: String
+    private lateinit var action: String
 
     @Selector(value = "#filedownload > input[name=id]", attr = "value")
-    lateinit var id: String
+    private lateinit var id: String
 
     @Selector(value = "#filedownload > input[name=key]", attr = "value")
-    lateinit var key: String
+    private lateinit var key: String
 
-    val link: String get() = Utils.absoluteUrl(
-        ApkMirrorService.BASE_URL, "$action?id=$id&key=$key&forcebaseapk=true"
-    )
+    val link: String get() = Utils.absoluteUrl(ApkMirrorService.BASE_URL, "$action?id=$id&key=$key&forcebaseapk=true")
 
     override fun toString(): String = "link: $link"
 }

@@ -7,15 +7,14 @@ import app.neonorbit.mrvpatchmanager.remote.data.ApkComboReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboVariantData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkFlashReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkFlashVariantData
-import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorItemData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorIFormData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorItemData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorVariantData
-import app.neonorbit.mrvpatchmanager.remote.data.ApkPureItemData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkPureReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkPureVariantData
 import app.neonorbit.mrvpatchmanager.remote.data.GithubReleaseData
-import app.neonorbit.mrvpatchmanager.remote.data.RssFeedData
+import app.neonorbit.mrvpatchmanager.remote.data.ApkMirrorRssFeedData
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
@@ -41,12 +40,12 @@ interface ApiService {
     ): Response<ResponseBody>
 
     @GET
-    @XmlParser
-    suspend fun getRssFeed(@Url url: String): Response<RssFeedData>
-
-    @GET
     @JsonParser
     suspend fun getGithubRelease(@Url url: String): Response<GithubReleaseData>
+
+    @GET
+    @XmlParser
+    suspend fun getApkMirrorFeed(@Url url: String): Response<ApkMirrorRssFeedData>
 
     @GET
     @HtmlParser
@@ -87,8 +86,4 @@ interface ApiService {
     @GET
     @HtmlParser
     suspend fun getApkPureVariant(@Url url: String): Response<ApkPureVariantData>
-
-    @GET
-    @HtmlParser
-    suspend fun getApkPureItem(@Url url: String): Response<ApkPureItemData>
 }

@@ -15,9 +15,9 @@ interface ApkRemoteService {
         throwServiceException(type, ver)
     }
 
-    fun Exception.handleApkServiceException(type: AppType, ver: String?, skip: Boolean) {
+    fun Exception.handleApkServiceException(type: AppType, ver: String?, strict: Boolean) {
         this.handleUnrelated()
-        if (ver != null || !skip) throwServiceException(type, ver)
+        if (strict) throwServiceException(type, ver)
     }
 
     private fun Exception.handleUnrelated() {
@@ -27,7 +27,7 @@ interface ApkRemoteService {
     private fun Exception.throwServiceException(type: AppType, ver: String?): Nothing {
         this.message?.let { Utils.warn(it, this) }
         throw Exception(
-            ver?.let { "${type.getName()} apk not found for version '$it'"} ?:
+            ver?.let { "${type.getName()} version '$it' is not available"} ?:
             "Couldn't fetch apk info from the server"
         )
     }

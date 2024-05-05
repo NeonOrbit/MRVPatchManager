@@ -43,7 +43,7 @@ object ApkUtil {
 
     fun verifyFbSignatureWithVersion(file: File, version: String?): Boolean {
         return getPackageInfo(file, true)?.takeIf {
-            ApkConfigs.isValidVersion(it.versionName, version) &&
+            ApkConfigs.matchApkVersion(it.versionName, version) &&
             AppConfig.DEFAULT_FB_PACKAGES.contains(it.packageName)
         }?.matchSignature(AppConfig.DEFAULT_FB_SIGNATURE) == true
     }

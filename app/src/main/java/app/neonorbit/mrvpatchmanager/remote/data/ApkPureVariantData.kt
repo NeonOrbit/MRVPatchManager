@@ -1,44 +1,90 @@
 package app.neonorbit.mrvpatchmanager.remote.data
 
+import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.remote.ApkPureService
+import app.neonorbit.mrvpatchmanager.util.NullableElementConverter
 import app.neonorbit.mrvpatchmanager.util.Utils
 import org.jsoup.nodes.Element
-import pl.droidsonroids.jspoon.ElementConverter
+import pl.droidsonroids.jspoon.Jspoon
 import pl.droidsonroids.jspoon.annotation.Selector
 
 class ApkPureVariantData {
-    @Selector(".ver-info-m")
-    var variants: List<Variant> = listOf()
+    val variants: List<Variant> get() = _variants.ifEmpty { _fallback }
+
+    @Selector("main", attr = "html", converter = PrimaryExtractor::class)
+    private var _fallback: List<Variant> = listOf()
+
+    @Selector("#version-list", attr = "html", converter = VariantsExtractor::class)
+    private var _variants: List<Variant> = listOf()
 
     override fun toString(): String {
-        return "variants: $variants"
+        return "variants: $_variants, fallback: $_fallback"
     }
 
-    class Variant {
-        @Selector("p:contains(Screen DPI)", converter = OwnText::class)
-        var dpi: String = ""
+    data class Variant(val arch: String, val apks: List<Apk>) {
+        override fun toString(): String {
+            return "arch: $arch, apks: $apks"
+        }
+    }
 
-        @Selector("p:contains(Architecture)", converter = OwnText::class)
-        var arch: String = ""
+    class Apk {
+        @Selector(".name", defValue = "")
+        private lateinit var name: String
 
-        @Selector("p:contains(Requires Android)", converter = OwnText::class)
-        var min: String = ""
+        @Selector(".tag:contains(apk)", defValue = "")
+        private lateinit var type: String
 
-        @Selector("a.down", attr = "href")
-        private lateinit var _link: String
+        @Selector(".sdk:contains(android)", defValue = "")
+        private lateinit var sdk: String
 
-        val link: String get() = Utils.absoluteUrl(
-            ApkPureService.BASE_URL, _link
-        )
+        @Selector("a.download-btn", attr = "href")
+        private lateinit var href: String
+
+        val minSDk: Int? get() = ApkConfigs.extractMinSdk(sdk)
+
+        val version: String? get() = ApkConfigs.extractVersionName(name)
+
+        val link: String get() = Utils.absoluteUrl(ApkPureService.BASE_URL, href)
+
+        val isValidType: Boolean get() = type.trim().lowercase().let { it == "apk" || "xapk" !in it }
 
         override fun toString(): String {
-            return "dpi: $dpi, arch: $arch, min: $min, link: $link"
+            return "type: $type, version: $version, minSDk: $minSDk, link: $link"
+        }
+
+        companion object {
+            fun build(name: String, type: String, sdk: String, href: String) = Apk().apply {
+                this.name = name; this.type = type; this.sdk = sdk; this.href = href
+            }
         }
     }
 
-    object OwnText : ElementConverter<String> {
-        override fun convert(node: Element, selector: Selector): String {
-            return node.ownText()
+    object VariantsExtractor : NullableElementConverter<List<Variant>> {
+        private val apkParser = Jspoon.create().adapter(Apk::class.java)
+
+        override fun convert(node: Element?, selector: Selector): List<Variant> {
+            return node?.select(".group-title:matches(\\barm(?:eabi|64)-(?:v7a|v8a)\\b)")?.map { arch ->
+                val items = mutableListOf<Apk>()
+                var current = arch.nextElementSibling()
+                while (current?.hasClass("apk") == true) {
+                    items.add(apkParser.fromHtml(current.select(".apk").html()))
+                    current = current.nextElementSibling()
+                }
+                Variant(arch.text(), items)
+            } ?: listOf()
         }
+    }
+
+    object PrimaryExtractor : NullableElementConverter<List<Variant>> {
+        override fun convert(node: Element?, selector: Selector): List<Variant> = node?.let { main ->
+            val name = main.select(".info-content .info-sdk").firstOrNull()?.text()
+            val type = main.select(".info-content .info-tag").firstOrNull()?.text()
+            val arch = main.select(".more-info .info:contains(Architecture)").select(".value").firstOrNull()?.text()
+            val sdk = main.select(".more-info .info:contains(Requires Android)").select(".value").firstOrNull()?.text()
+            val href = main.select("a#download_link").ifEmpty { main.select("a.download-start-btn") }.firstOrNull()?.attr("href")
+            if (name != null && type != null && arch != null && href != null) {
+                listOf(Variant(arch, listOf(Apk.build(name, type, sdk ?: "", href))))
+            } else null
+        } ?: listOf()
     }
 }

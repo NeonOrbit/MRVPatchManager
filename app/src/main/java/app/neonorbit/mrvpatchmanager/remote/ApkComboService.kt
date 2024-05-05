@@ -9,7 +9,7 @@ import app.neonorbit.mrvpatchmanager.result
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
 
 object ApkComboService : ApkRemoteService {
-    const val BASE_URL = "https://www.apkcombo.com"
+    const val BASE_URL = "https://apkcombo.com"
     private const val RELEASE_URL = "old-versions"
     private const val TOKEN_URL = "$BASE_URL/checkin"
     private const val FB_APP_URL = "$BASE_URL/facebook/com.facebook.katana/$RELEASE_URL"
@@ -37,25 +37,26 @@ object ApkComboService : ApkRemoteService {
     }
 
     private suspend fun fetchInfo(from: String, abi: String, ver: String?): RemoteApkInfo {
-        val service = RetrofitClient.SERVICE
-        return service.get(TOKEN_URL).result().string().let { token ->
-            service.getApkComboRelease(from).result().releases.LOG("Releases").filter {
-                it.isValidType && ApkConfigs.isValidRelease(it.name) && ApkConfigs.isValidVersion(it.name, ver)
-            }.take(3).LOG("Filtered").selectApk(abi).LOG("Selected")?.let { apk ->
-                RemoteApkInfo("${apk.link}&$token", apk.versionName)
+        return RetrofitClient.SERVICE.get(TOKEN_URL).result().string().LOG("Token").let { token ->
+            RetrofitClient.SERVICE.getApkComboRelease(from).result().LOG("Response").releases.LOG("Releases").filter {
+                it.isValidType && ApkConfigs.isValidRelease(it.name) && ApkConfigs.matchApkVersion(it.version, ver)
+            }.LOG("Filtered").sortedWith(
+                ApkConfigs.compareLatest({ it.version })
+            ).LOG("Sorted").take(5).selectApk(abi).LOG("Selected")?.let { apk ->
+                RemoteApkInfo("${apk.link}&$token", apk.version)
             }
         } ?: throw Exception()
     }
 
     private suspend fun List<ApkComboReleaseData.Release>.selectApk(abi: String) = firstNotNullOfOrNull { release ->
-        RetrofitClient.SERVICE.getApkComboVariant(release.link).result().let { combo ->
-            combo.variants.LOG("Variants").firstOrNull {
+        RetrofitClient.SERVICE.getApkComboVariant(release.link).result().LOG("Response").let { data ->
+            data.variants.LOG("Variants").firstOrNull {
                 it.arch.lowercase().contains(abi)
             }.LOG("Filtered")?.apks.LOG("APKs")?.filter {
-                it.isValidType && ApkConfigs.isValidDPI(it.info) && ApkConfigs.isSupportedMinVersion(it.info)
+                it.isValidType && ApkConfigs.isSupportedDPI(it.dpi) && ApkConfigs.isSupportedMinSdk(it.minSDk)
             }.LOG("Filtered")?.let { filtered ->
-                filtered.firstOrNull { ApkConfigs.isPreferredDPI(it.info) } ?: filtered.firstOrNull()
-            } ?: combo.fallback?.takeIf { it.isValidType }.LOG("Fallback")
+                filtered.firstOrNull { ApkConfigs.isPreferredDPI(it.dpi) } ?: filtered.firstOrNull()
+            }
         }
     }
 }

@@ -5,15 +5,15 @@ import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.isConnectError
 import app.neonorbit.mrvpatchmanager.network.HttpSpec
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
-import app.neonorbit.mrvpatchmanager.remote.data.ApkPureItemData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkPureReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.result
+import app.neonorbit.mrvpatchmanager.util.Utils
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
 import kotlin.coroutines.cancellation.CancellationException
 
 object ApkPureService : ApkRemoteService {
-    const val BASE_URL = "https://www.apkpure.com"
+    const val BASE_URL = "https://apkpure.com"
     private const val RELEASE_URL = "versions"
     private const val FB_APP_URL = "$BASE_URL/facebook/com.facebook.katana/$RELEASE_URL"
     private const val FB_LITE_URL = "$BASE_URL/facebook-lite/com.facebook.lite/$RELEASE_URL"
@@ -37,53 +37,28 @@ object ApkPureService : ApkRemoteService {
 
     private suspend fun fetchInfo(type: AppType, from: String, abi: String, ver: String?): RemoteApkInfo? {
         return try {
-            RetrofitClient.SERVICE.getApkPureRelease(from).result().releases.LOG("Releases").filter {
-                it.isValidType && ApkConfigs.isValidRelease(it.name) && ApkConfigs.isValidVersion(it.name, ver)
-            }.take(5).LOG("Filtered").selectApk(abi).LOG("Selected")?.let {
+            RetrofitClient.SERVICE.getApkPureRelease(from).result().LOG("Response").releases.LOG("Releases").filter {
+                it.isValidType && ApkConfigs.isValidRelease(it.name) && ApkConfigs.matchApkVersion(it.version, ver)
+            }.LOG("Filtered").sortedWith(
+                ApkConfigs.compareLatest({ it.version })
+            ).LOG("Sorted").take(5).selectApk(abi).LOG("Selected")?.let {
                 RemoteApkInfo(it.link, it.version)
             } ?: throw Exception()
         } catch (exception: Exception) {
-            exception.handleApkServiceException(type, ver, abi == ApkConfigs.ARM_64)
+            exception.handleApkServiceException(type, ver, ver != null || abi != ApkConfigs.ARM_64)
+            Utils.warn("Falling back: ${server()}", exception)
             null
         }
     }
 
-    private suspend fun  List<ApkPureReleaseData.Release>.selectApk(abi: String) = firstNotNullOfOrNull {
-        if (it.isVariant) getItemFromVariants(it.link, abi) else getItemDirectly(it.link, abi)
-    }
-
-    private suspend fun  getItemFromVariants(from: String, abi: String): ApkPureItemData.Item? {
-        return RetrofitClient.SERVICE.getApkPureVariant(from).result().let { pure ->
-            pure.variants.LOG("Variants").filter {
-                ApkConfigs.isValidDPI(it.dpi) && ApkConfigs.isSupportedMinVersion(it.min)
-            }.let { variants ->
-                variants.filter {
-                    it.arch.lowercase().contains(abi)
-                }.ifEmpty {
-                    variants.filter { matchArch(it.arch, abi) }
-                }
-            }.LOG("Filtered").let { filtered ->
-                filtered.firstOrNull {
-                    ApkConfigs.isPreferredDPI(it.dpi)
-                }?.let { getItemDirectly(it.link, abi) } ?: filtered.firstNotNullOfOrNull {
-                    getItemDirectly(it.link, abi)
-                }
+    private suspend fun  List<ApkPureReleaseData.Release>.selectApk(abi: String) = firstNotNullOfOrNull { release ->
+        RetrofitClient.SERVICE.getApkPureVariant(release.link).result().LOG("Response").let { data ->
+            data.variants.LOG("Variants").firstOrNull {
+                it.arch.lowercase().contains(abi)
+            }.LOG("Filtered")?.apks.LOG("APKs")?.firstOrNull {
+                it.isValidType && ApkConfigs.isSupportedMinSdk(it.minSDk)
             }
         }
-    }
-
-    private suspend fun getItemDirectly(from: String, abi: String): ApkPureItemData.Item? {
-        return RetrofitClient.SERVICE.getApkPureItem(from).result().LOG("ItemData").let { data ->
-            data.item?.takeIf { it.isValid(abi) } ?: data.variants.firstOrNull { it.isValid(abi) }
-        }
-    }
-
-    private fun ApkPureItemData.Item.isValid(abi: String): Boolean {
-        return isValidType && matchArch(arch, abi) && ApkConfigs.isSupportedMinVersion(min)
-    }
-
-    private fun matchArch(arch: String, abi: String) = arch.lowercase().let { a ->
-        a.contains(abi) || (abi == ApkConfigs.ARM_64 && ApkConfigs.SUPPORTED_ABIs.any { a.contains(it) })
     }
 
     private suspend fun hardcodedInfo(id: String): RemoteApkInfo {

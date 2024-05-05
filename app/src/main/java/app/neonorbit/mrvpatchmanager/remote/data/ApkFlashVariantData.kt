@@ -2,7 +2,7 @@ package app.neonorbit.mrvpatchmanager.remote.data
 
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.remote.ApkFlashService
-import app.neonorbit.mrvpatchmanager.util.BypassedElementConverter
+import app.neonorbit.mrvpatchmanager.util.NullableElementConverter
 import app.neonorbit.mrvpatchmanager.util.Utils
 import org.jsoup.nodes.Element
 import pl.droidsonroids.jspoon.Jspoon
@@ -31,35 +31,35 @@ class ApkFlashVariantData {
         @Selector(".vtype", defValue = "")
         private lateinit var type: String
 
+        @Selector(".vername", defValue = "")
+        private lateinit var name: String
+
         @Selector(".description", defValue = "")
-        lateinit var info: String
+        private lateinit var info: String
 
         @Selector("a.variant", attr = "href")
-        private lateinit var _link: String
+        private lateinit var href: String
 
-        val link: String get() = Utils.absoluteUrl(
-            ApkFlashService.BASE_URL, _link
-        )
+        val dpi: String? get() = info.takeIf { "dpi" in it }
 
-        @Selector(".vername")
-        private var _versionName: String? = null
+        val minSDk: Int? get() = ApkConfigs.extractMinSdk(info)
 
-        val versionName: String? by lazy {
-            _versionName?.let { ApkConfigs.extractVersionName(it) }
-        }
+        val version: String? get() = ApkConfigs.extractVersionName(name)
+
+        val link: String get() = Utils.absoluteUrl(ApkFlashService.BASE_URL, href)
 
         val isValidType: Boolean get() = type.trim().lowercase().let { it == "apk" || "xapk" !in it }
 
         override fun toString(): String {
-            return "type: $type, versionName: $versionName, info: $info, link: $link"
+            return "type: $type, version: $version, dpi: $dpi, minSDk: $minSDk, link: $link"
         }
     }
 
-    object VariantsExtractor : BypassedElementConverter<List<Variant>> {
+    object VariantsExtractor : NullableElementConverter<List<Variant>> {
         private val apkParser = Jspoon.create().adapter(Apk::class.java)
 
         override fun convert(node: Element?, selector: Selector): List<Variant> {
-            return node?.select(".files-header:contains(arm)")?.map { arch ->
+            return node?.select(".files-header:matches(\\barm(?:eabi|64)-(?:v7a|v8a)\\b)")?.map { arch ->
                 Variant(
                     arch.text(),
                     arch.nextElementSibling().select(".variant").map {

@@ -62,7 +62,7 @@ fun Long.toSizeString(withSpace: Boolean = false): String {
     if (this <= 0) return "0${space}Bytes"
     val units = arrayOf("B", "KB", "MB", "GB", "TB")
     val digit = (log10(this.toDouble()) / log10(1024.0)).toInt()
-    return String.format("%.2f", (this.toDouble() / 1024.0.pow(digit))).let {
+    return String.format(Locale.ROOT, "%.2f", (this.toDouble() / 1024.0.pow(digit))).let {
         "$it${space}${units[digit]}"
     }
 }
@@ -91,10 +91,16 @@ fun Throwable.toNetworkError(isOnline: Boolean, length: Int = 100): String {
     return when {
         !isOnline -> "No internet connection"
         isConnectError -> "Couldn't connect to the server"
+        this is HttpException -> this.httpError
         else -> this.error
     }.take(length).let {
         if (it.length > length) "${it}..." else it
     }
+}
+
+val HttpException.httpError: String; get() = when (code()) {
+    429 -> "HTTP 429: Too Many Requests  [Please try again later]"
+    else -> error
 }
 
 fun String.compareVersion(other: String?): Int {
@@ -135,8 +141,8 @@ fun <T> MutableCollection<T>.removeFirstIf(predicate: (T) -> Boolean) {
 
 @Suppress("unused")
 fun String.capitalizeWords(): String = split(" ").joinToString(" ") {
-    it.lowercase(Locale.getDefault()).replaceFirstChar { word ->
-        if (word.isLowerCase()) word.titlecase(Locale.getDefault()) else it
+    it.lowercase().replaceFirstChar { word ->
+        if (word.isLowerCase()) word.uppercase() else it
     }
 }
 
