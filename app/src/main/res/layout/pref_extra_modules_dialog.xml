@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingVertical="5dp"
+    android:paddingHorizontal="25dp"
+    android:orientation="vertical">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pref_extra_modules_message"
+        android:textColor="?colorOnSecondary"
+        android:textAppearance="?textAppearanceListItemSecondary" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/pref_extra_modules_hint"
+        android:layout_marginTop="14dp"
+        app:boxStrokeWidthFocused="1dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@android:id/edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="15dp"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.button.MaterialButton
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/mpro_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="7dp"
+            android:insetTop="10dp"
+            android:insetBottom="10dp"
+            app:cornerRadius="10dp"
+            app:strokeWidth="0.5dp"
+            android:textSize="13sp"
+            style="@style/MaterialButtonSecondary"
+            android:text="@string/pref_extra_modules_messenger_pro_name" />
+
+        <com.google.android.material.button.MaterialButton
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/clear_button"
+            android:layout_alignParentEnd="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="7dp"
+            android:minWidth="70dp"
+            android:insetTop="10dp"
+            android:insetBottom="10dp"
+            app:cornerRadius="10dp"
+            app:strokeWidth="0.5dp"
+            android:textSize="13sp"
+            style="@style/MaterialButtonSecondary"
+            android:text="@string/text_clear" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

@@ -17,9 +17,11 @@
             android:icon="@drawable/ic_pref_advanced" />
         <EditTextPreference
             android:key="pref_extra_modules"
+            android:positiveButtonText="@string/text_save"
             android:title="@string/pref_extra_modules_title"
             android:summary="@string/pref_extra_modules_summery"
             android:dialogMessage="@string/pref_extra_modules_message"
+            android:dialogLayout="@layout/pref_extra_modules_dialog"
             android:icon="@drawable/ic_pref_advanced" />
     </PreferenceCategory>
     <Preference

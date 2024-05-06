@@ -58,6 +58,8 @@ object AppConfig {
     const val MODULE_LATEST_URL = "https://github.com/NeonOrbit/ChatHeadEnabler/releases/latest"
     const val MANAGER_LATEST_URL = "https://github.com/NeonOrbit/MRVPatchManager/releases/latest"
 
+    const val MESSENGER_PRO_PKG = "tn.amin.mpro2"
+
     @Suppress("UNCHECKED_CAST")
     val DEFAULT_FB_PACKAGES = ConstantsM.DEFAULT_FB_PACKAGES as Set<String>
     const val MESSENGER_PACKAGE = ConstantsM.DEFAULT_TARGET_PACKAGE

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MRVPatch Manager</string>
+    <string name="app_name" translatable="false">MRVPatch Manager</string>
     <string name="title_home">Home</string>
     <string name="title_patched">Patched</string>
     <string name="title_settings">Settings</string>
@@ -72,10 +72,12 @@
     <string name="pref_apk_abi_type_detected">"Auto detected: %s"</string>
     <string name="pref_custom_keystore_title">Custom keystore file</string>
     <string name="pref_custom_keystore_summery">Set a custom keystore for apk signing.</string>
+    <string name="pref_extra_modules_hint">Package Names</string>
     <string name="pref_extra_modules_title">Allow third-party modules</string>
     <string name="pref_extra_modules_summery">Allow third-party modules to be loaded.</string>
-    <string name="pref_extra_modules_message">Package names separated by comma:</string>
+    <string name="pref_extra_modules_message">Package names separated by commas:</string>
     <string name="pref_extra_modules_package">Packages: %s</string>
+    <string name="pref_extra_modules_messenger_pro_name">Messenger Pro</string>
     <string name="pref_custom_keystore_keystore">Keystore: %s</string>
 
     <string name="pref_action_group_title">Actions</string>

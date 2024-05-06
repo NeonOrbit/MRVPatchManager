@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.viewModels
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -68,6 +69,14 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
         findPreference<EditTextPreference>(KEY_PREF_EXTRA_MODULES)?.let { pref ->
             if (pref.text?.isNotEmpty() == true) {
                 pref.summary = getString(R.string.pref_extra_modules_package, pref.text)
+            }
+            pref.setOnBindEditTextListener { editText ->
+                editText.rootView.findViewById<Button>(R.id.clear_button).setOnClickListener {
+                    editText.setText("")
+                }
+                editText.rootView.findViewById<Button>(R.id.mpro_button).setOnClickListener {
+                    editText.setText(AppConfig.MESSENGER_PRO_PKG)
+                }
             }
             pref.setOnPreferenceChangeListener { _, value ->
                 val packages = value.toString().split(',').map { it.trim() }.filter { it.isNotEmpty() }
