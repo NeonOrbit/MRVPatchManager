@@ -3,7 +3,7 @@ package app.neonorbit.mrvpatchmanager.ui.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.error
@@ -85,10 +85,10 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun visitHelp() {
-        uriEvent.post(viewModelScope, Uri.parse(AppConfig.HELP_FORUM_URL))
+        uriEvent.post(viewModelScope, Uri.parse(AppConfigs.HELP_FORUM_URL))
     }
 
     fun visitGithub() {
-        uriEvent.post(viewModelScope, Uri.parse(AppConfig.GITHUB_REPO_URL))
+        uriEvent.post(viewModelScope, Uri.parse(AppConfigs.GITHUB_REPO_URL))
     }
 }

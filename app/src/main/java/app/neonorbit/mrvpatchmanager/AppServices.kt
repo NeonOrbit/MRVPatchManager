@@ -15,9 +15,9 @@ import kotlinx.coroutines.SupervisorJob
 import java.io.File
 
 object AppServices {
-    private val application: App get() = App.instance
+    val application: MRVPatchManager get() = MRVPatchManager.instance
 
-    val globalScope: CoroutineScope = CoroutineScope(SupervisorJob())
+    val globalScope: CoroutineScope by lazy { CoroutineScope(SupervisorJob()) }
 
     val preferences: SharedPreferences by lazy {
         PreferenceManager.getDefaultSharedPreferences(application)
@@ -59,6 +59,6 @@ object AppServices {
     fun resolveDocumentTree(uri: Uri) = DocumentFile.fromTreeUri(application, uri)
 
     fun resolveContentUri(file: File): Uri? {
-        return FileProvider.getUriForFile(application, AppConfig.FILE_PROVIDER_AUTH, file)
+        return FileProvider.getUriForFile(application, AppConfigs.FILE_PROVIDER_AUTH, file)
     }
 }

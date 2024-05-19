@@ -6,8 +6,8 @@ class RelaxedEmitter<in T>(
     private val collector: FlowCollector<T>,
     private val interval: Long
 ) {
-    private var emitted: Long = 0L
     private var skipped: T? = null
+    private var emittedAt: Long = 0L
 
     suspend fun emit(value: T) {
         if (skip()) {
@@ -15,7 +15,7 @@ class RelaxedEmitter<in T>(
         } else {
             skipped = null
             collector.emit(value)
-            emitted = System.currentTimeMillis()
+            emittedAt = System.currentTimeMillis()
         }
     }
 
@@ -24,6 +24,6 @@ class RelaxedEmitter<in T>(
     }
 
     private fun skip(): Boolean {
-        return (interval - (System.currentTimeMillis() - emitted)) > 0
+        return (interval - (System.currentTimeMillis() - emittedAt)) > 0
     }
 }

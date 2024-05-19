@@ -8,35 +8,37 @@ import android.content.pm.PackageManager.GET_SIGNATURES
 import android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES
 import android.content.pm.Signature
 import android.graphics.drawable.Drawable
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.compareVersion
 import app.neonorbit.mrvpatchmanager.data.AppFileData
+import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.util.Utils
 import java.io.File
 import java.util.StringJoiner
 
 object ApkUtil {
+    data class ApkSimpleInfo(val pkg: String, val name: String, val version: String)
+
     private fun PackageInfo.matchSignature(other: String): Boolean {
-        return this.getSignatures().any { signature ->
-            Signature(other) == signature
-        }
+        return this.getSignatures().matchSignature(Signature(other))
     }
 
     private fun PackageInfo.matchSignature(other: PackageInfo): Boolean {
-        return this.getSignatures().any { it in other.getSignatures() }
+        return this.getSignatures().matchSignature(other.getSignatures())
     }
 
+    private fun Array<Signature>.matchSignature(other: Signature) = any { it == other }
+    private fun Array<Signature>.matchSignature(others: Array<Signature>) = any { it in others }
+
     fun verifySignature(file: File, sig: String): Boolean {
-        return getSignatures(file).any { signature ->
-            Signature(sig) == signature
-        }
+        return getSignatures(file).matchSignature(Signature(sig))
     }
 
     fun verifyFbSignature(file: File, strict: Boolean = true): Boolean {
         return getPackageInfo(file, true)?.takeIf {
-            AppConfig.DEFAULT_FB_PACKAGES.contains(it.packageName)
-        }?.matchSignature(AppConfig.DEFAULT_FB_SIGNATURE).let {
+            AppConfigs.DEFAULT_FB_PACKAGES.contains(it.packageName)
+        }?.matchSignature(AppConfigs.DEFAULT_FB_SIGNATURE).let {
             if (strict) it == true else it != false
         }
     }
@@ -44,8 +46,8 @@ object ApkUtil {
     fun verifyFbSignatureWithVersion(file: File, version: String?): Boolean {
         return getPackageInfo(file, true)?.takeIf {
             ApkConfigs.matchApkVersion(it.versionName, version) &&
-            AppConfig.DEFAULT_FB_PACKAGES.contains(it.packageName)
-        }?.matchSignature(AppConfig.DEFAULT_FB_SIGNATURE) == true
+            AppConfigs.DEFAULT_FB_PACKAGES.contains(it.packageName)
+        }?.matchSignature(AppConfigs.DEFAULT_FB_SIGNATURE) == true
     }
 
     fun hasLatestMrvSignedApp(file: File, sig: String? = null): Boolean {
@@ -55,7 +57,7 @@ object ApkUtil {
     }
 
     fun hasLatestMrvSignedApp(pkg: String, version: String, sig: String? = null): Boolean {
-        val signature = sig ?: AppConfig.MRV_PUBLIC_SIGNATURE
+        val signature = sig ?: AppConfigs.MRV_PUBLIC_SIGNATURE
         return getPackageInfo(pkg, true)?.takeIf { installed ->
             try {
                 installed.matchSignature(signature)
@@ -117,7 +119,7 @@ object ApkUtil {
                 details.add("Apk: ${info.getAppName()}")
                 details.add("Status: ${if (info.isPatched()) "Patched" else "Signed Only"}")
                 details.add("Signature: ${
-                    if (info.matchSignature(AppConfig.MRV_PUBLIC_SIGNATURE)) "Default" else "Custom"
+                    if (info.matchSignature(AppConfigs.MRV_PUBLIC_SIGNATURE)) "Default" else "Custom"
                 }")
                 details.add("Version: ${info.versionName}")
                 details.add("Version Code: ${info.longVersionCode}")
@@ -140,36 +142,47 @@ object ApkUtil {
         return result.toString()
     }
 
-    @Suppress("Deprecation", "QueryPermissionsNeeded")
+    @Suppress("QueryPermissionsNeeded")
     fun getInstalledAppList() = AppServices.packageManager.getInstalledApplications(0).filter {
-        (it.packageName.startsWith("com.facebook.") && it.packageName !in AppConfig.FB_EXCLUDED_PKG_LIST) ||
-                it.packageName.startsWith("com.instagram.")
+        it.packageName.let { pkg ->
+            (pkg.startsWith("com.facebook.") && pkg !in AppConfigs.FB_EXCLUDED_PKG_LIST) || pkg.startsWith("com.instagram.")
+        }
     }.mapNotNull { getPackageInfo(it.packageName) }.sortedWith(Comparator.comparing {
-       AppConfig.FB_ORDERED_PKG_LIST.indexOf(it.packageName).takeIf { i -> i >= 0 } ?:
-       AppConfig.FB_ORDERED_PKG_LIST.size
+       AppConfigs.FB_ORDERED_PKG_LIST.indexOf(it.packageName).takeIf { i -> i >= 0 } ?: AppConfigs.FB_ORDERED_PKG_LIST.size
     }).map { AppFileData(it.getAppName(), File(it.apkPath)) }
 
     fun isPatched(file: File?) = file?.let { getPackageInfo(it) }?.isPatched() == true
-    fun isMessenger(app: AppType?) = app?.getPackage() == AppConfig.MESSENGER_PACKAGE
-    fun isMessenger(file: File?) = file?.let { getPackageInfo(it) }?.packageName == AppConfig.MESSENGER_PACKAGE
+
+    fun isMessenger(app: AppType?) = app?.getPackage() == AppConfigs.MESSENGER_PACKAGE
+
+    fun isMessenger(file: File?) = file?.let { getPackageInfo(it) }?.packageName == AppConfigs.MESSENGER_PACKAGE
+
     fun isRecommendedForResolveConflicts(file: File) = getPackageInfo(file)?.packageName?.let {
         it == AppType.FACEBOOK.getPackage() || it == AppType.MESSENGER.getPackage()
     } != false
 
-    private fun PackageInfo.isMasked() = packageName.startsWith(AppConfig.PACKAGE_MASKED_PREFIX)
-    private fun PackageInfo.isPatched() = applicationInfo?.appComponentFactory == AppConfig.PATCHED_APK_PROXY_CLASS
+    private fun PackageInfo.isMasked() = packageName.startsWith(AppConfigs.PACKAGE_MASKED_PREFIX)
+
+    private fun PackageInfo.isPatched() = applicationInfo?.appComponentFactory == AppConfigs.PATCHED_APK_PROXY_CLASS
+
     private val PackageInfo.minAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.minSdkVersion ?: 0)
+
     private val PackageInfo.maxAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.targetSdkVersion ?: 0)
+
     private val PackageInfo.apkPath get() = applicationInfo.publicSourceDir?.takeIf { it.isNotEmpty() } ?: applicationInfo.sourceDir
+
     private val PackageInfo.isPermissionMasked get() = permissions?.let { permissions ->
-        permissions.any { permission -> permission.name?.startsWith(AppConfig.PACKAGE_MASKED_PREFIX) == true }
+        permissions.any { permission -> permission.name?.startsWith(AppConfigs.PACKAGE_MASKED_PREFIX) == true }
     }
 
     private fun getRelatedPackages(pkg: String): Set<String> {
-        return if (pkg in AppConfig.DEFAULT_FB_PACKAGES) AppConfig.DEFAULT_FB_PACKAGES else setOf(pkg)
+        return if (pkg in AppConfigs.DEFAULT_FB_PACKAGES) AppConfigs.DEFAULT_FB_PACKAGES else setOf(pkg)
     }
 
-    private fun getSignatures(file: File): Array<out Signature> {
+    @Suppress("Deprecation")
+    private fun PackageInfo.getSignatures() = signingInfo?.apkContentsSigners ?: signatures
+
+    private fun getSignatures(file: File): Array<Signature> {
         return getPackageInfo(file, true)?.getSignatures() ?: throw Exception("Failed to read apk signature")
     }
 
@@ -188,12 +201,12 @@ object ApkUtil {
         file, getFlags(cert, meta, perm)
     )
 
-    @Suppress("Deprecation", "SameParameterValue")
+    @Suppress("SameParameterValue")
     private fun getPackageInfo(pkg: String, flags: Int): PackageInfo? = try {
         AppServices.packageManager.getPackageInfo(pkg, flags)
     } catch (_: PackageManager.NameNotFoundException) { null }
 
-    @Suppress("Deprecation", "SameParameterValue")
+    @Suppress("SameParameterValue")
     private fun getPackageInfo(file: File, flags: Int): PackageInfo? {
         return AppServices.packageManager.getPackageArchiveInfo(file.absolutePath, flags)
     }
@@ -208,14 +221,9 @@ object ApkUtil {
     }
 
     private fun PackageInfo.getAppName(): String {
-        return AppConfig.getFbAppName(packageName) ?:
+        return AppConfigs.getFbAppName(packageName) ?:
         AppServices.packageManager.getApplicationLabel(this.applicationInfo).let {
             if (it.startsWith(this.packageName)) this.packageName else it.toString()
         }
     }
-
-    @Suppress("Deprecation")
-    private fun PackageInfo.getSignatures() = signingInfo?.apkContentsSigners ?: signatures
-
-    data class ApkSimpleInfo(val pkg: String, val name: String, val version: String)
 }

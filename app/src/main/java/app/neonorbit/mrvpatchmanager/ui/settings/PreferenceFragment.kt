@@ -28,9 +28,7 @@ class PreferenceFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel = viewModels<SettingsViewModel>(
-            { requireParentFragment() }
-        ).value
+        viewModel = viewModels<SettingsViewModel>({ requireParentFragment() }).value
         viewModel!!.uriEvent.observeOnUI(viewLifecycleOwner) {
             uriLauncher.launchUrl(requireContext(), it)
         }

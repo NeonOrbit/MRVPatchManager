@@ -1,6 +1,6 @@
-package app.neonorbit.mrvpatchmanager.apk
+package app.neonorbit.mrvpatchmanager.data
 
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 
 enum class AppType {
     FACEBOOK,
@@ -10,10 +10,10 @@ enum class AppType {
     BUSINESS_SUITE;
 
     fun getName(): String {
-        return AppConfig.getFbAppName(this)
+        return AppConfigs.getFbAppName(this)
     }
 
     fun getPackage(): String {
-        return AppConfig.getFbAppPkg(this)
+        return AppConfigs.getFbAppPkg(this)
     }
 }

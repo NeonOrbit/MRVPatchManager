@@ -1,8 +1,8 @@
 package app.neonorbit.mrvpatchmanager.network
 
-import app.neonorbit.mrvpatchmanager.network.parser.HtmlParser
-import app.neonorbit.mrvpatchmanager.network.parser.JsonParser
-import app.neonorbit.mrvpatchmanager.network.parser.XmlParser
+import app.neonorbit.mrvpatchmanager.network.marker.HtmlMarker
+import app.neonorbit.mrvpatchmanager.network.marker.JsonMarker
+import app.neonorbit.mrvpatchmanager.network.marker.XmlMarker
 import okhttp3.ResponseBody
 import pl.droidsonroids.retrofit2.JspoonConverterFactory
 import retrofit2.Converter
@@ -13,7 +13,7 @@ import java.lang.reflect.Type
 class ConverterFactory : Converter.Factory() {
     companion object {
         val PARSERS = listOf(
-            XmlParser::class, HtmlParser::class, JsonParser::class
+            XmlMarker::class, HtmlMarker::class, JsonMarker::class
         )
     }
 
@@ -39,9 +39,9 @@ class ConverterFactory : Converter.Factory() {
             it.annotationClass in PARSERS
         }?.annotationClass?.let { parser ->
             return when (parser) {
-                XmlParser::class -> xml.responseBodyConverter(type, annotations, retrofit)
-                HtmlParser::class -> html.responseBodyConverter(type, annotations, retrofit)
-                JsonParser::class -> gson.responseBodyConverter(type, annotations, retrofit)
+                XmlMarker::class -> xml.responseBodyConverter(type, annotations, retrofit)
+                HtmlMarker::class -> html.responseBodyConverter(type, annotations, retrofit)
+                JsonMarker::class -> gson.responseBodyConverter(type, annotations, retrofit)
                 else -> null
             }
         }

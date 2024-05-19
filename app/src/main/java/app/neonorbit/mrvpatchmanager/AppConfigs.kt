@@ -3,15 +3,18 @@ package app.neonorbit.mrvpatchmanager
 import android.os.Build
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
-import app.neonorbit.mrvpatchmanager.apk.AppType
+import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.data.AppItemData
 import org.lsposed.lspatch.share.Constants
 import org.lsposed.lspatch.share.ConstantsM
 import java.io.File
 
-object AppConfig {
+object AppConfigs {
     const val APP_TAG = "MRVPatchManager"
-    const val FILE_PROVIDER_AUTH = "${BuildConfig.APPLICATION_ID}.file.provider"
+
+    const val MODULE_APK_NAME = "Module.apk"
+    const val MANAGER_APK_NAME = "Manager.apk"
+    const val MODULE_ASSET_NAME = "module.pkg"
 
     private const val DOWNLOAD_DIR_NAME = "download"
     private const val CACHE_TEMP_DIR_NAME = "temp_dir"
@@ -22,26 +25,29 @@ object AppConfig {
     const val MODULE_PACKAGE = "app.neonorbit.chatheadenabler"
     const val MANAGER_PACKAGE = "app.neonorbit.mrvpatchmanager"
 
-    const val MODULE_APK_NAME = "Module.apk"
-    const val MANAGER_APK_NAME = "Manager.apk"
-    const val MODULE_ASSET_NAME = "module.pkg"
+    const val FILE_PROVIDER_AUTH = "${BuildConfig.APPLICATION_ID}.file.provider"
 
-    val TEMP_DIR: File get() = AppServices.getCacheDir(CACHE_TEMP_DIR_NAME)
+    val TEMP_DIR: File
+        get() = AppServices.getCacheDir(CACHE_TEMP_DIR_NAME)
 
-    val DOWNLOAD_DIR: File get() = AppServices.getCacheDir(DOWNLOAD_DIR_NAME)
+    val DOWNLOAD_DIR: File
+        get() = AppServices.getCacheDir(DOWNLOAD_DIR_NAME)
 
-    val PATCHED_OUT_DIR: File get() = AppServices.getCacheDir(PATCHED_OUT_DIR_NAME)
+    val PATCHED_OUT_DIR: File
+        get() = AppServices.getCacheDir(PATCHED_OUT_DIR_NAME)
 
-    val PATCHED_APK_DIR: File get() = AppServices.getFilesDir(PATCHED_APK_DIR_NAME)
+    val PATCHED_APK_DIR: File
+        get() = AppServices.getFilesDir(PATCHED_APK_DIR_NAME)
 
-    val CUSTOM_KEYSTORE_FILE: File get() = File(AppServices.appFilesDir, CUSTOM_KEYSTORE_NAME)
+    val CUSTOM_KEYSTORE_FILE: File
+        get() = File(AppServices.appFilesDir, CUSTOM_KEYSTORE_NAME)
 
     fun getDownloadApkFile(type: AppType, targetVersion: String?) = File(DOWNLOAD_DIR, "${
-        type.getName() + if (targetVersion == null) "" else "-versioned"
+        type.getName().replace(' ', '-') + if (targetVersion == null) "" else "-versioned"
     }.apk")
 
     fun getPatchedApkFile(file: File) = ApkUtil.getApkSimpleInfo(file)?.let { info ->
-        (getFbAppName(info.pkg) ?: info.name.replace(' ', '-')) + "-v${info.version}.apk"
+        info.name.replace(' ', '-') + "-v${info.version}.apk"
     }?.let { name -> File(PATCHED_APK_DIR, name) }
 
     val DEVICE_ABI: String by lazy {
@@ -58,8 +64,6 @@ object AppConfig {
     const val MODULE_LATEST_URL = "https://github.com/NeonOrbit/ChatHeadEnabler/releases/latest"
     const val MANAGER_LATEST_URL = "https://github.com/NeonOrbit/MRVPatchManager/releases/latest"
 
-    const val MESSENGER_PRO_PKG = "tn.amin.mpro2"
-
     @Suppress("UNCHECKED_CAST")
     val DEFAULT_FB_PACKAGES = ConstantsM.DEFAULT_FB_PACKAGES as Set<String>
     const val MESSENGER_PACKAGE = ConstantsM.DEFAULT_TARGET_PACKAGE
@@ -69,35 +73,31 @@ object AppConfig {
     const val PATCHED_APK_CONFIG_PATH = Constants.CONFIG_ASSET_PATH
     const val PATCHED_APK_PROXY_CLASS = Constants.PROXY_APP_COMPONENT_FACTORY
 
-    fun getFbAppName(type: AppType): String {
-        return when(type) {
-            AppType.FACEBOOK -> "Facebook"
-            AppType.MESSENGER -> "Messenger"
-            AppType.FACEBOOK_LITE -> "Facebook-Lite"
-            AppType.MESSENGER_LITE -> "Messenger-Lite"
-            AppType.BUSINESS_SUITE -> "Business-Suite"
-        }
+    fun getFbAppName(type: AppType): String = when(type) {
+        AppType.FACEBOOK -> "Facebook"
+        AppType.MESSENGER -> "Messenger"
+        AppType.FACEBOOK_LITE -> "Facebook Lite"
+        AppType.MESSENGER_LITE -> "Messenger Lite"
+        AppType.BUSINESS_SUITE -> "Business Suite"
     }
 
-    fun getFbAppPkg(type: AppType): String {
-        return when(type) {
-            AppType.FACEBOOK -> "com.facebook.katana"
-            AppType.MESSENGER -> "com.facebook.orca"
-            AppType.FACEBOOK_LITE -> "com.facebook.lite"
-            AppType.MESSENGER_LITE -> "com.facebook.mlite"
-            AppType.BUSINESS_SUITE -> "com.facebook.pages.app"
-        }
+    fun getFbAppPkg(type: AppType): String = when(type) {
+        AppType.FACEBOOK -> "com.facebook.katana"
+        AppType.MESSENGER -> "com.facebook.orca"
+        AppType.FACEBOOK_LITE -> "com.facebook.lite"
+        AppType.MESSENGER_LITE -> "com.facebook.mlite"
+        AppType.BUSINESS_SUITE -> "com.facebook.pages.app"
     }
 
-    fun getFbAppName(pkg: String): String? {
-        return when(pkg) {
-            "com.facebook.katana" -> "Facebook"
-            "com.facebook.orca" -> "Messenger"
-            "com.facebook.lite" -> "Facebook-Lite"
-            "com.facebook.mlite" -> "Messenger-Lite"
-            "com.facebook.pages.app" -> "Business-Suite"
-            else -> null
-        }
+    fun getFbAppName(pkg: String): String? = when(pkg) {
+        "com.facebook.katana" -> "Facebook"
+        "com.facebook.orca" -> "Messenger"
+        "com.facebook.lite" -> "Facebook Lite"
+        "com.facebook.mlite" -> "Messenger Lite"
+        "com.facebook.pages.app" -> "Business Suite"
+        "com.instagram.android" -> "Instagram"
+        "com.instagram.lite" -> "Instagram Lite"
+        else -> null
     }
 
     val FB_APP_LIST by lazy {
@@ -113,4 +113,11 @@ object AppConfig {
         "com.facebook.katana", "com.facebook.orca", "com.facebook.lite", "com.facebook.mlite", "com.facebook.pages.app"
     )
     val FB_EXCLUDED_PKG_LIST = listOf("com.facebook.services", "com.facebook.system", "com.facebook.appmanager")
+
+    const val MESSENGER_PRO_PKG = "tn.amin.mpro2"
+    private const val MESSENGER_PRO_NAME = "MPro"
+
+    fun tagMessengerPro(pkg: String): String {
+        return if (pkg == MESSENGER_PRO_PKG) "$pkg ($MESSENGER_PRO_NAME)" else pkg
+    }
 }

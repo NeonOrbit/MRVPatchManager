@@ -3,17 +3,20 @@ package app.neonorbit.mrvpatchmanager.ui.home
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
+import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPatcher
 import app.neonorbit.mrvpatchmanager.DefaultPatcher.PatchStatus
 import app.neonorbit.mrvpatchmanager.DefaultPreference
+import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
-import app.neonorbit.mrvpatchmanager.apk.AppType
 import app.neonorbit.mrvpatchmanager.compareVersion
 import app.neonorbit.mrvpatchmanager.data.AppFileData
+import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
@@ -36,11 +39,12 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.StringJoiner
 import kotlin.coroutines.coroutineContext
 
 class HomeViewModel : ViewModel() {
     private val repository = ApkRepository()
-    val fbAppList = AppConfig.FB_APP_LIST
+    val fbAppList = AppConfigs.FB_APP_LIST
 
     val uriEvent = SingleEvent<Uri>()
     val intentEvent = SingleEvent<Intent>()
@@ -65,7 +69,7 @@ class HomeViewModel : ViewModel() {
         MutableStateFlow(VersionStatus(null, null))
     }
 
-    fun getPatcherOptions() = DefaultPatcher.Options(
+    private fun getPatcherOptions() = DefaultPatcher.Options(
         fixConflict = DefaultPreference.isFixConflictEnabled(),
         maskPackage = DefaultPreference.isPackageMaskEnabled(),
         fallbackMode = DefaultPreference.isFallbackModeEnabled(),
@@ -81,7 +85,7 @@ class HomeViewModel : ViewModel() {
 
     private val moduleInfoIntent: Intent by lazy {
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-            Uri.fromParts("package", AppConfig.MODULE_PACKAGE, null)
+            Uri.fromParts("package", AppConfigs.MODULE_PACKAGE, null)
         )
     }
 
@@ -108,7 +112,7 @@ class HomeViewModel : ViewModel() {
     fun reloadModuleStatus(force: Boolean = false) {
         if (force) GithubService.checkForUpdate()
         if (moduleStatus.value.current == null || force) {
-            val version = ApkUtil.getPrefixedVersionName(AppConfig.MODULE_PACKAGE)
+            val version = ApkUtil.getPrefixedVersionName(AppConfigs.MODULE_PACKAGE)
             if ((version?.compareVersion(moduleLatest) ?: 0) >= 0) {
                 moduleLatest = null
             }
@@ -124,8 +128,8 @@ class HomeViewModel : ViewModel() {
     }
 
     fun showModuleInfo() = intentEvent.post(viewModelScope, moduleInfoIntent)
-    fun visitModule() = uriEvent.post(viewModelScope, Uri.parse(AppConfig.MODULE_LATEST_URL))
-    fun visitManager() = uriEvent.post(viewModelScope, Uri.parse(AppConfig.MANAGER_LATEST_URL))
+    fun visitModule() = uriEvent.post(viewModelScope, Uri.parse(AppConfigs.MODULE_LATEST_URL))
+    fun visitManager() = uriEvent.post(viewModelScope, Uri.parse(AppConfigs.MANAGER_LATEST_URL))
 
     fun installModule(force: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO + catcher) {
@@ -214,7 +218,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private suspend fun patchApk(input: File): File? {
-        val patched = AppConfig.getPatchedApkFile(input) ?: throw Exception(
+        val patched = AppConfigs.getPatchedApkFile(input) ?: throw Exception(
             "Failed to retrieve apk file info"
         )
         if (!skipCheck && patched.exists() && !confirmationEvent.ask(
@@ -367,4 +371,16 @@ class HomeViewModel : ViewModel() {
     class ProgressTrack(val current: Int = -1, val details: String = "∞", percent: String = "∞") {
         val percent = if (percent.isEmpty() || current < 0) "∞" else "$current%"
     }
+
+    fun getNotice(): String? = getPatcherOptions().let { opt ->
+        StringJoiner("\n").apply {
+            if (opt.maskPackage) add(getEnabledString(R.string.pref_mask_package_title))
+            if (opt.fixConflict) add(getEnabledString(R.string.pref_fix_conflict_title))
+            if (opt.fallbackMode) add(getEnabledString(R.string.pref_fallback_mode_title))
+            opt.extraModules?.let { mods ->
+                add("[Modules] -> " + mods.joinToString(", ", "[", "]") { AppConfigs.tagMessengerPro(it) })
+            }
+        }.toString().takeIf { it.isNotEmpty() }
+    }
+    private fun getEnabledString(@StringRes resId: Int) = "[Enabled] -> [${AppServices.application.getString(resId)}]"
 }

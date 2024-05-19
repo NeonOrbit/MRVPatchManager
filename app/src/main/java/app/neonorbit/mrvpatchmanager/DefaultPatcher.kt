@@ -13,7 +13,7 @@ import java.io.File
 
 class DefaultPatcher(private val input: File, private val options: Options) {
     private val output: File by lazy {
-        File(AppConfig.PATCHED_OUT_DIR, input.name)
+        File(AppConfigs.PATCHED_OUT_DIR, input.name)
     }
 
     fun patch() = callbackFlow {
@@ -52,13 +52,13 @@ class DefaultPatcher(private val input: File, private val options: Options) {
     }
 
     private fun File.verify() = output.exists() && ApkUtil.verifySignature(
-        this, options.customKeystore?.keySignature ?: AppConfig.MRV_PUBLIC_SIGNATURE
+        this, options.customKeystore?.keySignature ?: AppConfigs.MRV_PUBLIC_SIGNATURE
     )
 
     private fun buildOptions() = ArrayList<String>(17).apply {
         add(input.absolutePath)
         add("--temp-dir")
-        add(AppConfig.TEMP_DIR.absolutePath)
+        add(AppConfigs.TEMP_DIR.absolutePath)
         add("--out-file")
         add(output.absolutePath)
         add("--force")

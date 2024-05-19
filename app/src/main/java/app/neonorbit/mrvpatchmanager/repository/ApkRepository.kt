@@ -1,6 +1,6 @@
 package app.neonorbit.mrvpatchmanager.repository
 
-import app.neonorbit.mrvpatchmanager.apk.AppType
+import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
 import app.neonorbit.mrvpatchmanager.error

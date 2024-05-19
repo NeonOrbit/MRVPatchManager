@@ -9,7 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.R
@@ -37,7 +37,7 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
             }
         }
         viewModel!!.keystoreSaved.observeOnUI(viewLifecycleOwner) { data ->
-            DefaultPreference.setString(KEY_PREF_CUSTOM_KEYSTORE, data?.toJson())
+            DefaultPreference.putString(KEY_PREF_CUSTOM_KEYSTORE, data?.toJson())
             KeystoreDialogFragment.finish(this@PreferenceAdvancedFragment)
             AppServices.showToast(getString(
                 if (data != null) R.string.text_saved else R.string.text_cleared
@@ -75,7 +75,7 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
                     editText.setText("")
                 }
                 editText.rootView.findViewById<Button>(R.id.mpro_button).setOnClickListener {
-                    editText.setText(AppConfig.MESSENGER_PRO_PKG)
+                    editText.setText(AppConfigs.MESSENGER_PRO_PKG)
                 }
             }
             pref.setOnPreferenceChangeListener { _, value ->
@@ -101,7 +101,7 @@ class PreferenceAdvancedFragment : PreferenceFragmentCompat(), KeystoreDialogFra
     private fun getAbiPrefSummery(value: String?): String {
         if (context == null) return value.toString()
         return if (value != null && value != getString(R.string.apk_abi_auto)) "ABI: $value"
-        else getString(R.string.pref_apk_abi_type_detected, AppConfig.DEVICE_ABI)
+        else getString(R.string.pref_apk_abi_type_detected, AppConfigs.DEVICE_ABI)
     }
 
     override fun onKeystoreInput(response: KeystoreInputData?) {

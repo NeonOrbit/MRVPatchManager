@@ -1,8 +1,8 @@
 package app.neonorbit.mrvpatchmanager.network
 
-import app.neonorbit.mrvpatchmanager.network.parser.HtmlParser
-import app.neonorbit.mrvpatchmanager.network.parser.JsonParser
-import app.neonorbit.mrvpatchmanager.network.parser.XmlParser
+import app.neonorbit.mrvpatchmanager.network.marker.HtmlMarker
+import app.neonorbit.mrvpatchmanager.network.marker.JsonMarker
+import app.neonorbit.mrvpatchmanager.network.marker.XmlMarker
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkComboVariantData
 import app.neonorbit.mrvpatchmanager.remote.data.ApkFlashReleaseData
@@ -40,50 +40,50 @@ interface ApiService {
     ): Response<ResponseBody>
 
     @GET
-    @JsonParser
+    @JsonMarker
     suspend fun getGithubRelease(@Url url: String): Response<GithubReleaseData>
 
     @GET
-    @XmlParser
+    @XmlMarker
     suspend fun getApkMirrorFeed(@Url url: String): Response<ApkMirrorRssFeedData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkMirrorRelease(@Url url: String): Response<ApkMirrorReleaseData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkMirrorVariant(@Url url: String): Response<ApkMirrorVariantData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkMirrorItem(@Url url: String): Response<ApkMirrorItemData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkMirrorInputForm(@Url url: String): Response<ApkMirrorIFormData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkComboRelease(@Url url: String): Response<ApkComboReleaseData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkComboVariant(@Url url: String): Response<ApkComboVariantData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkFlashRelease(@Url url: String): Response<ApkFlashReleaseData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkFlashVariant(@Url url: String): Response<ApkFlashVariantData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkPureRelease(@Url url: String): Response<ApkPureReleaseData>
 
     @GET
-    @HtmlParser
+    @HtmlMarker
     suspend fun getApkPureVariant(@Url url: String): Response<ApkPureVariantData>
 }

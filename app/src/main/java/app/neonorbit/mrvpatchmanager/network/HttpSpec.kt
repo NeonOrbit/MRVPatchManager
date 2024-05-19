@@ -17,6 +17,7 @@ object HttpSpec {
     object Code {
         const val NOT_MODIFIED = 304
         const val PARTIAL_CONTENT = 206
+        const val TOO_MANY_REQUESTS = 429
         const val RANGE_NOT_SATISFIABLE = 416
     }
 }

@@ -56,9 +56,9 @@ class ApkInfoPreloader(private val lifecycleOwner: LifecycleOwner,
                 items.clear()
                 cached.clear()
                 items.addAll(dataSource)
-                onReload = false
             }
             triggerPreload()
+            onReload = false
         }
     }
 

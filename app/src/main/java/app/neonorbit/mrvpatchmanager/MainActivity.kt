@@ -24,12 +24,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         this.installSplashScreen()
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater).also {
             setContentView(it.root)
             setSupportActionBar(it.toolbar)
         }
-
         val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment).let {
             (it as NavHostFragment).navController
         }
@@ -74,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.tutorial -> {
                 startActivity(Intent(
-                    Intent.ACTION_VIEW, Uri.parse(AppConfig.TUTORIAL_URL)
+                    Intent.ACTION_VIEW, Uri.parse(AppConfigs.TUTORIAL_URL)
                 ))
                 true
             }
@@ -83,25 +81,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showInstructionDialog() {
-        MaterialAlertDialogBuilder(this).setMessage(
-            getString(R.string.instructions)
-        ).show()
+        MaterialAlertDialogBuilder(this).setMessage(getString(R.string.instructions)).show()
     }
 
     private fun showAboutDialog() {
-        val adb = AboutDialogBinding.inflate(LayoutInflater.from(this), null, false)
-        adb.appTitle.text = getString(R.string.app_name)
-        adb.appVersion.text = getString(R.string.version_text, BuildConfig.VERSION_NAME)
-        adb.developerInfo.setLinkedText(
-            R.string.developer_info_text, AppConfig.DEVELOPER, AppConfig.DEVELOPER_URL
-        )
-        adb.helpForumInfo.setLinkedText(
-            R.string.help_forum_info_text, AppConfig.HELP_FORUM, AppConfig.HELP_FORUM_URL
-        )
-        adb.sourceCodeInfo.setLinkedText(
-            R.string.source_code_info_text, AppConfig.GITHUB_REPO, AppConfig.GITHUB_REPO_URL
-        )
-        MaterialAlertDialogBuilder(this).setView(adb.root).show()
-        Glide.with(this).load(R.mipmap.ic_launcher).transform(RoundedCorners(50)).into(adb.aboutIcon)
+        AboutDialogBinding.inflate(LayoutInflater.from(this), null, false).apply {
+            appTitle.text = getString(R.string.app_name)
+            appVersion.text = getString(R.string.version_text, BuildConfig.VERSION_NAME)
+            developerInfo.setLinkedText(
+                R.string.developer_info_text, AppConfigs.DEVELOPER, AppConfigs.DEVELOPER_URL
+            )
+            helpForumInfo.setLinkedText(
+                R.string.help_forum_info_text, AppConfigs.HELP_FORUM, AppConfigs.HELP_FORUM_URL
+            )
+            sourceCodeInfo.setLinkedText(
+                R.string.source_code_info_text, AppConfigs.GITHUB_REPO, AppConfigs.GITHUB_REPO_URL
+            )
+        }.let {
+            MaterialAlertDialogBuilder(this).setView(it.root).show()
+            Glide.with(this).load(R.mipmap.ic_launcher).transform(RoundedCorners(50)).into(it.aboutIcon)
+        }
     }
 }

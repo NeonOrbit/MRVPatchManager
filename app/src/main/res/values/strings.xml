@@ -61,7 +61,7 @@
     <string name="pref_fix_conflict_summery">If you are unable to remove the preinstalled fb apps.</string>
     <string name="pref_mask_package_title">Mask package name</string>
     <string name="pref_mask_package_summery">If unable to remove the original messenger app.</string>
-    <string name="pref_fallback_mode_title">Fallback mode (slow)</string>
+    <string name="pref_fallback_mode_title">Fallback patch mode</string>
     <string name="pref_fallback_mode_summery">If patched apps do not work after some time.</string>
     <string name="pref_advanced_settings_title">Advanced configurations</string>
     <string name="pref_advanced_settings_summery">Intended for advanced users only.</string>

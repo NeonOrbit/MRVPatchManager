@@ -8,8 +8,12 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.text.HtmlCompat
 import androidx.documentfile.provider.DocumentFile
+import app.neonorbit.mrvpatchmanager.network.HttpSpec
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.Closeable
@@ -20,6 +24,10 @@ import java.net.UnknownHostException
 import java.util.Locale
 import kotlin.math.log10
 import kotlin.math.pow
+
+fun Mutex.lockOrThrow(msg: String) {
+    if (!tryLock()) throw IllegalStateException(msg)
+}
 
 inline fun <reified T> String.parseJson(): T? {
     return Gson().fromJson(this, object : TypeToken<T>() {}.type)
@@ -68,7 +76,7 @@ fun Long.toSizeString(withSpace: Boolean = false): String {
 }
 
 fun Uri.toTempFile(): File = File.createTempFile(
-    "resolved", null, AppConfig.TEMP_DIR
+    "resolved", null, AppConfigs.TEMP_DIR
 ).let { copyTo(it) }
 
 fun Uri.copyTo(file: File): File {
@@ -98,8 +106,12 @@ fun Throwable.toNetworkError(isOnline: Boolean, length: Int = 100): String {
     }
 }
 
+suspend fun Throwable.toNetworkError(length: Int = 100) = withContext(Dispatchers.IO) {
+    toNetworkError(try { AppServices.isNetworkOnline() } catch (e: Exception) { false }, length)
+}
+
 val HttpException.httpError: String; get() = when (code()) {
-    429 -> "HTTP 429: Too Many Requests  [Please try again later]"
+    HttpSpec.Code.TOO_MANY_REQUESTS -> "Too Many Requests [Please try again later]"
     else -> error
 }
 

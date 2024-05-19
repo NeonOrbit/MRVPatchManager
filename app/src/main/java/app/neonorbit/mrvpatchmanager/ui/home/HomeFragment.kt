@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.annotation.StringRes
 import androidx.appcompat.widget.PopupMenu
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
@@ -16,15 +15,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.data.AppFileData
 import app.neonorbit.mrvpatchmanager.data.AppItemData
+import app.neonorbit.mrvpatchmanager.data.UpdateEventData
 import app.neonorbit.mrvpatchmanager.databinding.FragmentHomeBinding
 import app.neonorbit.mrvpatchmanager.databinding.InstalledAppsDialogBinding
 import app.neonorbit.mrvpatchmanager.databinding.VersionInputDialogBinding
-import app.neonorbit.mrvpatchmanager.event.UpdateEvent
 import app.neonorbit.mrvpatchmanager.observeOnUI
 import app.neonorbit.mrvpatchmanager.ui.AutoProgressDialog
 import app.neonorbit.mrvpatchmanager.ui.ConfirmationDialog
@@ -33,7 +32,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.util.StringJoiner
 
 class HomeFragment : Fragment(),
     AutoProgressDialog.OnCancelListener,
@@ -163,16 +161,10 @@ class HomeFragment : Fragment(),
             }
         }
 
-        viewModel!!.getPatcherOptions().let { opt ->
-            StringJoiner("\n").apply {
-                if (opt.maskPackage) add(getEnabledString(R.string.pref_mask_package_title))
-                if (opt.fixConflict) add(getEnabledString(R.string.pref_fix_conflict_title))
-                if (opt.fallbackMode) add(getEnabledString(R.string.pref_fallback_mode_title))
-            }.toString().takeIf { it.isNotEmpty() }?.let {
-                binding!!.noticeCard.isVisible = true
-                binding!!.noticeCardText.text = it
-            } ?: { binding!!.noticeCard.isVisible = false }
-        }
+        viewModel!!.getNotice()?.let {
+            binding!!.noticeCard.isVisible = true
+            binding!!.noticeCardText.text = it
+        } ?: { binding!!.noticeCard.isVisible = false }
 
         binding!!.managerButton.setOnClickListener { viewModel!!.installManager() }
         binding!!.moduleInfoButton.setOnClickListener { viewModel!!.showModuleInfo() }
@@ -213,7 +205,6 @@ class HomeFragment : Fragment(),
     private val selectedApp: AppItemData? get() = viewModel?.fbAppList?.find {
         binding?.dropDownMenu?.text.toString() == it.name
     }
-    private fun getEnabledString(@StringRes resId: Int) = "[Enabled] -> [${getString(resId)}]"
 
     override fun onProgressCancelled() {
         viewModel?.quickDownloadJob?.value?.cancel()
@@ -241,19 +232,19 @@ class HomeFragment : Fragment(),
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     fun onInstallationEvent(data: AppInstaller.Event) {
-        if (data.pkg == AppConfig.MODULE_PACKAGE) {
+        if (data.pkg == AppConfigs.MODULE_PACKAGE) {
             EventBus.getDefault().removeStickyEvent(data)
             viewModel?.reloadModuleStatus(true)
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    fun onUpdateEvent(event: UpdateEvent) {
+    fun onUpdateEvent(event: UpdateEventData) {
         when (event) {
-            is UpdateEvent.Manager -> {
+            is UpdateEventData.Manager -> {
                 updateManagerCard(event.current, event.latest)
             }
-            is UpdateEvent.Module -> {
+            is UpdateEventData.Module -> {
                 viewModel?.updateModuleStatus(event.current, event.latest)
             }
         }

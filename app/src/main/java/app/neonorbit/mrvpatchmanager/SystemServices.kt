@@ -10,7 +10,7 @@ import java.net.Socket
 
 object SystemServices {
     fun getNetworkService(context: Context): ConnectivityManager? {
-        return context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+        return context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
     }
 
     object Network {
@@ -27,11 +27,7 @@ object SystemServices {
         fun isOnline(context: Context): Boolean {
             if (!isConnected(context)) return false
             return try {
-                Socket().use {
-                    it.connect(
-                        InetSocketAddress("8.8.8.8", 53), 5000
-                    )
-                }
+                Socket().connect(InetSocketAddress("8.8.8.8", 53), 5000)
                 true
             } catch (e: Exception) {
                 false

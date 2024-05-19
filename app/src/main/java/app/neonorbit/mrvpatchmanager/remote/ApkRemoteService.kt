@@ -1,6 +1,6 @@
 package app.neonorbit.mrvpatchmanager.remote
 
-import app.neonorbit.mrvpatchmanager.apk.AppType
+import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.isConnectError
 import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo
 import app.neonorbit.mrvpatchmanager.util.Utils

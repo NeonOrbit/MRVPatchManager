@@ -1,14 +1,13 @@
 package app.neonorbit.mrvpatchmanager.remote
 
 import android.util.Log
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
-import app.neonorbit.mrvpatchmanager.apk.AppType
+import app.neonorbit.mrvpatchmanager.data.AppType
+import app.neonorbit.mrvpatchmanager.download.ApkDownloader
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
-import app.neonorbit.mrvpatchmanager.download.FileDownloader
-import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.toNetworkError
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -35,37 +34,37 @@ class ApkRemoteFileProvider {
     }
 
     fun getManagerApk(): Flow<DownloadStatus> = flow {
-        FileDownloader.download(
+        ApkDownloader.download(
             GithubService.getManagerLink(),
-            File(AppConfig.DOWNLOAD_DIR, AppConfig.MANAGER_APK_NAME)
+            File(AppConfigs.DOWNLOAD_DIR, AppConfigs.MANAGER_APK_NAME)
         ).catch {
-            emit(DownloadStatus.FAILED(it.error))
+            emit(DownloadStatus.FAILED(it.toNetworkError()))
         }.let { emitAll(it) }
     }
 
     fun getModuleApk(): Flow<DownloadStatus> = flow {
-        FileDownloader.download(
+        ApkDownloader.download(
             GithubService.getModuleLink(),
-            File(AppConfig.DOWNLOAD_DIR, AppConfig.MODULE_APK_NAME)
+            File(AppConfigs.DOWNLOAD_DIR, AppConfigs.MODULE_APK_NAME)
         ).catch {
-            emit(DownloadStatus.FAILED(it.error))
+            emit(DownloadStatus.FAILED(it.toNetworkError()))
         }.let { emitAll(it) }
     }
 
     fun getFbApk(type: AppType, abi: String, version: String?): Flow<DownloadStatus> {
-        val file = AppConfig.getDownloadApkFile(type, version)
+        val file = AppConfigs.getDownloadApkFile(type, version)
         if (hasValidFile(file, version)) {
             return flowOf(DownloadStatus.FINISHED(file))
-        } else if (version != null) file.delete()
-        val iterator = getServices()
-        var service: ApkRemoteService = iterator.next()
+        }
+        val services = getServices()
+        var service: ApkRemoteService = services.next()
         return flow {
             emit(DownloadStatus.FETCHING(service.server()))
             val fetched = service.fetch(type, abi, version)
             fetched.version?.let {
                 emit(DownloadStatus.FETCHED(it))
             }
-            FileDownloader.download(fetched.link, file).onEach {
+            ApkDownloader.download(fetched.link, file).onEach {
                 if (it is DownloadStatus.FINISHED) {
                     if (!ApkUtil.verifyFbSignature(it.file)) {
                         it.file.delete()
@@ -75,8 +74,8 @@ class ApkRemoteFileProvider {
             }.let { emitAll(it) }
         }.retryWhen { exception, _ ->
             Log.w(TAG, "getFbApk[${service.server()}]", exception)
-            AppServices.isNetworkOnline() && iterator.hasNext().also {
-                if (it) service = iterator.next()
+            AppServices.isNetworkOnline() && services.hasNext().also {
+                if (it) service = services.next()
             }
         }.catch { exception ->
             val isOnline = AppServices.isNetworkOnline()

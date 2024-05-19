@@ -1,6 +1,6 @@
 package app.neonorbit.mrvpatchmanager.ui.settings
 
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.remote.ApkRemoteFileProvider
 import java.io.File
 
@@ -13,5 +13,5 @@ object SettingsData {
         }.toTypedArray()
     }
 
-    val CUSTOM_KEY_FILE: File get() = AppConfig.CUSTOM_KEYSTORE_FILE
+    val CUSTOM_KEY_FILE: File get() = AppConfigs.CUSTOM_KEYSTORE_FILE
 }

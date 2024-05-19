@@ -3,9 +3,9 @@ package app.neonorbit.mrvpatchmanager
 import android.app.Application
 import app.neonorbit.mrvpatchmanager.remote.GithubService
 
-class App : Application() {
+class MRVPatchManager : Application() {
     companion object {
-        lateinit var instance: App
+        lateinit var instance: MRVPatchManager
     }
 
     override fun onCreate() {

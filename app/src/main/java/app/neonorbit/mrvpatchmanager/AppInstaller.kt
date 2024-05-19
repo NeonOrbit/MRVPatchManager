@@ -13,12 +13,13 @@ import java.io.File
 
 object AppInstaller {
     data class Event(val pkg: String)
-    private const val DATA = "package:app.neonorbit."
+
+    private const val VALID_PKG = "package:app.neonorbit."
 
     private val receiver by lazy {
         object: BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                intent?.dataString?.takeIf { it.startsWith(DATA) }?.let {
+                intent?.dataString?.takeIf { it.startsWith(VALID_PKG) }?.let {
                     EventBus.getDefault().postSticky(Event(it.substringAfter(":")))
                 }
             }

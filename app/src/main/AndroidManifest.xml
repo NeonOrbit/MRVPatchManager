@@ -20,7 +20,7 @@
     </queries>
 
     <application
-        android:name=".App"
+        android:name=".MRVPatchManager"
         android:allowBackup="true"
         android:supportsRtl="true"
         android:icon="@mipmap/ic_launcher"

@@ -1,7 +1,7 @@
 package app.neonorbit.mrvpatchmanager.remote
 
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
-import app.neonorbit.mrvpatchmanager.apk.AppType
+import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
 import app.neonorbit.mrvpatchmanager.remote.data.ApkFlashReleaseData
 import app.neonorbit.mrvpatchmanager.remote.data.RemoteApkInfo

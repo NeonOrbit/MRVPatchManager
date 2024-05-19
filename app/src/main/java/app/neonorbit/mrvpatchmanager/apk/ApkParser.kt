@@ -1,6 +1,6 @@
 package app.neonorbit.mrvpatchmanager.apk
 
-import app.neonorbit.mrvpatchmanager.AppConfig
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.util.Utils
 import com.google.gson.Gson
@@ -33,7 +33,7 @@ object ApkParser {
 
     fun getPatchedConfig(file: File): PatchConfig? = try {
         ZipFile(file).use { zip ->
-            zip.getInputStream(zip.getEntry(AppConfig.PATCHED_APK_CONFIG_PATH)).use { input ->
+            zip.getInputStream(zip.getEntry(AppConfigs.PATCHED_APK_CONFIG_PATH)).use { input ->
                 Gson().fromJson(input.bufferedReader(StandardCharsets.UTF_8), PatchConfig::class.java)
             }
         }
