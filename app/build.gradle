@@ -7,11 +7,11 @@ apply from: "dependency.gradle"
 
 android {
     namespace 'app.neonorbit.mrvpatchmanager'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         minSdk 28
-        targetSdk 34
+        targetSdk 35
         versionCode 2310
         versionName "2.3.1"
         applicationId namespace
@@ -25,12 +25,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '21'
     }
 
     buildFeatures {
@@ -76,14 +76,14 @@ dependencies {
     //noinspection DependencyNotationArgument
     implementation mrvpatcher('5.7.0', 'e1216b7c671335762e48731ee17a128036bb0ce7')
 
-    implementation 'androidx.core:core-ktx:1.13.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
     implementation "androidx.core:core-splashscreen:1.0.1"
     implementation 'androidx.browser:browser:1.8.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.4'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.4'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4'
 
     implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
@@ -122,6 +122,6 @@ dependencies {
     }
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
