@@ -52,7 +52,7 @@ object ApkUtil {
 
     fun hasLatestMrvSignedApp(file: File, sig: String? = null): Boolean {
         return getPackageInfo(file)?.let { apk ->
-            hasLatestMrvSignedApp(apk.packageName, apk.versionName, sig)
+            hasLatestMrvSignedApp(apk.packageName, apk.versionName!!, sig)
         } == true
     }
 
@@ -63,21 +63,21 @@ object ApkUtil {
                 installed.matchSignature(signature)
             } catch (_: Exception) { false }
         }?.let { installed ->
-            installed.versionName.compareVersion(version) >= 0
+            installed.versionName!!.compareVersion(version) >= 0
         } == true
     }
 
     fun getApkSimpleInfo(file: File): ApkSimpleInfo? {
         return getPackageInfo(file, cert = false, meta = true)?.let {
-            ApkSimpleInfo(it.packageName, it.getAppName(), it.versionName)
+            ApkSimpleInfo(it.packageName, it.getAppName(), it.versionName!!)
         }
     }
 
     fun getApkIcon(file: File): Drawable? {
         return getPackageInfo(file)?.let {
-            it.applicationInfo.sourceDir = file.absolutePath
-            it.applicationInfo.publicSourceDir = file.absolutePath
-            it.applicationInfo.loadIcon(AppServices.packageManager)
+            it.applicationInfo!!.sourceDir = file.absolutePath
+            it.applicationInfo!!.publicSourceDir = file.absolutePath
+            it.applicationInfo!!.loadIcon(AppServices.packageManager)
         }
     }
 
@@ -169,7 +169,7 @@ object ApkUtil {
 
     private val PackageInfo.maxAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.targetSdkVersion ?: 0)
 
-    private val PackageInfo.apkPath get() = applicationInfo.publicSourceDir?.takeIf { it.isNotEmpty() } ?: applicationInfo.sourceDir
+    private val PackageInfo.apkPath get() = applicationInfo!!.publicSourceDir?.takeIf { it.isNotEmpty() } ?: applicationInfo!!.sourceDir
 
     private val PackageInfo.isPermissionMasked get() = permissions?.let { permissions ->
         permissions.any { permission -> permission.name?.startsWith(AppConfigs.PACKAGE_MASKED_PREFIX) == true }
@@ -180,7 +180,9 @@ object ApkUtil {
     }
 
     @Suppress("Deprecation")
-    private fun PackageInfo.getSignatures() = signingInfo?.apkContentsSigners ?: signatures
+    private fun PackageInfo.getSignatures() = signingInfo?.apkContentsSigners ?: signatures ?: throw Exception(
+        "Failed to read apk signature"
+    )
 
     private fun getSignatures(file: File): Array<Signature> {
         return getPackageInfo(file, true)?.getSignatures() ?: throw Exception("Failed to read apk signature")
@@ -222,7 +224,7 @@ object ApkUtil {
 
     private fun PackageInfo.getAppName(): String {
         return AppConfigs.getFbAppName(packageName) ?:
-        AppServices.packageManager.getApplicationLabel(this.applicationInfo).let {
+        AppServices.packageManager.getApplicationLabel(this.applicationInfo!!).let {
             if (it.startsWith(this.packageName)) this.packageName else it.toString()
         }
     }
