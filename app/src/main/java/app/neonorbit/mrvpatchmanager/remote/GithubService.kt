@@ -28,28 +28,28 @@ object GithubService {
         return fetchDirectLink(AppConfigs.MODULE_PACKAGE, MODULE_URL)
     }
 
-    fun checkForUpdate() {
+    fun checkForUpdate(force: Boolean = false) {
         AppServices.globalScope.launch(Dispatchers.IO) {
             EventBus.getDefault().removeStickyEvent(UpdateEventData.Manager::class.java)
-            fetchUpdate(AppConfigs.MANAGER_PACKAGE, MANAGER_URL)?.let {
+            fetchUpdate(AppConfigs.MANAGER_PACKAGE, MANAGER_URL, force)?.let {
                 EventBus.getDefault().postSticky(it)
             }
         }
         AppServices.globalScope.launch(Dispatchers.IO) {
             EventBus.getDefault().removeStickyEvent(UpdateEventData.Module::class.java)
-            fetchUpdate(AppConfigs.MODULE_PACKAGE, MODULE_URL)?.let {
+            fetchUpdate(AppConfigs.MODULE_PACKAGE, MODULE_URL, force)?.let {
                 EventBus.getDefault().postSticky(it)
             }
         }
     }
 
     private suspend fun fetchDirectLink(pkg: String, from: String): String {
-        return fetchData(pkg, from)!!.assets[0].link
+        return fetchData(pkg, from, false)!!.assets[0].link
     }
 
-    private suspend fun fetchUpdate(pkg: String, url: String): UpdateEventData? {
+    private suspend fun fetchUpdate(pkg: String, url: String, force: Boolean): UpdateEventData? {
         return ApkUtil.getPrefixedVersionName(pkg)?.let { current ->
-            fetchData(pkg, url)?.takeIf {
+            fetchData(pkg, url, force)?.takeIf {
                 it.version.compareVersion(current) > 0
             }?.let {
                 if (pkg == AppConfigs.MANAGER_PACKAGE)
@@ -59,9 +59,9 @@ object GithubService {
         }
     }
 
-    private suspend fun fetchData(pkg: String, url: String): GithubReleaseData? {
-        val cacheKey = getKey(pkg)
-        return CacheManager.get(cacheKey) ?: try {
+    private suspend fun fetchData(pkg: String, url: String, force: Boolean): GithubReleaseData? {
+        val cacheKey: String = getCacheKey(pkg)
+        return (if (force) null else CacheManager.get(cacheKey)) ?: try {
             RetrofitClient.SERVICE.getGithubRelease(url).result().also {
                 CacheManager.put(cacheKey, it, CACHE_TIMEOUT_HOUR)
             }
@@ -70,7 +70,7 @@ object GithubService {
         }
     }
 
-    private fun getKey(pkg: String): String {
+    private fun getCacheKey(pkg: String): String {
         return "${KEY_UPDATE_CACHE}_${pkg.substringAfterLast('.')}"
     }
 }

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.net.Uri
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.annotation.WorkerThread
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
@@ -49,6 +50,10 @@ object AppServices {
     }
 
     private fun File.init() = apply { if (!exists()) mkdirs() }
+
+    fun showToast(@StringRes resId: Int, long: Boolean = false) {
+        showToast(application.getString(resId), long)
+    }
 
     fun showToast(message: String, long: Boolean = false) {
         Toast.makeText(application, message,

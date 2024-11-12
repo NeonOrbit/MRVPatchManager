@@ -6,6 +6,7 @@
     <string name="menu_about_title">About</string>
     <string name="menu_instruction_title">Instruction</string>
     <string name="menu_tutorial_title">Video Tutorial</string>
+    <string name="menu_update_check_title">Check Update</string>
     <string name="save_menu_title">Save</string>
     <string name="delete_menu_title">Delete</string>
     <string name="share_menu_title">Share</string>
@@ -30,6 +31,7 @@
     <string name="no_patched_apps">No patched apps</string>
     <string name="patched_apk_placeholder">Patched apk file info</string>
     <string name="manual_installed_app_title">Patch an installed app:</string>
+    <string name="checking_for_update">Checking for update…</string>
 
     <string name="text_confirmation">Confirmation</string>
     <string name="text_warning">Warning!</string>

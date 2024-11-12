@@ -14,6 +14,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import app.neonorbit.mrvpatchmanager.databinding.AboutDialogBinding
 import app.neonorbit.mrvpatchmanager.databinding.ActivityMainBinding
+import app.neonorbit.mrvpatchmanager.remote.GithubService
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -62,10 +63,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.about -> {
-                showAboutDialog()
-                true
-            }
             R.id.instruction -> {
                 showInstructionDialog()
                 true
@@ -74,6 +71,15 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(
                     Intent.ACTION_VIEW, Uri.parse(AppConfigs.TUTORIAL_URL)
                 ))
+                true
+            }
+            R.id.update -> {
+                GithubService.checkForUpdate(force = true)
+                AppServices.showToast(R.string.checking_for_update, true)
+                true
+            }
+            R.id.about -> {
+                showAboutDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)
