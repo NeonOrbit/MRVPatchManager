@@ -40,6 +40,7 @@ class SettingsViewModel : ViewModel() {
         if (cacheJob != null) return
         viewModelScope.launch(Dispatchers.IO) {
             AppServices.clearAppCache()
+            DefaultPreference.clearCache()
             withContext(Dispatchers.Main) {
                 AppServices.showToast("Cache cleared")
             }

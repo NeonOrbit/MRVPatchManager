@@ -12,7 +12,7 @@ object DownloadCache {
     data class Cache(val eTag: String?, val mDate: String?, val length: Long)
 
     fun get(file: File): Cache? {
-        return DefaultPreference.getString(file.asCacheKey())?.let {
+        return DefaultPreference.getCache(file.asCacheKey())?.let {
             try { it.parseJson() } catch (_: Exception) { null }
         }
     }
@@ -24,7 +24,7 @@ object DownloadCache {
             response.headers()[HttpSpec.Header.LAST_MODIFIED],
             response.body()!!.contentLength()
         ).let {
-            DefaultPreference.putString(file.asCacheKey(), Gson().toJson(it))
+            DefaultPreference.putCache(file.asCacheKey(), Gson().toJson(it))
         }
     }
 

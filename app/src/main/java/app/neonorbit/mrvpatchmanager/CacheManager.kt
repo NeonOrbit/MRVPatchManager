@@ -6,11 +6,11 @@ import java.util.concurrent.TimeUnit.HOURS
 
 object CacheManager {
     fun put(key: String, value: Any, hours: Int) {
-        DefaultPreference.putString(key, serialize(value, hours.toLong()))
+        DefaultPreference.putCache(key, serialize(value, hours.toLong()))
     }
 
     inline fun <reified T> get(key: String, force: Boolean = false): T? {
-        return DefaultPreference.getString(key)?.let {
+        return DefaultPreference.getCache(key)?.let {
             try {
                 val token = object : TypeToken<CachedData<T>>() {}
                 (Gson().fromJson(it, token.type) as CachedData<T>?)?.get(force)

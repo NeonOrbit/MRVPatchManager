@@ -1,6 +1,7 @@
 package app.neonorbit.mrvpatchmanager
 
 import android.content.ContentResolver
+import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
@@ -22,6 +23,10 @@ object AppServices {
 
     val preferences: SharedPreferences by lazy {
         PreferenceManager.getDefaultSharedPreferences(application)
+    }
+
+    val cachePreferences: SharedPreferences by lazy {
+        application.getSharedPreferences("${application.packageName}_cache", Context.MODE_PRIVATE)
     }
 
     val assetManager: AssetManager get() = application.assets

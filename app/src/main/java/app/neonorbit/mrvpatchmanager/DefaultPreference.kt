@@ -7,6 +7,7 @@ import app.neonorbit.mrvpatchmanager.ui.settings.PreferenceFragment
 
 @Suppress("Unused", "SameParameterValue")
 object DefaultPreference {
+    private val cache: SharedPreferences get() = AppServices.cachePreferences
     private val preferences: SharedPreferences get() = AppServices.preferences
 
     private const val KEY_PREF_APK_SERVER = PreferenceFragment.KEY_PREF_APK_SERVER
@@ -59,4 +60,12 @@ object DefaultPreference {
     private fun remove(key: String) {
         preferences.edit().remove(key).apply()
     }
+
+    fun getCache(key: String): String? = cache.getString(key, null)
+
+    fun putCache(key: String, value: String?) = value?.let {
+        cache.edit().putString(key, it).apply()
+    } ?: remove(key)
+
+    fun clearCache() = cache.edit().clear().apply()
 }
