@@ -79,6 +79,7 @@ object AppConfigs {
         AppType.FACEBOOK_LITE -> "Facebook Lite"
         AppType.MESSENGER_LITE -> "Messenger Lite"
         AppType.BUSINESS_SUITE -> "Business Suite"
+        AppType.FB_ADS_MANAGER -> "Ads Manager"
     }
 
     fun getFbAppPkg(type: AppType): String = when(type) {
@@ -87,6 +88,7 @@ object AppConfigs {
         AppType.FACEBOOK_LITE -> "com.facebook.lite"
         AppType.MESSENGER_LITE -> "com.facebook.mlite"
         AppType.BUSINESS_SUITE -> "com.facebook.pages.app"
+        AppType.FB_ADS_MANAGER -> "com.facebook.adsmanager"
     }
 
     fun getFbAppName(pkg: String): String? = when(pkg) {
@@ -95,6 +97,7 @@ object AppConfigs {
         "com.facebook.lite" -> "Facebook Lite"
         "com.facebook.mlite" -> "Messenger Lite"
         "com.facebook.pages.app" -> "Business Suite"
+        "com.facebook.adsmanager" -> "Ads Manager"
         "com.instagram.android" -> "Instagram"
         "com.instagram.lite" -> "Instagram Lite"
         else -> null
@@ -106,11 +109,13 @@ object AppConfigs {
             AppItemData("Facebook App", AppType.FACEBOOK, R.drawable.ic_fb_katana),
             AppItemData("Facebook Lite", AppType.FACEBOOK_LITE, R.drawable.ic_fb_lite),
             AppItemData("Business Suite", AppType.BUSINESS_SUITE, R.drawable.ic_fb_page),
+            AppItemData("Ads Manager", AppType.FB_ADS_MANAGER, R.drawable.ic_fb_ads),
         )
     }
 
     val FB_ORDERED_PKG_LIST = listOf(
-        "com.facebook.katana", "com.facebook.orca", "com.facebook.lite", "com.facebook.mlite", "com.facebook.pages.app"
+        "com.facebook.katana", "com.facebook.orca", "com.facebook.lite",
+        "com.facebook.mlite", "com.facebook.pages.app", "com.facebook.adsmanager"
     )
     val FB_EXCLUDED_PKG_LIST = listOf("com.facebook.services", "com.facebook.system", "com.facebook.appmanager")
 

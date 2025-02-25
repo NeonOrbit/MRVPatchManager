@@ -20,6 +20,7 @@ object ApkPureService : ApkRemoteService {
     private const val MSG_APP_URL = "$BASE_URL/facebook-messenger/com.facebook.orca/$RELEASE_URL"
     private const val MSG_LITE_URL = "$BASE_URL/messenger-lite/com.facebook.mlite/$RELEASE_URL"
     private const val BSN_SUITE_URL = "$BASE_URL/meta-business-suite/com.facebook.pages.app/$RELEASE_URL"
+    private const val AD_MANAGER_URL = "$BASE_URL/meta-ads-manager/com.facebook.adsmanager/$RELEASE_URL"
 
     override fun server(): String {
         return "apkpure.com"
@@ -32,6 +33,7 @@ object ApkPureService : ApkRemoteService {
             AppType.FACEBOOK_LITE -> fetchInfo(type, FB_LITE_URL, abi, ver) ?: hardcodedInfo("lite")
             AppType.MESSENGER_LITE -> fetchInfo(type, MSG_LITE_URL, abi, ver) ?: hardcodedInfo("mlite")
             AppType.BUSINESS_SUITE -> fetchInfo(type, BSN_SUITE_URL, abi, ver) ?: hardcodedInfo("pages.app")
+            AppType.FB_ADS_MANAGER -> fetchInfo(type, AD_MANAGER_URL, abi, ver) ?: hardcodedInfo("adsmanager")
         }
     }
 

@@ -21,6 +21,7 @@ object ApkMirrorService : ApkRemoteService {
         AppType.FACEBOOK_LITE to "lite",
         AppType.MESSENGER_LITE to "messenger-lite",
         AppType.BUSINESS_SUITE to "pages-manager",
+        AppType.FB_ADS_MANAGER to "facebook-ads-manager",
     )
 
     private fun buildFallbackUrl(type: AppType) = "$FALLBACK_URL/${ids[type]}"

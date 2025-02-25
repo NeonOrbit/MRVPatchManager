@@ -18,6 +18,7 @@ object ApkFlashService : ApkRemoteService {
     private const val MSG_APP_URL = "$APK_URL/com.facebook.orca/facebook-messenger/$RELEASE_URL"
     private const val MSG_LITE_URL = "$APK_URL/com.facebook.mlite/messenger-lite/$RELEASE_URL"
     private const val BSN_SUITE_URL = "$APK_URL/com.facebook.pages.app/meta-business-suite/$RELEASE_URL"
+    private const val AD_MANAGER_URL = "$APK_URL/com.facebook.adsmanager/meta-ads-manager/$RELEASE_URL"
 
     override fun server(): String {
         return "apkflash.com"
@@ -31,6 +32,7 @@ object ApkFlashService : ApkRemoteService {
                 AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL, abi, ver)
                 AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL, abi, ver)
                 AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi, ver)
+                AppType.FB_ADS_MANAGER -> fetchInfo(AD_MANAGER_URL, abi, ver)
             }
         } catch (exception: Exception) {
             exception.handleApkServiceException(type, ver)

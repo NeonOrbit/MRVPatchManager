@@ -9,7 +9,7 @@ import app.neonorbit.mrvpatchmanager.result
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
 
 object ApkComboService : ApkRemoteService {
-    const val BASE_URL = "https://apkcombo.com"
+    const val BASE_URL = "https://apkcombo.app"
     private const val RELEASE_URL = "old-versions"
     private const val TOKEN_URL = "$BASE_URL/checkin"
     private const val FB_APP_URL = "$BASE_URL/facebook/com.facebook.katana/$RELEASE_URL"
@@ -17,6 +17,7 @@ object ApkComboService : ApkRemoteService {
     private const val MSG_APP_URL = "$BASE_URL/facebook-messenger/com.facebook.orca/$RELEASE_URL"
     private const val MSG_LITE_URL = "$BASE_URL/messenger-lite/com.facebook.mlite/$RELEASE_URL"
     private const val BSN_SUITE_URL = "$BASE_URL/meta-business-suite/com.facebook.pages.app/$RELEASE_URL"
+    private const val AD_MANAGER_URL = "$BASE_URL/meta-ads-manager/com.facebook.adsmanager/$RELEASE_URL"
 
     override fun server(): String {
         return "apkcombo.com"
@@ -30,6 +31,7 @@ object ApkComboService : ApkRemoteService {
                 AppType.FACEBOOK_LITE -> fetchInfo(FB_LITE_URL, abi, ver)
                 AppType.MESSENGER_LITE -> fetchInfo(MSG_LITE_URL, abi, ver)
                 AppType.BUSINESS_SUITE -> fetchInfo(BSN_SUITE_URL, abi, ver)
+                AppType.FB_ADS_MANAGER -> fetchInfo(AD_MANAGER_URL, abi, ver)
             }
         } catch (exception: Exception) {
             exception.handleApkServiceException(type, ver)

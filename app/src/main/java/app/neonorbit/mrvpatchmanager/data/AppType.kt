@@ -7,7 +7,8 @@ enum class AppType {
     MESSENGER,
     FACEBOOK_LITE,
     MESSENGER_LITE,
-    BUSINESS_SUITE;
+    BUSINESS_SUITE,
+    FB_ADS_MANAGER;
 
     fun getName(): String {
         return AppConfigs.getFbAppName(this)
