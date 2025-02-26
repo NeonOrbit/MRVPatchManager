@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 
 object GithubService {
-    private const val CACHE_TIMEOUT_HOUR = 20
+    private const val CACHE_TIMEOUT_HOUR = 2
     private const val KEY_UPDATE_CACHE = "update_check_cache"
     private const val BASE_URL = "https://api.github.com/repos"
     private const val MANAGER_URL = "$BASE_URL/NeonOrbit/MRVPatchManager/releases/latest"

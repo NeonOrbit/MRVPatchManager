@@ -1,5 +1,6 @@
 package app.neonorbit.mrvpatchmanager
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.text.Spanned
@@ -54,8 +55,8 @@ inline fun <T> Response<T>.useResponse(block: (Response<T>) -> Unit) {
     }
 }
 
-fun List<File>.existAnyIn(dir: DocumentFile): Boolean = any { file ->
-    dir.listFiles().any { file.name.equals(it.name, true) }
+fun List<File>.existAnyIn(dir: DocumentFile): Boolean = dir.listFiles().let { all ->
+    this.any { file -> all.any { file.name.equals(it.name, true) } }
 }
 
 fun File.totalSize(): Long {
@@ -75,17 +76,17 @@ fun Long.toSizeString(withSpace: Boolean = false): String {
     }
 }
 
-fun Uri.toTempFile(): File = File.createTempFile(
+fun Uri.toTempFile(resolver: ContentResolver): File = File.createTempFile(
     "resolved", null, AppConfigs.TEMP_DIR
-).let { copyTo(it) }
+).let { copyTo(resolver, it) }
 
-fun Uri.copyTo(file: File): File {
-    AppServices.contentResolver.openInputStream(this)?.use { input ->
-        file.outputStream().use { output ->
+fun Uri.copyTo(resolver: ContentResolver, dest: File): File {
+    resolver.openInputStream(this)?.use { input ->
+        dest.outputStream().use { output ->
             input.copyTo(output)
         }
     } ?: throw Exception("Failed to resolve uri: $this")
-    return file
+    return dest
 }
 
 val Throwable.error: String; get() = this.message ?: this.javaClass.simpleName

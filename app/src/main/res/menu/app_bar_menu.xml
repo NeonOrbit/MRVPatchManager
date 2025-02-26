@@ -10,6 +10,7 @@
         android:title="@string/menu_tutorial_title"
         app:showAsAction="never" />
     <item
+        android:visible="false"
         android:id="@+id/update"
         android:title="@string/menu_update_check_title"
         app:showAsAction="never" />

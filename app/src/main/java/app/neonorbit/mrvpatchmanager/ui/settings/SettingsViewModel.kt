@@ -61,14 +61,14 @@ class SettingsViewModel : ViewModel() {
     fun saveKeystore(input: KeystoreInputData?) {
         if (input == null) {
             SettingsData.CUSTOM_KEY_FILE.delete()
-            keystoreName.post(null, with = this)
+            keystoreName.post(with = this, null)
             keystoreSaved.post(viewModelScope, null)
             return
         }
         viewModelScope.launch(Dispatchers.IO) {
             var keyfile: File? = null
             try {
-                keyfile = input.uri.toTempFile()
+                keyfile = input.uri.toTempFile(AppServices.contentResolver)
                 KeystoreManager.readKeyData(
                     keyfile, SettingsData.CUSTOM_KEY_FILE.absolutePath,
                     input.password, input.aliasName, input.aliasPassword

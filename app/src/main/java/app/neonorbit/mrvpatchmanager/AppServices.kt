@@ -12,14 +12,16 @@ import androidx.annotation.WorkerThread
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
+import app.neonorbit.mrvpatchmanager.util.Utils
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.io.File
 
 object AppServices {
     val application: MRVPatchManager get() = MRVPatchManager.instance
-
-    val globalScope: CoroutineScope by lazy { CoroutineScope(SupervisorJob()) }
 
     val preferences: SharedPreferences by lazy {
         PreferenceManager.getDefaultSharedPreferences(application)
@@ -34,6 +36,12 @@ object AppServices {
     val packageManager: PackageManager by lazy { application.packageManager }
 
     val contentResolver: ContentResolver by lazy { application.contentResolver }
+
+    val globalScope: CoroutineScope by lazy {
+        CoroutineScope(SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
+            Utils.error("Global Coroutine Exception: ${throwable.message}", throwable)
+        })
+    }
 
     @WorkerThread
     fun isNetworkOnline() = SystemServices.Network.isOnline(application)
@@ -61,9 +69,12 @@ object AppServices {
     }
 
     fun showToast(message: String, long: Boolean = false) {
-        Toast.makeText(application, message,
-            if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-        ).show()
+        globalScope.launch(Dispatchers.Main) {
+            val duration = if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+            try {
+                Toast.makeText(application, message, duration).show()
+            } catch (_: Exception) {}
+        }
     }
 
     fun resolveDocumentTree(uri: Uri) = DocumentFile.fromTreeUri(application, uri)

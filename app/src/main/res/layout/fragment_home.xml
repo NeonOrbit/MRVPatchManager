@@ -338,7 +338,9 @@
                         android:layout_marginBottom="10dp"
                         app:trackColor="@color/primary_variant"
                         app:trackThickness="6dp"
-                        app:trackCornerRadius="20dp" />
+                        app:trackCornerRadius="20dp"
+                        app:indicatorTrackGapSize="0dp"
+                        app:trackStopIndicatorSize="0dp" />
 
                     <TextView
                         android:id="@+id/progress_details"

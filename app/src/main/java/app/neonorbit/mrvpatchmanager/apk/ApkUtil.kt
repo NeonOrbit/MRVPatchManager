@@ -116,6 +116,7 @@ object ApkUtil {
         files.forEach { file ->
             val details = StringJoiner("\n")
             getPackageInfo(file, cert = true, meta = true, perm = true)?.also { info ->
+                details.add("[${info.packageName}]")
                 details.add("Apk: ${info.getAppName()}")
                 details.add("Status: ${if (info.isPatched()) "Patched" else "Signed Only"}")
                 details.add("Signature: ${
@@ -131,7 +132,7 @@ object ApkUtil {
                     details.add("Package Masked: ${config.pkgMasked}")
                     details.add("Resolved Conflicts: ${config.confFixed}")
                     if (config.exModules.isNotEmpty()) {
-                        details.add("Third-party Modules: ${config.exModules}")
+                        details.add("Modules: ${config.exModules}")
                     }
                 } ?: info.isPermissionMasked?.also {
                     if (it) details.add("Resolved Conflicts: true")

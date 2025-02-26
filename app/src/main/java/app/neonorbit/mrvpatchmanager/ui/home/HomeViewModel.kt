@@ -22,11 +22,11 @@ import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
 import app.neonorbit.mrvpatchmanager.event.SingleEvent
 import app.neonorbit.mrvpatchmanager.post
-import app.neonorbit.mrvpatchmanager.postNow
 import app.neonorbit.mrvpatchmanager.remote.GithubService
 import app.neonorbit.mrvpatchmanager.repository.ApkRepository
 import app.neonorbit.mrvpatchmanager.toSizeString
 import app.neonorbit.mrvpatchmanager.toTempFile
+import app.neonorbit.mrvpatchmanager.util.Utils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -109,21 +109,21 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun reloadModuleStatus(force: Boolean = false) {
-        if (force) GithubService.checkForUpdate()
-        if (moduleStatus.value.current == null || force) {
+    fun loadModuleStatus(reload: Boolean = false) {
+        if (reload) GithubService.checkForUpdate()
+        if (moduleStatus.value.current == null || reload) {
             val version = ApkUtil.getPrefixedVersionName(AppConfigs.MODULE_PACKAGE)
             if ((version?.compareVersion(moduleLatest) ?: 0) >= 0) {
                 moduleLatest = null
             }
-            moduleStatus.postNow(VersionStatus(version, moduleLatest), with = this)
+            moduleStatus.post(this, VersionStatus(version, moduleLatest))
         }
     }
 
     fun updateModuleStatus(current: String, latest: String) {
         if (latest != moduleLatest) {
             moduleLatest = latest
-            moduleStatus.postNow(VersionStatus(current, moduleLatest), with = this)
+            moduleStatus.post(this, VersionStatus(current, moduleLatest))
         }
     }
 
@@ -135,7 +135,7 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO + catcher) {
             install(repository.getModuleApk(force))
         }.let { job ->
-            quickDownloadJob.post(job, with = this)
+            quickDownloadJob.post(this, job)
         }
     }
 
@@ -143,7 +143,7 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO + catcher) {
             install(repository.getManagerApk())
         }.let { job ->
-            quickDownloadJob.post(job, with = this)
+            quickDownloadJob.post(this, job)
         }
     }
 
@@ -172,7 +172,7 @@ class HomeViewModel : ViewModel() {
 
     fun patch(app: AppType? = null, uri: Uri? = null, target: String? = null) {
         if (patchingJob != null) {
-            progressStatus.post("Stopping...", this)
+            progressStatus.post(this, "Stopping...")
             patchingJob?.cancel()
             return
         }
@@ -182,7 +182,7 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.Default + catcher) {
             progressStatus.emit("Progress...")
             progressTracker.emit(ProgressTrack())
-            val file = uri?.toTempFile()?.also {
+            val file = uri?.toTempFile(AppServices.contentResolver)?.also {
                 manual = it
             } ?: app?.takeIf { checkMaskPackage(it) }?.let {
                 getPatchableApkFile(app, target)
@@ -200,7 +200,7 @@ class HomeViewModel : ViewModel() {
             }
         }.let { job ->
             patchingJob = job
-            patchingStatus.post(true, with = this)
+            patchingStatus.post(this, true)
             job.invokeOnCompletion {
                 manual?.delete()
                 if (it is CancellationException) {
@@ -209,10 +209,10 @@ class HomeViewModel : ViewModel() {
                         progressTracker.emit(ProgressTrack())
                     }
                 } else if (progressTracker.value.current < 0) {
-                    progressTracker.post(ProgressTrack(0), with = this)
+                    progressTracker.post(this, ProgressTrack(0))
                 }
                 patchingJob = null
-                patchingStatus.post(false, with = this)
+                patchingStatus.post(this, false)
             }
         }
     }
@@ -242,6 +242,7 @@ class HomeViewModel : ViewModel() {
                 }
             }
         }.catch {
+            Utils.error("Patch Error", it)
             progressStatus.emit("Patch Error: ${it.error}")
             progressTracker.emit(ProgressTrack(0))
         }.lastOrNull().let {

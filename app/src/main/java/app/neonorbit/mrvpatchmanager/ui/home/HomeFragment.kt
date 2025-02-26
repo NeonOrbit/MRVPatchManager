@@ -63,7 +63,7 @@ class HomeFragment : Fragment(),
         viewModel!!.moduleStatus.observeOnUI(viewLifecycleOwner) {
             updateModuleCard(it)
         }
-        viewModel!!.reloadModuleStatus()
+        viewModel!!.loadModuleStatus()
 
         binding!!.dropDownMenu.setAdapter(AppsAdapter(requireContext(), viewModel!!.fbAppList))
         binding!!.dropDownMenu.setText(viewModel!!.fbAppList[0].name)
@@ -234,7 +234,7 @@ class HomeFragment : Fragment(),
     fun onInstallationEvent(data: AppInstaller.Event) {
         if (data.pkg == AppConfigs.MODULE_PACKAGE) {
             EventBus.getDefault().removeStickyEvent(data)
-            viewModel?.reloadModuleStatus(true)
+            viewModel?.loadModuleStatus(reload = true)
         }
     }
 

@@ -3,7 +3,7 @@ package app.neonorbit.mrvpatchmanager.download
 import java.io.File
 
 sealed class DownloadStatus {
-    object DOWNLOADING : DownloadStatus()
+    data object DOWNLOADING : DownloadStatus()
     data class FETCHING(val server: String) : DownloadStatus()
     data class FETCHED(val version: String) : DownloadStatus()
     data class PROGRESS(val current: Long, val total: Long) : DownloadStatus()

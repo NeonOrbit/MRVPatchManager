@@ -30,14 +30,8 @@ fun <T> Flow<T>.observeOnUI(
 ) = owner.repeatOnUI { this@observeOnUI.collect(collector) }
 
 fun <T> MutableStateFlow<T>.post(
-    value: T,
-    with: ViewModel
+    with: ViewModel, value: T
 ) = with.viewModelScope.launch { emit(value) }
-
-fun <T> MutableStateFlow<T>.postNow(
-    value: T,
-    with: ViewModel
-) = with.viewModelScope.launch(Dispatchers.Main.immediate) { emit(value) }
 
 /**
  * Launches a coroutine and immediately returns the Job,
