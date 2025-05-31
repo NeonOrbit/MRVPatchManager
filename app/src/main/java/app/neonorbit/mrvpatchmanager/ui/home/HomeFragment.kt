@@ -177,6 +177,7 @@ class HomeFragment : Fragment(),
     private fun showVersionInputDialog() {
         VersionInputDialogBinding.inflate(LayoutInflater.from(requireContext()), null, false).let { bind ->
             MaterialAlertDialogBuilder(requireContext()).setView(bind.root).create().also { dialog ->
+                bind.selectedApp.text = selectedApp?.name ?: "No Selected App"
                 bind.apkVersion.editText!!.setText(viewModel?.lastSelectedVersion)
                 bind.patchButton.setOnClickListener {
                     dialog.dismiss()

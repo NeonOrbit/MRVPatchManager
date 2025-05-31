@@ -42,6 +42,7 @@
     <string name="text_clear">Clear</string>
     <string name="text_cleared">Cleared</string>
     <string name="text_required">Required</string>
+    <string name="text_versions">versions</string>
     <string name="developer_info_text">Developer: &#160;%s</string>
     <string name="help_forum_info_text">Help Forum: &#160;%s</string>
     <string name="source_code_info_text">Source Code: &#160;%s</string>

@@ -27,12 +27,31 @@
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/patch_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_gravity="end"
-        style="@style/MaterialButtonSecondary"
-        android:text="@string/patch_button_title" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/selected_app"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/material_green_500"
+            android:gravity="center_vertical"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/patch_button"
+            android:layout_alignTop="@id/patch_button"
+            android:layout_alignBottom="@id/patch_button"
+            android:layout_centerVertical="true"
+            android:textAppearance="?textAppearanceListItemSecondary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/patch_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="end"
+            android:layout_alignParentEnd="true"
+            style="@style/MaterialButtonSecondary"
+            android:text="@string/patch_button_title" />
+    </RelativeLayout>
 </LinearLayout>
