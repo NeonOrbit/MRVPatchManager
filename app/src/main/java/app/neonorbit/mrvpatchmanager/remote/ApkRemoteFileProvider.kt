@@ -9,6 +9,7 @@ import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.download.ApkDownloader
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
 import app.neonorbit.mrvpatchmanager.toNetworkError
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import java.io.File
+import java.security.SignatureException
 
 class ApkRemoteFileProvider {
     companion object {
@@ -73,14 +75,19 @@ class ApkRemoteFileProvider {
                 if (it is DownloadStatus.FINISHED) {
                     if (!ApkUtil.verifyFbSignature(it.file)) {
                         it.file.delete()
-                        throw Exception("Signature verification failed")
+                        throw SignatureException("Signature failed")
                     }
                 }
             }.let { emitAll(it) }
-        }.retryWhen { exception, _ ->
-            Log.w(TAG, "getFbApk[${service.server()}]", exception)
+        }.retryWhen { e, _ ->
+            Log.w(TAG, "getFbApk[${service.server()}]", e)
             AppServices.isNetworkOnline() && services.hasNext().also {
-                if (it) service = services.next()
+                if (it) {
+                    service = services.next()
+                    val err = if (e is SignatureException) e.message else "Failed"
+                    emit(DownloadStatus.FETCHING("$err, trying the next server..."))
+                    delay(3000)
+                }
             }
         }.catch { exception ->
             val isOnline = AppServices.isNetworkOnline()

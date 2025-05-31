@@ -181,9 +181,11 @@ object ApkUtil {
     }
 
     @Suppress("Deprecation")
-    private fun PackageInfo.getSignatures() = signingInfo?.apkContentsSigners ?: signatures ?: throw Exception(
-        "Failed to read apk signature"
-    )
+    private fun PackageInfo.getSignatures(): Array<Signature> {
+        return ((signatures ?: emptyArray()) + (signingInfo?.apkContentsSigners ?: emptyArray())).also {
+            if (it.isEmpty()) throw Exception("Failed to read apk signature")
+        }
+    }
 
     private fun getSignatures(file: File): Array<Signature> {
         return getPackageInfo(file, true)?.getSignatures() ?: throw Exception("Failed to read apk signature")
