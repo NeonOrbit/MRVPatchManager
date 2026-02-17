@@ -1,9 +1,14 @@
 package app.neonorbit.mrvpatchmanager.network
 
+import android.webkit.CookieManager
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.BuildConfig
+import app.neonorbit.mrvpatchmanager.util.Utils
 import okhttp3.Cache
 import okhttp3.CacheControl
+import okhttp3.Cookie
+import okhttp3.CookieJar
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
@@ -12,8 +17,8 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
+    const val USER_AGENT = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
     private const val BASE_URL = "https://place.holder/"
-    private const val USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64)"
     private const val CACHE_PATH = "http-cache"
     private const val MAX_CACHE_HOUR = 1
     private const val MAX_CACHE_SIZE = 1024 * 1024 * 10L
@@ -22,15 +27,31 @@ object RetrofitClient {
         CLIENT.create(ApiService::class.java)
     }
 
+    val cookieJar = object : CookieJar {
+        override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
+        override fun loadForRequest(url: HttpUrl): List<Cookie> {
+            val cookieString = CookieManager.getInstance().getCookie(url.toString())
+            val cookies = mutableListOf<Cookie>()
+            cookieString?.split(";")?.forEach {
+                Cookie.parse(url, it.trim())?.let { c -> cookies.add(c) }
+            }
+            if (cookies.isNotEmpty()) Utils.log("Cookies found [${url.host}]: $cookies")
+            return cookies
+        }
+    }
+
     private val CLIENT: Retrofit by lazy {
         OkHttpClient.Builder()
+            .cookieJar(cookieJar)
             .addInterceptor { chain ->
                 chain.request().newBuilder()
                     .header(HttpSpec.Header.USER_AGENT, USER_AGENT)
                     .build().let { request ->
                         chain.proceed(request)
                     }
-            }.addNetworkInterceptor { chain ->
+            }
+            .addInterceptor(CloudflareInterceptor())
+            .addNetworkInterceptor { chain ->
                 chain.request().let { request ->
                     chain.proceed(request).newBuilder()
                         .header(HttpSpec.Header.CACHE_CONTROL, cacheHeader(request))

@@ -18,13 +18,20 @@ import app.neonorbit.mrvpatchmanager.remote.GithubService
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
+    companion object {
+        val current: AppCompatActivity; get() = instance?.get()!!
+        private var instance: AtomicReference<MainActivity>? = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         this.installSplashScreen()
         super.onCreate(savedInstanceState)
+        instance = AtomicReference(this)
         binding = ActivityMainBinding.inflate(layoutInflater).also {
             setContentView(it.root)
             setSupportActionBar(it.toolbar)
@@ -107,5 +114,10 @@ class MainActivity : AppCompatActivity() {
             MaterialAlertDialogBuilder(this).setView(it.root).show()
             Glide.with(this).load(R.mipmap.ic_launcher).transform(RoundedCorners(50)).into(it.aboutIcon)
         }
+    }
+
+    override fun onDestroy() {
+        instance = null
+        super.onDestroy()
     }
 }
