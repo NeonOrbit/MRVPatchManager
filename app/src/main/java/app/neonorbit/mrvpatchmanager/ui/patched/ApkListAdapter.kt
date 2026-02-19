@@ -52,6 +52,7 @@ class ApkListAdapter : RecyclerView.Adapter<ApkItemHolder>() {
         infoPreloader.load(holder.apkInfo, position)
         Glide.with(holder.itemView)
             .load(item.path)
+            .circleCrop()
             .placeholder(R.drawable.generic_placeholder)
             .transition(DrawableTransitionOptions.withCrossFade())
             .into(holder.apkIcon)

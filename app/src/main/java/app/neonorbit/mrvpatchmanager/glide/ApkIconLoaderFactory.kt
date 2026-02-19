@@ -31,7 +31,7 @@ class ApkIconLoaderFactory(val context: Context) : ModelLoaderFactory<String, Dr
         }
 
         override fun handles(model: String): Boolean {
-            return model.substringAfterLast(".").equals("apk", true)
+            return model.substringAfterLast(".").contains("apk", true)
         }
     }
 

@@ -13,12 +13,19 @@ import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.compareVersion
 import app.neonorbit.mrvpatchmanager.data.AppFileData
 import app.neonorbit.mrvpatchmanager.data.AppType
+import app.neonorbit.mrvpatchmanager.toSizeString
 import app.neonorbit.mrvpatchmanager.util.Utils
 import java.io.File
 import java.util.StringJoiner
+import java.util.zip.ZipFile
 
 object ApkUtil {
     data class ApkSimpleInfo(val pkg: String, val name: String, val version: String)
+
+    fun isApk(file: File, verify: Boolean = false): Boolean {
+        return file.extension.equals("apk", true) &&
+                (!verify || ZipFile(file).use { it.getEntry(ApkConfigs.ANDROID_MANIFEST) != null })
+    }
 
     private fun PackageInfo.matchSignature(other: String): Boolean {
         return this.getSignatures().matchSignature(Signature(other))
@@ -32,7 +39,9 @@ object ApkUtil {
     private fun Array<Signature>.matchSignature(others: Array<Signature>) = any { it in others }
 
     fun verifySignature(file: File, sig: String): Boolean {
-        return getSignatures(file).matchSignature(Signature(sig))
+        return ApkBundles.peekBaseApkFromBundle(file) { base ->
+            getSignatures(base ?: file).matchSignature(Signature(sig))
+        }
     }
 
     fun verifyFbSignature(file: File, strict: Boolean = true): Boolean {
@@ -74,50 +83,62 @@ object ApkUtil {
     }
 
     fun getApkIcon(file: File): Drawable? {
-        return getPackageInfo(file)?.let {
+        return if (isApk(file)) getPackageInfo(file)?.let {
             it.applicationInfo!!.sourceDir = file.absolutePath
             it.applicationInfo!!.publicSourceDir = file.absolutePath
             it.applicationInfo!!.loadIcon(AppServices.packageManager)
-        }
+        } else ApkBundles.getIconFromBundle(file)
     }
 
     fun getPrefixedVersionName(pkg: String) = getPackageInfo(pkg)?.let { "v${it.versionName}" }
 
     fun getConflictedApps(file: File): Map<String, String> {
         val conflicted = HashMap<String, String>()
-        getPackageInfo(file, cert = true, meta = false, perm = true)?.let { apk ->
-            getRelatedPackages(apk.packageName).forEach { pkg ->
-                getPackageInfo(pkg, cert = true, meta = true, perm = true)?.let { installed ->
-                    try {
-                        if (!installed.matchSignature(apk) &&
-                            (apk.packageName == installed.packageName ||
-                                    match(apk.isPermissionMasked, installed.isPermissionMasked))) {
-                            conflicted[pkg] = installed.getAppName()
-                        }
-                    } catch (_: Exception) { }
+        val base = ApkBundles.getBaseApkFromBundle(file)
+        try {
+            getPackageInfo(base ?: file, cert = true, meta = false, perm = true)?.let { apk ->
+                getRelatedPackages(apk.packageName).forEach { pkg ->
+                    getPackageInfo(pkg, cert = true, meta = true, perm = true)?.let { installed ->
+                        try {
+                            if (!installed.matchSignature(apk) &&
+                                (apk.packageName == installed.packageName ||
+                                        match(apk.isPermissionMasked, installed.isPermissionMasked))) {
+                                conflicted[pkg] = installed.getAppName()
+                            }
+                        } catch (_: Exception) { }
+                    }
                 }
             }
+        } finally {
+            base?.delete()
         }
         return conflicted
     }
 
     private fun match(a: Boolean?, b: Boolean?): Boolean = a != null && b != null && a == b
 
-    fun getApkSummery(file: File) = getPackageInfo(file)?.let { info ->
-        val summery = StringJoiner(" ")
-        summery.add(info.longVersionCode.toString())
-        ApkParser.getABI(file)?.let { summery.add("($it)") }
-        if (info.isMasked()) summery.add("[masked]")
-        summery.toString()
+    fun getApkSummery(file: File): String? {
+        return if (isApk(file)) getPackageInfo(file)?.let { info ->
+            val summery = StringJoiner(" ")
+            summery.add(info.longVersionCode.toString())
+            ApkParser.getABI(file)?.let { summery.add("($it)") }
+            if (info.isMasked()) summery.add("[masked]")
+            summery.toString()
+        } else ApkBundles.getSummeryFromBundle(file)
     }
 
     fun getApkDetails(files: List<File>): String {
         val result = StringJoiner("\n\n")
-        files.forEach { file ->
+        files.forEach { raw ->
             val details = StringJoiner("\n")
-            getPackageInfo(file, cert = true, meta = true, perm = true)?.also { info ->
+            val size = raw.length().toSizeString(true)
+            val file = ApkBundles.getBaseApkFromBundle(raw) ?: raw
+            val bundleText = if (file !== raw) "(Bundle)" else ""
+            try {
+                val info = getPackageInfo(file, cert = true, meta = true, perm = true) ?: throw Exception()
                 details.add("[${info.packageName}]")
-                details.add("Apk: ${info.getAppName()}")
+                details.add("App: ${info.getAppName()}")
+                details.add("Size: $size $bundleText")
                 details.add("Status: ${if (info.isPatched()) "Patched" else "Signed Only"}")
                 details.add("Signature: ${
                     if (info.matchSignature(AppConfigs.MRV_PUBLIC_SIGNATURE)) "Default" else "Custom"
@@ -137,7 +158,12 @@ object ApkUtil {
                 } ?: info.isPermissionMasked?.also {
                     if (it) details.add("Resolved Conflicts: true")
                 }
-            } ?: details.add("Failed to retrieve apk info: ${file.name}")
+            } catch (e: Exception) {
+                details.add("File: ${raw.name}").add("Size: $size")
+                details.add("Failed to retrieve apk info: ${e.message ?: ""}")
+            } finally {
+                if (file !== raw) file.delete()
+            }
             result.add(details.toString())
         }
         return result.toString()

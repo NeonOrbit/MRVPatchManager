@@ -46,8 +46,8 @@ object AppConfigs {
         type.getName().replace(' ', '-') + if (targetVersion == null) "" else "-versioned"
     }.apk")
 
-    fun getPatchedApkFile(file: File) = ApkUtil.getApkSimpleInfo(file)?.let { info ->
-        info.name.replace(' ', '-') + "-v${info.version}.apk"
+    fun getPatchedApkFile(file: File, base: File?) = ApkUtil.getApkSimpleInfo(base ?: file)?.let { info ->
+        info.name.replace(' ', '-') + "-v${info.version}.${if (base != null) "apks" else "apk"}"
     }?.let { name -> File(PATCHED_APK_DIR, name) }
 
     val DEVICE_ABI: String by lazy {
@@ -70,6 +70,7 @@ object AppConfigs {
     const val DEFAULT_FB_SIGNATURE = ConstantsM.DEFAULT_FB_SIGNATURE
     const val MRV_PUBLIC_SIGNATURE = ConstantsM.DEFAULT_MRV_SIGNATURE
     const val PACKAGE_MASKED_PREFIX = ConstantsM.MASK_PREFIX
+    const val BUNDLE_MASKED_MARKER = ConstantsM.MASK_MARKER
     const val PATCHED_APK_CONFIG_PATH = Constants.CONFIG_ASSET_PATH
     const val PATCHED_APK_PROXY_CLASS = Constants.PROXY_APP_COMPONENT_FACTORY
 

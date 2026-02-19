@@ -20,6 +20,7 @@ class DefaultPatcher(private val input: File, private val options: Options) {
         checkPreconditions()
         initStatusProducer(this)
         MRVPatcher.patch(*buildOptions())
+        send(PatchStatus.PATCHING("verifying apk"))
         if (output.verify()) {
             send(PatchStatus.FINISHED(output))
         } else {
@@ -51,12 +52,13 @@ class DefaultPatcher(private val input: File, private val options: Options) {
         )
     }
 
-    private fun File.verify() = output.exists() && ApkUtil.verifySignature(
+    private fun File.verify() = this.exists() && ApkUtil.verifySignature(
         this, options.customKeystore?.keySignature ?: AppConfigs.MRV_PUBLIC_SIGNATURE
     )
 
     private fun buildOptions() = ArrayList<String>(17).apply {
         add(input.absolutePath)
+        add("--internal-patch")
         add("--temp-dir")
         add(AppConfigs.TEMP_DIR.absolutePath)
         add("--out-file")

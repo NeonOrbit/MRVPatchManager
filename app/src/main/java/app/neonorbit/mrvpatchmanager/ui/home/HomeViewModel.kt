@@ -7,11 +7,13 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppConfigs
+import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.DefaultPatcher
 import app.neonorbit.mrvpatchmanager.DefaultPatcher.PatchStatus
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.R
+import app.neonorbit.mrvpatchmanager.apk.ApkBundles
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.compareVersion
@@ -92,7 +94,12 @@ class HomeViewModel : ViewModel() {
     private val filePickerIntent: Intent by lazy {
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = ApkConfigs.APK_MIME_TYPE
+            type = "*/*"
+            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
+                "application/vnd.android.package-archive",
+                "application/octet-stream",
+                "application/zip"
+            ))
         }
     }
 
@@ -133,7 +140,7 @@ class HomeViewModel : ViewModel() {
 
     fun installModule(force: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO + catcher) {
-            install(repository.getModuleApk(force))
+            autoInstall(repository.getModuleApk(force))
         }.let { job ->
             quickDownloadJob.post(this, job)
         }
@@ -141,7 +148,7 @@ class HomeViewModel : ViewModel() {
 
     fun installManager() {
         viewModelScope.launch(Dispatchers.IO + catcher) {
-            install(repository.getManagerApk())
+            autoInstall(repository.getManagerApk())
         }.let { job ->
             quickDownloadJob.post(this, job)
         }
@@ -177,31 +184,36 @@ class HomeViewModel : ViewModel() {
             return
         }
         skipCheck = false
+        var base: File? = null
         var manual: File? = null
         currentOptions = getPatcherOptions()
         viewModelScope.launch(Dispatchers.Default + catcher) {
-            progressStatus.emit("Progress...")
+            progressStatus.emit("Preparing...")
             progressTracker.emit(ProgressTrack())
             val file = uri?.toTempFile(AppServices.contentResolver)?.also {
                 manual = it
             } ?: app?.takeIf { checkMaskPackage(it) }?.let {
                 getPatchableApkFile(app, target)
             }
-            file?.takeIf {
-                checkPreconditions(file, manual != null).also {
+            file?.takeIf { f ->
+                base = ApkBundles.getBaseApkFromBundle(f)
+                checkPreconditions(base ?: file, manual != null).also {
                     if (!it) progressStatus.emit(null)
                 }
             }?.let {
                 progressTracker.emit(ProgressTrack())
-                patchApk(file)?.let { patched ->
-                    progressTracker.emit(ProgressTrack(100, percent = ""))
-                    install(patched)
+                patchApk(file, base)?.let { patched ->
+                    confirmInstallation(patched).let {
+                        progressTracker.emit(ProgressTrack(100, percent = ""))
+                        if (it) installEvent.post(patched)
+                    }
                 }
             }
         }.let { job ->
             patchingJob = job
             patchingStatus.post(this, true)
             job.invokeOnCompletion {
+                base?.delete()
                 manual?.delete()
                 if (it is CancellationException) {
                     viewModelScope.launch {
@@ -217,8 +229,8 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun patchApk(input: File): File? {
-        val patched = AppConfigs.getPatchedApkFile(input) ?: throw Exception(
+    private suspend fun patchApk(input: File, base: File?): File? {
+        val patched = AppConfigs.getPatchedApkFile(input, base) ?: throw Exception(
             "Failed to retrieve apk file info"
         )
         if (!skipCheck && patched.exists() && !confirmationEvent.ask(
@@ -294,7 +306,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private suspend fun install(download: Flow<DownloadStatus>) {
+    private suspend fun autoInstall(download: Flow<DownloadStatus>) {
         quickDownloadProgress.emit(-1)
         download.onEach { status ->
             when (status) {
@@ -312,22 +324,24 @@ class HomeViewModel : ViewModel() {
             quickDownloadProgress.emit(null)
         }.lastOrNull().let {
             if (it is DownloadStatus.FINISHED) {
-                install(it.file)
+                if (confirmationEvent.ask("Install ${it.file.name}?")) {
+                    AppInstaller.install(AppServices.application, it.file)
+                }
             }
         }
     }
 
-    private suspend fun install(file: File) {
+    private suspend fun confirmInstallation(file: File): Boolean {
         val conflicted = ApkUtil.getConflictedApps(file)
-        if (conflicted.isEmpty()) {
-            if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
-        } else if (confirmationEvent.ask(msg = "Apps with different signatures have been detected.\n" +
+        if (conflicted.isEmpty()) return confirmationEvent.ask("Install ${file.name}?")
+        if (confirmationEvent.ask(msg = "Apps with different signatures have been detected.\n" +
                     "Please uninstall the following apps first:\n" + "[${conflicted.values.joinToString(", ")}]",
                 action = "Uninstall")
-            ) {
+        ) {
             uninstallEvent.post(conflicted.keys)
-            if (confirmationEvent.ask("Install ${file.name}?")) installEvent.post(file)
+            return confirmationEvent.ask("Install ${file.name}?")
         }
+        return false
     }
 
     private suspend fun checkMaskPackage(app: AppType? = null, file: File? = null): Boolean {

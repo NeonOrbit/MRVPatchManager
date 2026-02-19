@@ -16,6 +16,7 @@ object ApkConfigs {
         "nodpi", "360dpi", "400dpi", "420dpi", "480dpi", "560dpi", "640dpi"
     )
 
+    const val ANDROID_MANIFEST = "AndroidManifest.xml"
     const val APK_MIME_TYPE = "application/vnd.android.package-archive"
 
     private val ANDROID_VERSION by lazy { Utils.sdkToVersion(Build.VERSION.SDK_INT) }
