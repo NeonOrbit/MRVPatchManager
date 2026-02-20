@@ -40,9 +40,11 @@ class ApkMirrorVariantData {
 
         val link: String get() = Utils.absoluteUrl(ApkMirrorService.BASE_URL, href)
 
-        val isValidType: Boolean get() = type.trim().lowercase().let {
+        val isValidType: Boolean get() = true
+
+        /*val isValidType: Boolean get() = type.trim().lowercase().let {
             it == "apk" || ("xapk" !in it && "bundle" !in it )
-        }
+        }*/
 
         override fun toString(): String {
             return "arch: $arch, type: $type, dpi: $dpi, minSDk: $minSDk, version: $version, link: $link"

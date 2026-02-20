@@ -27,9 +27,10 @@ class ApkPureReleaseData {
 
         val link: String get() = Utils.absoluteUrl(ApkPureService.BASE_URL, href)
 
-        val isValidType: Boolean get() = type.lowercase().let {
+        val isValidType: Boolean get() = true
+        /*val isValidType: Boolean get() = type.lowercase().let {
             "xapk" !in it || "apk" in it.replace("xapk", "")
-        }
+        }*/
 
         override fun toString(): String {
             return "type: $type, name: $name, link: $link"

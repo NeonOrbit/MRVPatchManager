@@ -45,18 +45,22 @@ object ApkUtil {
     }
 
     fun verifyFbSignature(file: File, strict: Boolean = true): Boolean {
-        return getPackageInfo(file, true)?.takeIf {
-            AppConfigs.DEFAULT_FB_PACKAGES.contains(it.packageName)
-        }?.matchSignature(AppConfigs.DEFAULT_FB_SIGNATURE).let {
-            if (strict) it == true else it != false
+        return ApkBundles.peekBaseApkFromBundle(file) { base ->
+            getPackageInfo(base ?: file, true)?.takeIf {
+                AppConfigs.DEFAULT_FB_PACKAGES.contains(it.packageName)
+            }?.matchSignature(AppConfigs.DEFAULT_FB_SIGNATURE).let {
+                if (strict) it == true else it != false
+            }
         }
     }
 
     fun verifyFbSignatureWithVersion(file: File, version: String?): Boolean {
-        return getPackageInfo(file, true)?.takeIf {
-            ApkConfigs.matchApkVersion(it.versionName, version) &&
-            AppConfigs.DEFAULT_FB_PACKAGES.contains(it.packageName)
-        }?.matchSignature(AppConfigs.DEFAULT_FB_SIGNATURE) == true
+        return ApkBundles.peekBaseApkFromBundle(file) { base ->
+            getPackageInfo(base ?: file, true)?.takeIf {
+                ApkConfigs.matchApkVersion(it.versionName, version) &&
+                        AppConfigs.DEFAULT_FB_PACKAGES.contains(it.packageName)
+            }?.matchSignature(AppConfigs.DEFAULT_FB_SIGNATURE) == true
+        }
     }
 
     fun hasLatestMrvSignedApp(file: File, sig: String? = null): Boolean {

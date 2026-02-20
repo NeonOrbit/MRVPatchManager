@@ -48,7 +48,8 @@ class ApkFlashVariantData {
 
         val link: String get() = Utils.absoluteUrl(ApkFlashService.BASE_URL, href)
 
-        val isValidType: Boolean get() = type.trim().lowercase().let { it == "apk" || "xapk" !in it }
+        val isValidType: Boolean get() = true
+        //val isValidType: Boolean get() = type.trim().lowercase().let { it == "apk" || "xapk" !in it }
 
         override fun toString(): String {
             return "type: $type, version: $version, dpi: $dpi, minSDk: $minSDk, link: $link"

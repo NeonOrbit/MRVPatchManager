@@ -75,7 +75,7 @@ class ApkRemoteFileProvider {
                 if (it is DownloadStatus.FINISHED) {
                     if (!ApkUtil.verifyFbSignature(it.file)) {
                         it.file.delete()
-                        throw SignatureException("Signature failed")
+                        throw SignatureException("Signature verification failed")
                     }
                 }
             }.let { emitAll(it) }

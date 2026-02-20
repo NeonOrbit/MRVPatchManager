@@ -218,6 +218,7 @@ class HomeViewModel : ViewModel() {
                     }
                 }
             }
+            AppServices.clearTempDir()
         }.let { job ->
             patchingJob = job
             patchingStatus.post(this, true)

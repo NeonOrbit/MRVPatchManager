@@ -32,9 +32,10 @@ class ApkMirrorItemData {
         @Selector(value = "a", defValue = "")
         lateinit var text: String
 
-        val isValid: Boolean get() = href.contains("forcebaseapk=true") || text.lowercase().let {
+        val isValid: Boolean get() = true
+        /*val isValid: Boolean get() = href.contains("forcebaseapk=true") || text.lowercase().let {
             "apk" in it && "bundle" !in it
-        }
+        }*/
 
         override fun toString(): String {
             return "text: $text, url: $href"
