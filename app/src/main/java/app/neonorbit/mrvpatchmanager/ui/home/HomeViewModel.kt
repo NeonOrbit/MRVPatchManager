@@ -177,7 +177,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun patch(app: AppType? = null, uri: Uri? = null, target: String? = null) {
+    fun patch(app: AppType? = null, uri: Uri? = null, installed: AppFileData? = null, target: String? = null) {
         if (patchingJob != null) {
             progressStatus.post(this, "Stopping...")
             patchingJob?.cancel()
@@ -185,19 +185,27 @@ class HomeViewModel : ViewModel() {
         }
         skipCheck = false
         var base: File? = null
-        var manual: File? = null
+        val temps = ArrayList<File>()
         currentOptions = getPatcherOptions()
         viewModelScope.launch(Dispatchers.Default + catcher) {
             progressStatus.emit("Preparing...")
             progressTracker.emit(ProgressTrack())
-            val file = uri?.toTempFile(AppServices.contentResolver)?.also {
-                manual = it
+            AppServices.clearTempDir()
+            val file = installed?.let {
+                if (it.splits.isEmpty()) it.base else {
+                    base = it.base
+                    ApkBundles.createTempBundle(it.base, it.splits).also { t ->
+                        temps.add(t)
+                    }
+                }
+            } ?: uri?.toTempFile(AppServices.contentResolver)?.also {
+                temps.add(it)
             } ?: app?.takeIf { checkMaskPackage(it) }?.let {
                 getPatchableApkFile(app, target)
             }
             file?.takeIf { f ->
-                base = ApkBundles.getBaseApkFromBundle(f)
-                checkPreconditions(base ?: file, manual != null).also {
+                base = base ?: ApkBundles.getBaseApkFromBundle(f)?.also { temps.add(it) }
+                checkPreconditions(base ?: file, app == null).also {
                     if (!it) progressStatus.emit(null)
                 }
             }?.let {
@@ -213,8 +221,7 @@ class HomeViewModel : ViewModel() {
             patchingJob = job
             patchingStatus.post(this, true)
             job.invokeOnCompletion {
-                base?.delete()
-                manual?.delete()
+                temps.forEach(File::delete)
                 if (it is CancellationException) {
                     viewModelScope.launch {
                         progressStatus.emit(null)

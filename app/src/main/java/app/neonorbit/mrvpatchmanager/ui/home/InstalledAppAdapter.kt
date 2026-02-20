@@ -29,7 +29,7 @@ class InstalledAppAdapter(private val list: List<AppFileData>) : RecyclerView.Ad
         val item = list[position]
         holder.apkTitle.text = item.name
         Glide.with(holder.itemView)
-            .load(item.file.absolutePath)
+            .load(item.base.absolutePath)
             .placeholder(R.drawable.generic_placeholder)
             .transition(DrawableTransitionOptions.withCrossFade())
             .into(holder.apkIcon)

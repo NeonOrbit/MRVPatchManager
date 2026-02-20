@@ -7,8 +7,10 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStreamReader
+import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 object ApkBundles {
     private const val ANDROID_MANIFEST = ApkConfigs.ANDROID_MANIFEST
@@ -52,6 +54,20 @@ object ApkBundles {
                 }
             }
             baseApk
+        }
+    }
+
+    fun createTempBundle(base: File, splits: List<File>): File {
+        return File.createTempFile("bundle", ".apks", AppConfigs.TEMP_DIR).also { out ->
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(out), 512 * 1024)).use { zos ->
+                zos.setLevel(Deflater.NO_COMPRESSION)
+                (listOf(base) + splits).forEach { file ->
+                    val entry = ZipEntry(if (file === base) "base.apk" else file.name)
+                    zos.putNextEntry(entry)
+                    file.inputStream().use { it.copyTo(zos, 128 * 1024) }
+                    zos.closeEntry()
+                }
+            }
         }
     }
 

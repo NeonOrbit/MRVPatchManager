@@ -116,7 +116,7 @@ class PatchedViewModel : ViewModel() {
             progressState.postValue(true)
             files.forEach { srcFile ->
                 val outFile = outDir.findFile(srcFile.name) ?: outDir.createFile(
-                    ApkConfigs.APK_MIME_TYPE, srcFile.name
+                    "application/octet-stream", srcFile.name
                 ) ?: throw Exception("Failed to create file")
                 AppServices.contentResolver.openOutputStream(outFile.uri)?.use { output ->
                     srcFile.inputStream().use { input ->
@@ -155,6 +155,7 @@ class PatchedViewModel : ViewModel() {
         }
         viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO + catcher) {
             progressState.postValue(true)
+            AppServices.clearTempDir()
             val file = File(item.path)
             val conflicted = ApkUtil.getConflictedApps(file)
             if (conflicted.isEmpty() || confirmationEvent.ask(null,

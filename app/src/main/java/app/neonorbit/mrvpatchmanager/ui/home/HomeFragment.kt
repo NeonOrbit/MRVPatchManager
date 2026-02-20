@@ -10,7 +10,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.widget.PopupMenu
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -192,7 +191,7 @@ class HomeFragment : Fragment(),
                 bind.list.adapter = InstalledAppAdapter(apps).apply {
                     setItemClickListener { item ->
                         dialog.dismiss()
-                        viewModel?.patch(uri = item.file.toUri())
+                        viewModel?.patch(installed = item)
                     }
                 }
             }.show()

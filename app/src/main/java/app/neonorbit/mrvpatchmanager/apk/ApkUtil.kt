@@ -176,7 +176,10 @@ object ApkUtil {
         }
     }.mapNotNull { getPackageInfo(it.packageName) }.sortedWith(Comparator.comparing {
        AppConfigs.FB_ORDERED_PKG_LIST.indexOf(it.packageName).takeIf { i -> i >= 0 } ?: AppConfigs.FB_ORDERED_PKG_LIST.size
-    }).map { AppFileData(it.getAppName(), File(it.apkPath)) }
+    }).map { pi ->
+        val ai = pi.applicationInfo!!
+        AppFileData(pi.getAppName(), File(ai.sourceDir), ai.splitSourceDirs?.map { File(it) } ?: listOf())
+    }
 
     fun isPatched(file: File?) = file?.let { getPackageInfo(it) }?.isPatched() == true
 
@@ -195,8 +198,6 @@ object ApkUtil {
     private val PackageInfo.minAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.minSdkVersion ?: 0)
 
     private val PackageInfo.maxAndroidName get() = "Android " + Utils.sdkToVersion(applicationInfo?.targetSdkVersion ?: 0)
-
-    private val PackageInfo.apkPath get() = applicationInfo!!.publicSourceDir?.takeIf { it.isNotEmpty() } ?: applicationInfo!!.sourceDir
 
     private val PackageInfo.isPermissionMasked get() = permissions?.let { permissions ->
         permissions.any { permission -> permission.name?.startsWith(AppConfigs.PACKAGE_MASKED_PREFIX) == true }
