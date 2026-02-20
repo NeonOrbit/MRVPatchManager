@@ -13,6 +13,7 @@ import app.neonorbit.mrvpatchmanager.DefaultPatcher
 import app.neonorbit.mrvpatchmanager.DefaultPatcher.PatchStatus
 import app.neonorbit.mrvpatchmanager.DefaultPreference
 import app.neonorbit.mrvpatchmanager.R
+import app.neonorbit.mrvpatchmanager.UniversalInstaller
 import app.neonorbit.mrvpatchmanager.apk.ApkBundles
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
@@ -51,7 +52,6 @@ class HomeViewModel : ViewModel() {
     val uriEvent = SingleEvent<Uri>()
     val intentEvent = SingleEvent<Intent>()
     val messageEvent = SingleEvent<String>()
-    val installEvent = SingleEvent<File>()
     val uninstallEvent = SingleEvent<Set<String>>()
     val apkPickerEvent = SingleEvent<Intent>()
     val appPickerEvent = SingleEvent<List<AppFileData>>()
@@ -205,7 +205,7 @@ class HomeViewModel : ViewModel() {
                 patchApk(file, base)?.let { patched ->
                     confirmInstallation(patched).let {
                         progressTracker.emit(ProgressTrack(100, percent = ""))
-                        if (it) installEvent.post(patched)
+                        if (it) UniversalInstaller.install(patched)
                     }
                 }
             }

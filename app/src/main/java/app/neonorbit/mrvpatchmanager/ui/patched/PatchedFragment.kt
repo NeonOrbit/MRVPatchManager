@@ -16,16 +16,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.LinearLayoutManager
-import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
+import app.neonorbit.mrvpatchmanager.UniversalInstaller
 import app.neonorbit.mrvpatchmanager.databinding.FragmentPatchedBinding
 import app.neonorbit.mrvpatchmanager.glide.RecyclerPreloadProvider
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
+import app.neonorbit.mrvpatchmanager.ui.AutoProgressDialog
 import app.neonorbit.mrvpatchmanager.ui.ConfirmationDialog
 import app.neonorbit.mrvpatchmanager.util.AppUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
 import com.bumptech.glide.util.ViewPreloadSizeProvider
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 class PatchedFragment : Fragment(),
     ActionMode.Callback, ApkListAdapter.Callback,
@@ -95,10 +99,6 @@ class PatchedFragment : Fragment(),
             startActivity(intent)
         }
 
-        viewModel!!.installEvent.observeOnUI(viewLifecycleOwner) { file ->
-            AppInstaller.install(requireContext(), file)
-        }
-
         viewModel!!.saveFilesEvent.observeOnUI(viewLifecycleOwner) { intent ->
             saveDirPicker.launch(intent)
         }
@@ -122,12 +122,28 @@ class PatchedFragment : Fragment(),
         )
     }
 
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         actionMode?.finish()
         actionMode = null
         viewModel = null
         binding = null
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    fun onInstallationEvent(event: UniversalInstaller.Event) {
+        AutoProgressDialog.post(this, "PIE", event.msg, event.msg?.let { -1 }, false)
+        if (event.intent != null && UniversalInstaller.isPending()) startActivity(event.intent)
     }
 
     override fun onItemClicked(item: ApkFileData) {

@@ -13,36 +13,59 @@ import app.neonorbit.mrvpatchmanager.databinding.SimpleProgressViewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AutoProgressDialog : DialogFragment() {
-    private var viewModel: AutoProgressViewModel? = null
+    companion object {
+        private const val TITLE = "TitleArgKey"
+        private const val INTERACTIVE = "Interactive"
 
-    @UiThread
-    fun post(parent: Fragment, title: String? = null, progress: Int?) {
-        progress?.let {
-            if (!isAdded(parent)) {
-                if (title != null) setTitle(title)
-                showNow(parent.childFragmentManager, TAG)
+        @UiThread
+        fun post(parent: Fragment, tag: String, title: String?, progress: Int?, interactive: Boolean = true) {
+            val instance = parent.childFragmentManager.findFragmentByTag(tag)?.let { it as AutoProgressDialog }
+            if (progress == null) {
+                instance?.dismiss()
+                return
             }
-            viewModel?.liveProgress?.value = it
-        } ?: finish(parent)
+            ViewModelProvider(parent)[AutoProgressViewModel::class.java].liveProgress.value = progress
+            if (instance == null || (instance.dialog?.isShowing != true && !parent.childFragmentManager.isStateSaved)) {
+                instance?.dismiss()
+                AutoProgressDialog().apply {
+                    isCancelable = false
+                    arguments = Bundle()
+                    setTitle(title ?: "Progress")
+                    setInteractive(interactive)
+                    showNow(parent.childFragmentManager, tag)
+                }
+            } else {
+                instance.dialog?.setTitle(title)
+            }
+        }
+    }
+
+    class AutoProgressViewModel : ViewModel() {
+        val liveProgress: MutableLiveData<Int> = MutableLiveData()
+    }
+
+    private val viewModel by lazy {
+        ViewModelProvider(requireParentFragment())[AutoProgressViewModel::class.java]
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val binding = SimpleProgressViewBinding.inflate(layoutInflater)
-        viewModel = ViewModelProvider(this)[AutoProgressViewModel::class.java]
-        viewModel?.liveProgress?.observe(this) {
+        viewModel.liveProgress.observe(this) {
             binding.progressBar.progress = it
             binding.progressBar.isIndeterminate = it < 0
         }
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(arguments?.getString(TITLE))
             .setView(binding.root)
-            .setNegativeButton(getString(android.R.string.cancel)) { _,_->
-                listener?.onProgressCancelled()
+            .also {
+                if (isInteractive()) it.setNegativeButton(getString(android.R.string.cancel)) { _,_->
+                    listener?.onProgressCancelled()
+                }
             }.create()
     }
 
     override fun dismiss() {
-        super.dismissNow()
+        super.dismissAllowingStateLoss()
     }
 
     override fun onCancel(dialog: DialogInterface) {
@@ -50,46 +73,21 @@ class AutoProgressDialog : DialogFragment() {
         listener?.onProgressCancelled()
     }
 
-    private fun setTitle(title: String) {
-        arguments?.putString(TITLE, title)
-    }
-
-    private fun finish(parent: Fragment) {
-        getFragment(parent)?.dismissNow()
-    }
-
     interface OnCancelListener {
         fun onProgressCancelled()
     }
 
-    private val listener: OnCancelListener? get() = parentFragment?.let {
-        if (it is OnCancelListener) it else null
+    private val listener: OnCancelListener? get() = parentFragment as? OnCancelListener
+
+    private fun setTitle(title: String) {
+        arguments?.putString(TITLE, title)
     }
 
-    private fun isAdded(parent: Fragment): Boolean {
-        return getFragment(parent)?.isAdded == true
+    private fun setInteractive(interactive: Boolean) {
+        arguments?.putBoolean(INTERACTIVE, interactive)
     }
 
-    private fun getFragment(parent: Fragment): AutoProgressDialog? {
-        return parent.childFragmentManager.findFragmentByTag(TAG)?.let {
-            it as AutoProgressDialog
-        }
-    }
-
-    companion object {
-        private const val TAG = "QuickProgress"
-        private const val TITLE = "TitleArgKey"
-
-        fun newInstance(title: String = "Progress"): AutoProgressDialog {
-            return AutoProgressDialog().apply {
-                isCancelable = false
-                arguments = Bundle()
-                setTitle(title)
-            }
-        }
-    }
-
-    class AutoProgressViewModel : ViewModel() {
-        val liveProgress: MutableLiveData<Int> = MutableLiveData()
+    private fun isInteractive(): Boolean {
+        return arguments?.getBoolean(INTERACTIVE) != false
     }
 }

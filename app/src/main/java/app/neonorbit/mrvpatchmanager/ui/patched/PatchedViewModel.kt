@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppServices
+import app.neonorbit.mrvpatchmanager.UniversalInstaller
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.error
@@ -27,7 +28,6 @@ class PatchedViewModel : ViewModel() {
 
     val intentEvent = SingleEvent<Intent>()
     val dialogEvent = SingleEvent<String>()
-    val installEvent = SingleEvent<File>()
     val saveFilesEvent = SingleEvent<Intent>()
     val confirmationEvent = ConfirmationEvent()
     val progressState = MutableLiveData<Boolean>()
@@ -147,7 +147,13 @@ class PatchedViewModel : ViewModel() {
     }
 
     fun installApk(item: ApkFileData) {
-        viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO) {
+        if (mutex.isLocked) return
+        val catcher = CoroutineExceptionHandler { _, it ->
+            viewModelScope.launch(Dispatchers.Main) {
+                AppServices.showToast(it.error)
+            }
+        }
+        viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO + catcher) {
             progressState.postValue(true)
             val file = File(item.path)
             val conflicted = ApkUtil.getConflictedApps(file)
@@ -156,7 +162,7 @@ class PatchedViewModel : ViewModel() {
                             "[${conflicted.values.joinToString(", ")}]",
                     "Install Anyway"
                 )) {
-                installEvent.post(file)
+                UniversalInstaller.install(file)
             }
         }.invokeOnCompletion {
             progressState.postValue(false)

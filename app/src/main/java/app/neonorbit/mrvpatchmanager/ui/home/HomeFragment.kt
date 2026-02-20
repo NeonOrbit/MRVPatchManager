@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppInstaller
 import app.neonorbit.mrvpatchmanager.R
+import app.neonorbit.mrvpatchmanager.UniversalInstaller
 import app.neonorbit.mrvpatchmanager.data.AppFileData
 import app.neonorbit.mrvpatchmanager.data.AppItemData
 import app.neonorbit.mrvpatchmanager.data.UpdateEventData
@@ -41,7 +42,6 @@ class HomeFragment : Fragment(),
     private var viewModel: HomeViewModel? = null
     private lateinit var apkPicker: ActivityResultLauncher<Intent>
     private val uriLauncher by lazy { CustomTabsIntent.Builder().build() }
-    private val autoProgressDialog by lazy { AutoProgressDialog.newInstance() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,7 +75,7 @@ class HomeFragment : Fragment(),
         }
 
         viewModel!!.quickDownloadProgress.observeOnUI(viewLifecycleOwner) { progress ->
-            autoProgressDialog.post(this, "Downloading", progress)
+            AutoProgressDialog.post(this, "HDL", "Downloading", progress)
         }
 
         viewModel!!.progressStatus.observeOnUI(viewLifecycleOwner) {
@@ -151,10 +151,6 @@ class HomeFragment : Fragment(),
             uriLauncher.launchUrl(requireContext(), it)
         }
 
-        viewModel!!.installEvent.observeOnUI(viewLifecycleOwner) { file ->
-            AppInstaller.install(requireContext(), file)
-        }
-
         viewModel!!.uninstallEvent.observeOnUI(viewLifecycleOwner) { packages ->
             packages.forEach {
                 AppInstaller.uninstall(requireContext(), it)
@@ -221,14 +217,20 @@ class HomeFragment : Fragment(),
     }
 
     override fun onStop() {
-        super.onStop()
         EventBus.getDefault().unregister(this)
+        super.onStop()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel = null
         binding = null
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    fun onInstallationEvent(event: UniversalInstaller.Event) {
+        AutoProgressDialog.post(this, "HIE", event.msg, event.msg?.let { -1 }, false)
+        if (event.intent != null && UniversalInstaller.isPending()) startActivity(event.intent)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
