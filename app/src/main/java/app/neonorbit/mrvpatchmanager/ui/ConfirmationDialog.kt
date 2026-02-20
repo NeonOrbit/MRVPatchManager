@@ -35,9 +35,7 @@ class ConfirmationDialog : DialogFragment() {
         fun onResponse(response: Boolean)
     }
 
-    private val listener: ResponseListener? get() = parentFragment?.let {
-        if (it is ResponseListener) it else null
-    }
+    private val listener: ResponseListener? get() = parentFragment as? ResponseListener
 
     companion object {
         private const val TAG = "Confirmation"

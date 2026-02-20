@@ -1,5 +1,6 @@
 package app.neonorbit.mrvpatchmanager
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.BroadcastReceiver
@@ -37,6 +38,7 @@ object AppInstaller {
     }
 
     @Suppress("Deprecation")
+    @SuppressLint("RequestInstallPackagesPolicy")
     fun install(context: Context, file: File) {
         val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

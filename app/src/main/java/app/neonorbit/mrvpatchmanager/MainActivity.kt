@@ -1,12 +1,12 @@
 package app.neonorbit.mrvpatchmanager
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.tutorial -> {
                 startActivity(Intent(
-                    Intent.ACTION_VIEW, Uri.parse(AppConfigs.TUTORIAL_URL)
+                    Intent.ACTION_VIEW, AppConfigs.TUTORIAL_URL.toUri()
                 ))
                 true
             }

@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import app.neonorbit.mrvpatchmanager.keystore.KeystoreData
 import app.neonorbit.mrvpatchmanager.ui.settings.PreferenceAdvancedFragment
 import app.neonorbit.mrvpatchmanager.ui.settings.PreferenceFragment
+import androidx.core.content.edit
 
 @Suppress("Unused", "SameParameterValue")
 object DefaultPreference {
@@ -40,7 +41,7 @@ object DefaultPreference {
 
     fun putString(key: String, value: String?) {
         if (value == null) remove(key)
-        else preferences.edit().putString(key, value).apply()
+        else preferences.edit { putString(key, value) }
     }
 
     private fun getStringList(key: String, del: Char, trim: Boolean): List<String>? {
@@ -54,18 +55,18 @@ object DefaultPreference {
     }
 
     private fun putBoolean(key: String, value: Boolean) {
-        preferences.edit().putBoolean(key, value).apply()
+        preferences.edit { putBoolean(key, value) }
     }
 
     private fun remove(key: String) {
-        preferences.edit().remove(key).apply()
+        preferences.edit { remove(key) }
     }
 
     fun getCache(key: String): String? = cache.getString(key, null)
 
     fun putCache(key: String, value: String?) = value?.let {
-        cache.edit().putString(key, it).apply()
+        cache.edit { putString(key, it) }
     } ?: remove(key)
 
-    fun clearCache() = cache.edit().clear().apply()
+    fun clearCache() = cache.edit { clear() }
 }

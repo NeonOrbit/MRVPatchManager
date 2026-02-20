@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.annotation.StringRes
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.neonorbit.mrvpatchmanager.AppConfigs
@@ -34,6 +35,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -43,7 +45,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.StringJoiner
-import kotlin.coroutines.coroutineContext
 
 class HomeViewModel : ViewModel() {
     private val repository = ApkRepository()
@@ -135,8 +136,8 @@ class HomeViewModel : ViewModel() {
     }
 
     fun showModuleInfo() = intentEvent.post(viewModelScope, moduleInfoIntent)
-    fun visitModule() = uriEvent.post(viewModelScope, Uri.parse(AppConfigs.MODULE_LATEST_URL))
-    fun visitManager() = uriEvent.post(viewModelScope, Uri.parse(AppConfigs.MANAGER_LATEST_URL))
+    fun visitModule() = uriEvent.post(viewModelScope, AppConfigs.MODULE_LATEST_URL.toUri())
+    fun visitManager() = uriEvent.post(viewModelScope, AppConfigs.MANAGER_LATEST_URL.toUri())
 
     fun installModule(force: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO + catcher) {
@@ -282,7 +283,7 @@ class HomeViewModel : ViewModel() {
                     if (ApkUtil.hasLatestMrvSignedApp(type.getPackage(), version, customSig) && !confirmationEvent.ask(
                             "Already on the latest version, download anyway?"
                     ).also { skipCheck = it }) {
-                        coroutineContext[Job]?.cancel() ?: throw CancellationException()
+                        currentCoroutineContext()[Job]?.cancel() ?: throw CancellationException()
                     }
                 }
                 is DownloadStatus.DOWNLOADING -> {

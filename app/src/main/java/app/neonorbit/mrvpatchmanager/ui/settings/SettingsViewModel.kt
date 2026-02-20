@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.core.net.toUri
 
 class SettingsViewModel : ViewModel() {
     val uriEvent = SingleEvent<Uri>()
@@ -86,10 +87,10 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun visitHelp() {
-        uriEvent.post(viewModelScope, Uri.parse(AppConfigs.HELP_FORUM_URL))
+        uriEvent.post(viewModelScope, AppConfigs.HELP_FORUM_URL.toUri())
     }
 
     fun visitGithub() {
-        uriEvent.post(viewModelScope, Uri.parse(AppConfigs.GITHUB_REPO_URL))
+        uriEvent.post(viewModelScope, AppConfigs.GITHUB_REPO_URL.toUri())
     }
 }

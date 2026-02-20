@@ -10,8 +10,7 @@ import app.neonorbit.mrvpatchmanager.removeFirstIf
 import app.neonorbit.mrvpatchmanager.repository.data.ApkFileData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -19,7 +18,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.WeakHashMap
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.coroutineContext
 
 class ApkInfoPreloader(private val lifecycleOwner: LifecycleOwner,
                        private val maxPreload: Int,
@@ -83,20 +81,17 @@ class ApkInfoPreloader(private val lifecycleOwner: LifecycleOwner,
         }
     }
 
-    private suspend fun preloadAndUpdate() {
-        val jobs = ArrayList<Job>(maxPreload)
+    private suspend fun preloadAndUpdate() = coroutineScope {
         for (position in nextPreloadRange()) {
             val path = items[position].path
-            coroutineContext.ensureActive()
-            lifecycleScope.launch(coroutineContext) {
+            launch {
                 ApkUtil.getApkSummery(File(path)).let { info ->
                     cached[position] = (info ?: items[position].version).also {
                         updateViewFor(position, it)
                     }
                 }
-            }.also { jobs.add(it) }
+            }
         }
-        jobs.joinAll()
         updateRequestedViews()
     }
 
