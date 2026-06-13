@@ -43,6 +43,8 @@ object AppServices {
         })
     }
 
+    fun canRequestInstalls() = packageManager.canRequestPackageInstalls()
+
     @WorkerThread
     fun isNetworkOnline() = SystemServices.Network.isOnline(application)
 

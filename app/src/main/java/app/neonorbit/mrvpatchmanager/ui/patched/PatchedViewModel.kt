@@ -1,16 +1,20 @@
 package app.neonorbit.mrvpatchmanager.ui.patched
 
 import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.UniversalInstaller
 import app.neonorbit.mrvpatchmanager.apk.ApkConfigs
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
+import app.neonorbit.mrvpatchmanager.event.PendingEvent
 import app.neonorbit.mrvpatchmanager.event.SingleEvent
 import app.neonorbit.mrvpatchmanager.existAnyIn
 import app.neonorbit.mrvpatchmanager.launchSyncedBlock
@@ -31,6 +35,7 @@ class PatchedViewModel : ViewModel() {
     val saveFilesEvent = SingleEvent<Intent>()
     val confirmationEvent = ConfirmationEvent()
     val progressState = MutableLiveData<Boolean>()
+    val permissionEvent = PendingEvent<Intent, Boolean>()
 
     val patchedApkList by lazy {
         MutableLiveData<List<ApkFileData>>()
@@ -155,13 +160,25 @@ class PatchedViewModel : ViewModel() {
         }
         viewModelScope.launchSyncedBlock(mutex, Dispatchers.IO + catcher) {
             progressState.postValue(true)
+            if (!AppServices.canRequestInstalls()) {
+                if (!confirmationEvent.ask(
+                        msg = "To continue, please allow permission to install apps.", action = "Allow"
+                    )) return@launchSyncedBlock
+                if (!permissionEvent.waitForResult(
+                        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                            data = Uri.fromParts("package", AppConfigs.MANAGER_PACKAGE, null)
+                        })) {
+                    AppServices.showToast("Please allow permission to install apps.", true)
+                    return@launchSyncedBlock
+                }
+            }
             AppServices.clearTempDir()
             val file = File(item.path)
             val conflicted = ApkUtil.getConflictedApps(file)
-            if (conflicted.isEmpty() || confirmationEvent.ask(null,
-                    "Installation may fail due to conflicting apk signatures with the following apps:\n" +
+            if (conflicted.isEmpty() || confirmationEvent.ask(
+                    msg = "Installation may fail due to conflicting apk signatures with the following apps:\n" +
                             "[${conflicted.values.joinToString(", ")}]",
-                    "Install Anyway"
+                    action = "Install Anyway"
                 )) {
                 UniversalInstaller.install(file)
             }

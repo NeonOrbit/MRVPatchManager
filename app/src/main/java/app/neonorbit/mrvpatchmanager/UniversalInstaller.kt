@@ -41,7 +41,7 @@ object UniversalInstaller {
                 }
                 else -> {
                     val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
-                    AppServices.showToast("Install failed: $msg", long = true)
+                    AppServices.showToast("Failed: $msg", long = true)
                     Utils.error("Install failed: $msg")
                 }
             }

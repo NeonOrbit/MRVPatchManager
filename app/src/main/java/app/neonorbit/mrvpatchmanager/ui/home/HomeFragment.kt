@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.neonorbit.mrvpatchmanager.AppConfigs
 import app.neonorbit.mrvpatchmanager.AppInstaller
+import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.UniversalInstaller
 import app.neonorbit.mrvpatchmanager.data.AppFileData
@@ -41,6 +42,7 @@ class HomeFragment : Fragment(),
     private var viewModel: HomeViewModel? = null
     private lateinit var apkPicker: ActivityResultLauncher<Intent>
     private val uriLauncher by lazy { CustomTabsIntent.Builder().build() }
+    private lateinit var permissionLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +55,9 @@ class HomeFragment : Fragment(),
             result?.data?.data?.let {
                 viewModel?.patch(uri = it)
             }
+        }
+        permissionLauncher = registerForActivityResult(StartActivityForResult()) { _ ->
+            viewModel?.permissionEvent?.sendResult(AppServices.canRequestInstalls())
         }
         initializeFragment()
         return binding!!.root
@@ -150,6 +155,10 @@ class HomeFragment : Fragment(),
             uriLauncher.launchUrl(requireContext(), it)
         }
 
+        viewModel!!.permissionEvent.observeOnUI(viewLifecycleOwner) { event ->
+            permissionLauncher.launch(event.data)
+        }
+
         viewModel!!.uninstallEvent.observeOnUI(viewLifecycleOwner) { packages ->
             packages.forEach {
                 AppInstaller.uninstall(requireContext(), it)
@@ -228,6 +237,7 @@ class HomeFragment : Fragment(),
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     fun onInstallationEvent(event: UniversalInstaller.Event) {
+        EventBus.getDefault().removeStickyEvent(event)
         AutoProgressDialog.post(this, "HIE", event.msg, event.msg?.let { -1 }, false)
         if (event.intent != null && UniversalInstaller.isPending()) startActivity(event.intent)
     }

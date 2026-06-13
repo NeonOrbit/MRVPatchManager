@@ -24,6 +24,7 @@ import app.neonorbit.mrvpatchmanager.data.AppType
 import app.neonorbit.mrvpatchmanager.download.DownloadStatus
 import app.neonorbit.mrvpatchmanager.error
 import app.neonorbit.mrvpatchmanager.event.ConfirmationEvent
+import app.neonorbit.mrvpatchmanager.event.PendingEvent
 import app.neonorbit.mrvpatchmanager.event.SingleEvent
 import app.neonorbit.mrvpatchmanager.post
 import app.neonorbit.mrvpatchmanager.remote.GithubService
@@ -57,6 +58,7 @@ class HomeViewModel : ViewModel() {
     val apkPickerEvent = SingleEvent<Intent>()
     val appPickerEvent = SingleEvent<List<AppFileData>>()
     val confirmationEvent = ConfirmationEvent()
+    val permissionEvent = PendingEvent<Intent, Boolean>()
 
     val patchingStatus = MutableStateFlow(false)
     val progressStatus = MutableStateFlow<String?>(null)
@@ -342,15 +344,25 @@ class HomeViewModel : ViewModel() {
 
     private suspend fun confirmInstallation(file: File): Boolean {
         val conflicted = ApkUtil.getConflictedApps(file)
-        if (conflicted.isEmpty()) return confirmationEvent.ask("Install ${file.name}?")
-        if (confirmationEvent.ask(msg = "Apps with different signatures have been detected.\n" +
-                    "Please uninstall the following apps first:\n" + "[${conflicted.values.joinToString(", ")}]",
+        var install = if (conflicted.isEmpty()) confirmationEvent.ask("Install ${file.name}?")
+        else if (confirmationEvent.ask(
+                msg = "Apps with different signatures have been detected.\n" +
+                        "Please uninstall the following apps first:\n" +
+                        "[${conflicted.values.joinToString(", ")}]",
                 action = "Uninstall")
         ) {
             uninstallEvent.post(conflicted.keys)
-            return confirmationEvent.ask("Install ${file.name}?")
+            confirmationEvent.ask("Install ${file.name}?")
+        } else false
+        if (install && !AppServices.canRequestInstalls()) {
+            if (!permissionEvent.waitForResult(Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, "package:${AppConfigs.MANAGER_PACKAGE}".toUri()
+            ))) {
+                AppServices.showToast("Please allow permission to install apps.", true)
+                install = false
+            }
         }
-        return false
+        return install
     }
 
     private suspend fun checkMaskPackage(app: AppType? = null, file: File? = null): Boolean {

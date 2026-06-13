@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.R
 import app.neonorbit.mrvpatchmanager.UniversalInstaller
 import app.neonorbit.mrvpatchmanager.databinding.FragmentPatchedBinding
@@ -40,6 +41,7 @@ class PatchedFragment : Fragment(),
     private var tracker: SelectionTracker<Long>? = null
     private var actionMode: ActionMode? = null
     private lateinit var saveDirPicker: ActivityResultLauncher<Intent>
+    private lateinit var permissionLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,8 +53,11 @@ class PatchedFragment : Fragment(),
         saveDirPicker = registerForActivityResult(StartActivityForResult()) { result ->
             result?.data?.let { viewModel?.onSaveDirectoryPicked(it) }
         }
-        binding!!.progressBar.isVisible = true
+        permissionLauncher = registerForActivityResult(StartActivityForResult()) { _ ->
+            viewModel?.permissionEvent?.sendResult(AppServices.canRequestInstalls())
+        }
 
+        binding!!.progressBar.isVisible = true
         val recyclerAdapter = ApkListAdapter()
         val recyclerView = binding!!.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -103,6 +108,10 @@ class PatchedFragment : Fragment(),
             saveDirPicker.launch(intent)
         }
 
+        viewModel!!.permissionEvent.observeOnUI(viewLifecycleOwner) { event ->
+            permissionLauncher.launch(event.data)
+        }
+
         viewModel!!.confirmationEvent.observeOnUI(viewLifecycleOwner) { event ->
             ConfirmationDialog.show(
                 this@PatchedFragment, event.title, event.message, event.action
@@ -142,6 +151,7 @@ class PatchedFragment : Fragment(),
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     fun onInstallationEvent(event: UniversalInstaller.Event) {
+        EventBus.getDefault().removeStickyEvent(event)
         AutoProgressDialog.post(this, "PIE", event.msg, event.msg?.let { -1 }, false)
         if (event.intent != null && UniversalInstaller.isPending()) startActivity(event.intent)
     }
