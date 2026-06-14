@@ -6,7 +6,7 @@ import app.neonorbit.mrvpatchmanager.util.Utils
 import pl.droidsonroids.jspoon.annotation.Selector
 
 class ApkPureReleaseData {
-    @Selector(value = "a.ver_download_link")
+    @Selector(value = "a.ver-item-n, a.dt-version-name-link")
     var releases: List<Release> = listOf()
 
     override fun toString(): String {
@@ -14,13 +14,13 @@ class ApkPureReleaseData {
     }
 
     class Release {
-        @Selector(".ver-item-type", defValue = "")
-        private lateinit var type: String
+        /*@Selector(".ver-item-type", defValue = "")
+        private lateinit var type: String*/
 
-        @Selector("a.ver_download_link", attr = "href")
+        @Selector("a.ver-item-n, a.dt-version-name-link", attr = "href")
         private lateinit var href: String
 
-        @Selector(".ver-item-n", defValue = "")
+        @Selector("a.ver-item-n, a.dt-version-name-link", defValue = "")
         lateinit var name: String
 
         val version: String? get() = ApkConfigs.extractVersionName(name)
@@ -33,7 +33,7 @@ class ApkPureReleaseData {
         }*/
 
         override fun toString(): String {
-            return "type: $type, name: $name, link: $link"
+            return "name: $name, link: $link"
         }
     }
 }
