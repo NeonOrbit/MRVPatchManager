@@ -2,6 +2,7 @@ package app.neonorbit.mrvpatchmanager.util
 
 import android.content.Context
 import androidx.annotation.StringRes
+import app.neonorbit.mrvpatchmanager.AppServices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 object AppUtil {
@@ -55,5 +56,16 @@ object AppUtil {
 
     fun show(context: Context, message: String) {
         MaterialAlertDialogBuilder(context).setMessage(message).show()
+    }
+
+    fun show(context: Context, title: String, message: String, copyable: Boolean = false) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(title).setMessage(message)
+            .also {
+                if (copyable) it.setPositiveButton(android.R.string.copy) { _,_->
+                    AppServices.copyToClipboard(message)
+                }
+            }
+            .show()
     }
 }

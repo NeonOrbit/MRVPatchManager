@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.ZipFile
 
 object UniversalInstaller {
-    data class Event(val msg: String? = null, val intent: Intent? = null)
+    data class Event(val msg: String? = null, val err: String? = null, val intent: Intent? = null)
     private const val ACTION_INSTALL = ".ACTION_INSTALL_STATUS"
     private val currentSession: AtomicInteger = AtomicInteger(-1)
 
@@ -41,7 +41,7 @@ object UniversalInstaller {
                 }
                 else -> {
                     val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
-                    AppServices.showToast("Failed: $msg", long = true)
+                    EventBus.getDefault().postSticky(Event(err = msg))
                     Utils.error("Install failed: $msg")
                 }
             }

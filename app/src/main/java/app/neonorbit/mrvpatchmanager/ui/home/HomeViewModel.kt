@@ -310,8 +310,8 @@ class HomeViewModel : ViewModel() {
                 }
             }
         }.catch {
-            progressStatus.emit("Download Error: ${it.message}")
             progressTracker.emit(ProgressTrack(0))
+            progressStatus.emit(getDlErrorMessage(it.message, target == null))
         }.lastOrNull()?.let {
             if (it is DownloadStatus.FINISHED) it.file else null
         }
@@ -419,4 +419,12 @@ class HomeViewModel : ViewModel() {
         }.toString().takeIf { it.isNotEmpty() }
     }
     private fun getEnabledString(@StringRes resId: Int) = "[Enabled] -> [${AppServices.application.getString(resId)}]"
+
+    private fun getDlErrorMessage(error: String?, note: Boolean): String {
+        var msg = "Download Failed"
+        if (error != null) msg += ": $error"
+        if (note && error?.contains("No internet") != true) msg += "\n\nNote: If the download keeps failing, " +
+                "please go to apkmirror.com to get the apk manually, and then patch it using the MANUAL option."
+        return msg
+    }
 }

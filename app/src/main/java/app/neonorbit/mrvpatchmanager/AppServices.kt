@@ -1,5 +1,7 @@
 package app.neonorbit.mrvpatchmanager
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ContentResolver
 import android.content.Context
 import android.content.SharedPreferences
@@ -37,6 +39,8 @@ object AppServices {
 
     val contentResolver: ContentResolver by lazy { application.contentResolver }
 
+    val clipboardManager by lazy { application.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+
     val globalScope: CoroutineScope by lazy {
         CoroutineScope(SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
             Utils.error("Global Coroutine Exception: ${throwable.message}", throwable)
@@ -67,6 +71,10 @@ object AppServices {
     }
 
     private fun File.init() = apply { if (!exists()) mkdirs() }
+
+    fun copyToClipboard(text: String) {
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", text))
+    }
 
     fun showToast(@StringRes resId: Int, long: Boolean = false) {
         showToast(application.getString(resId), long)

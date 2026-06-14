@@ -239,7 +239,8 @@ class HomeFragment : Fragment(),
     fun onInstallationEvent(event: UniversalInstaller.Event) {
         EventBus.getDefault().removeStickyEvent(event)
         AutoProgressDialog.post(this, "HIE", event.msg, event.msg?.let { -1 }, false)
-        if (event.intent != null && UniversalInstaller.isPending()) startActivity(event.intent)
+        if (event.err != null) AppUtil.show(requireContext(), "Installation Failed", event.err, true)
+        else if (event.intent != null && UniversalInstaller.isPending()) startActivity(event.intent)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
