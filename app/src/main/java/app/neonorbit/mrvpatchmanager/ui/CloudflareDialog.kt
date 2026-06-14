@@ -11,9 +11,11 @@ import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.DialogFragment
+import app.neonorbit.mrvpatchmanager.AppServices
 import app.neonorbit.mrvpatchmanager.MainActivity
 import app.neonorbit.mrvpatchmanager.network.CloudflareInterceptor
 import app.neonorbit.mrvpatchmanager.network.RetrofitClient
+import app.neonorbit.mrvpatchmanager.util.Utils
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
 
 class CloudflareDialog(private val lock: CloudflareInterceptor.CfLock) : DialogFragment() {
@@ -21,6 +23,7 @@ class CloudflareDialog(private val lock: CloudflareInterceptor.CfLock) : DialogF
         private const val URL_ARG = "url"
         private const val STALE_ARG = "stale"
         fun show(lock: CloudflareInterceptor.CfLock, url: String, staleCookie: String?) {
+            checkWebViewSupport()
             val fragment = CloudflareDialog(lock).apply {
                 arguments = Bundle().apply {
                     putString(URL_ARG, url)
@@ -28,6 +31,14 @@ class CloudflareDialog(private val lock: CloudflareInterceptor.CfLock) : DialogF
                 }
             }
             fragment.show(MainActivity.current.supportFragmentManager, "cloudflare_solver")
+        }
+        private fun checkWebViewSupport() {
+            try {
+                if (WebView.getCurrentWebViewPackage()?.versionName?.split(".")?.
+                    firstOrNull()?.toIntOrNull()?.let { it < 120 } == true) {
+                    AppServices.showToast("Please update WebView (Android System WebView)", true)
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -44,13 +55,19 @@ class CloudflareDialog(private val lock: CloudflareInterceptor.CfLock) : DialogF
             }
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
-                    CookieManager.getInstance().flush()
-                    CookieManager.getInstance().getCookie(url).let { cookie ->
-                        if (isClearanceUpdated(stale, cookie)) {
-                            cookie.LOG("Cloudflare cookies obtained")
-                            lock.release()
-                            dismiss()
+                    try {
+                        CookieManager.getInstance().flush()
+                        CookieManager.getInstance().getCookie(url).let { cookie ->
+                            if (isClearanceUpdated(stale, cookie)) {
+                                cookie.LOG("Cloudflare cookies obtained")
+                                lock.release()
+                                dismiss()
+                            }
                         }
+                    } catch (e: Exception) {
+                        Utils.warn("[CloudflareDialog] Cookie error", e)
+                        lock.release()
+                        dismiss()
                     }
                 }
             }

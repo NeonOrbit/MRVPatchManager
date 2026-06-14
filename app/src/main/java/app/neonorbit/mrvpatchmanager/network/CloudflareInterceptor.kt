@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.webkit.CookieManager
 import app.neonorbit.mrvpatchmanager.ui.CloudflareDialog
+import app.neonorbit.mrvpatchmanager.util.Utils
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -28,7 +29,12 @@ class CloudflareInterceptor : Interceptor {
         // https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/
         if (response.header("cf-mitigated")?.contains("challenge", true) == true) {
             response.close()
-            val cookieManager = CookieManager.getInstance()
+            val cookieManager = try {
+                CookieManager.getInstance()
+            } catch (e: Exception) {
+                Utils.warn("[CloudflareInterceptor] Cookie error", e)
+                return chain.proceed(request)
+            }
             val staleCookie = cookieManager.getCookie(url)
             synchronized(lock) {
                 val currentCookie = cookieManager.getCookie(url)

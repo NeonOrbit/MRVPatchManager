@@ -30,13 +30,18 @@ object RetrofitClient {
     val cookieJar = object : CookieJar {
         override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
         override fun loadForRequest(url: HttpUrl): List<Cookie> {
-            val cookieString = CookieManager.getInstance().getCookie(url.toString())
-            val cookies = mutableListOf<Cookie>()
-            cookieString?.split(";")?.forEach {
-                Cookie.parse(url, it.trim())?.let { c -> cookies.add(c) }
+            return try {
+                val cookieString = CookieManager.getInstance().getCookie(url.toString())
+                val cookies = mutableListOf<Cookie>()
+                cookieString?.split(";")?.forEach {
+                    Cookie.parse(url, it.trim())?.let { c -> cookies.add(c) }
+                }
+                if (cookies.isNotEmpty()) Utils.log("Cookies found [${url.host}]: $cookies")
+                return cookies
+            } catch (e: Exception) {
+                Utils.warn("[RetrofitClient] Cookie error for ${url.host}", e)
+                ArrayList()
             }
-            if (cookies.isNotEmpty()) Utils.log("Cookies found [${url.host}]: $cookies")
-            return cookies
         }
     }
 
