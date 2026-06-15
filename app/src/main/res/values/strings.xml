@@ -61,11 +61,11 @@
     <string name="pref_apk_server_title">Apk download server</string>
     <string name="pref_apk_server_summery">Pick a server for APK downloads.</string>
     <string name="pref_fix_conflict_title">Resolve apk conflicts</string>
-    <string name="pref_fix_conflict_summery">If you are unable to remove the preinstalled fb apps.</string>
+    <string name="pref_fix_conflict_summery">Enable if you can\'t remove the preinstalled Meta apps.</string>
     <string name="pref_mask_package_title">Mask package name</string>
-    <string name="pref_mask_package_summery">If unable to remove the original messenger app.</string>
+    <string name="pref_mask_package_summery">Enable if you can\'t remove the original Messenger app.</string>
     <string name="pref_fallback_mode_title">Fallback patch mode</string>
-    <string name="pref_fallback_mode_summery">If patched apps do not work after some time.</string>
+    <string name="pref_fallback_mode_summery">Use an alternative fallback patching method.</string>
     <string name="pref_advanced_settings_title">Advanced configurations</string>
     <string name="pref_advanced_settings_summery">Intended for advanced users only.</string>
 
@@ -91,65 +91,67 @@
     <string name="pref_instruction_title">Instructions</string>
     <string name="pref_instruction_summery">Read the usage instructions.</string>
     <string name="pref_troubleshoot_title">Troubleshoot</string>
-    <string name="pref_troubleshoot_summery">Common issues and their solutions.</string>
+    <string name="pref_troubleshoot_summery">Common issues and solutions.</string>
     <string name="pref_safety_note_title">Safety Note</string>
-    <string name="pref_safety_note_summery">Having safety concerns?</string>
+    <string name="pref_safety_note_summery">Having security concerns?</string>
     <string name="pref_visit_help_title">Help Forum</string>
-    <string name="pref_visit_help_summery">Visit the help forum to ask your question.</string>
+    <string name="pref_visit_help_summery">Visit the XDA help forum.</string>
     <string name="pref_visit_source_title">Source Code</string>
-    <string name="pref_visit_source_summery">Visit the github repository of the project.</string>
+    <string name="pref_visit_source_summery">Visit the project\'s GitHub repository.</string>
     <string name="pref_extra_modules_invalid_pkg">Invalid package name: %s</string>
     <string name="pref_clear_cache_confirm_prompt">Clear cache</string>
-    <string name="pref_clear_cache_confirm_message">"This won\'t delete your patched apps."</string>
+    <string name="pref_clear_cache_confirm_message">"This will not delete your patched apps."</string>
 
-    <string name="pref_fix_conflict_confirm_message">Enabling this option will allow you
-        to install patched Messenger alongside the original FB apps,
-        but may affect some functionality (opening links, login sharing etc).
-        \nNormally, you should avoid this. It is intended for those who are unable to remove the original fb apps
-        and facing issues while installing the patched apps.
+    <string name="pref_fix_conflict_confirm_message">Enabling this option
+        lets you install patched Messenger alongside original Meta apps.
+        \nHowever, if you have the option to uninstall both Facebook and Messenger,
+        but are facing issues due to other pre-installed apps from Meta,
+        it is highly recommended to uninstall both original apps and install the patched versions instead.
+        This fixes cross-app features like opening links from Messenger to Facebook and login sharing.
     </string>
     <string name="pref_mask_package_confirm_message">This option is NOT recommended for regular users.
-        It is intended for those who cannot remove the original messenger app.
-        \nBe aware that enabling this option may affect some functionality and cause minor issues (ignorable).
-        Please make every effort to remove the original Messenger before considering this option.
-        \n[See the \"Resolve apk conflicts\" option]
+        It is meant for those who cannot remove the original Messenger app.
+        \nNote that enabling this option may affect some functionality in Messenger and cause minor issues.
+        Please try to remove the original Messenger app before using this option.
+        \n[See \"Resolve apk conflicts\" option]
     </string>
-    <string name="pref_fallback_mode_confirm_message">Do you really want to enable fallback mode?
-        \n[Apps patched in fallback mode may launch a little slowly]
+    <string name="pref_fallback_mode_confirm_message">Enable fallback mode?
+        \n[Apps patched in fallback mode may launch slightly slower]
     </string>
     <string name="instructions">
         Instructions:
-        \n\nUninstall all the official facebook apps: facebook, messenger, facebook lite, etc.
+        \n\nUninstall all official facebook apps: facebook, messenger, facebook lite, etc.
         \n\nInstall the ChatHeadEnabler module.
-        \n\nPatch and install a Messenger app from here.
+        \n\nPatch and install a Messenger apk from here.
         \n\nPlease watch the video tutorial (from the app menu) for complete instructions.
-        \n\n[Visit the help forum from the settings tab]
+        \n\n[Find the help forum under Settings.]
     </string>
     <string name="troubleshoot">
         Troubleshoot:
         \n\nDownload failed?
-        \nSelect different servers or try again later.
-        \nAlternatively, you can download Messenger from apkmirror.com and patch it using the manual option.
+        \nSelect a different server or try again later.
+        \nAlternatively, you can download a Messenger apk from apkmirror.com and patch it using the manual option.
         \n\nInstall failed?
-        \nEnsure you have uninstalled all the original fb apps.
-        If some fb apps cannot be uninstalled, enable the \"Resolve apk conflicts\" option and try patching again.
+        \nMake sure you have uninstalled all official Meta apps.
+        If some Meta apps cannot be uninstalled, enable the \"Resolve apk conflicts\" option and try patching again.
         \n\nNot working?
-        \nEnsure you have installed the ChatHeadEnabler module. Also, try restarting the Messenger app.
-        \n\nNot working after a few days?
-        \nEnable fallback mode and then patch again.
-        \n\n[Visit the help forum from the settings tab]
+        \nMake sure you have installed the ChatHeadEnabler module. Also, try restarting the Messenger app.
+        \n\n[Find the help forum under Settings.]
     </string>
     <string name="safety_note">
         Safety Note:
         \n\nIs it safe to use?
-        \nYes. It is safe, just like any other apps installed from the playstore.
-        \n[Make sure you installed the MRVPatchManager from the official github link]
-        \n\nHow can I be sure it is safe?
-        \nAll the apps, tools and dependencies used here are open source,
-        and you can find their source codes on github.
+        \nYes. It is just as safe as any app installed from the Play Store.
+        \n(Make sure you downloaded MRVPatchManager from the official GitHub link.)
+        \n\nHow can I be sure?
+        \nAll the apps, tools and dependencies used here are open source.
+        You can view their full source code on GitHub.
         \n\nWhat safety measures are taken?
-        \nThe manager downloads your selected app from the apk servers
-        and verifies it against the original facebook signature,
-        ensuring that you are patching an official Facebook app.
+        \nMRVPatchManager downloads your selected app from various APK servers
+        and verifies it against the original Meta signature,
+        ensuring you are patching a genuine, official Meta app.
+        \nBecause of this local signature verification, APK servers cannot distribute tampered or unsafe files.
+        If a file has been modified, the signature check fails and the manager will refuse to patch it.
+        This mirrors the exact security check the Play Store uses to verify an app\'s authenticity."
     </string>
 </resources>

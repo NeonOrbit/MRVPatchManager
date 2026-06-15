@@ -1,18 +1,18 @@
-# MRVPatch Manager
+# MRVPatchManager
 
-MRVPatch Manager is an APK patching app that enables you to use [ChatHeadEnabler](https://github.com/NeonOrbit/ChatHeadEnabler)
-(along with other Xposed modules) on non-rooted devices.
+MRVPatchManager is an APK patching app that lets you use [ChatHeadEnabler](https://github.com/NeonOrbit/ChatHeadEnabler)
+in Messenger (along with other Xposed modules), on non-rooted devices.
+
 
 <picture><img src="resource/screenshot.png" height=420/></picture>
 
 ## Features
 - Direct download from multiple APK servers.
-- Manual patching option for offline APKs.
-- Ensures safety by checking APK signature.
-- Download specific versions and ABI types.
-- Selection from a variety of APK servers.
-- Support for allowing third-party modules.
-- Support for signing with a custom keystore.
+- Manual patching option for offline APK files.
+- Auto Signature verification to ensure app safety.
+- Filter downloads by specific version and ABI type.
+- Third-party module support for extended features.
+- Custom keystore signing for advanced users.
 
 ## Support
 Watch the [video tutorial](https://www.youtube.com/watch?v=UxHSTHam42w) for instructions.  
