@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdk 28
         targetSdk 35
-        versionCode 2370
-        versionName "2.3.7"
+        versionCode 2410
+        versionName "2.4.1"
         applicationId namespace
     }
 
