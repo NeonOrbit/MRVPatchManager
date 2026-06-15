@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
+import android.os.Build
 import androidx.core.content.FileProvider
 import app.neonorbit.mrvpatchmanager.apk.ApkUtil
 import app.neonorbit.mrvpatchmanager.util.Utils
@@ -64,7 +65,7 @@ object UniversalInstaller {
                 } else {
                     ZipFile(file).use { zip ->
                         zip.entries().asSequence().forEach { entry ->
-                            if (entry.name.endsWith(".apk") && !entry.isDirectory) {
+                            if (entry.name.endsWith(".apk") && isValidSplitArch(entry.name) && !entry.isDirectory) {
                                 writeFileToSession(session, zip.getInputStream(entry), entry.name, entry.size)
                             }
                         }
@@ -114,5 +115,12 @@ object UniversalInstaller {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
+    }
+
+    private fun isValidSplitArch(name: String): Boolean {
+        return !name.endsWith("x86.apk") && !name.endsWith("x86_64.apk") &&
+        (Build.SUPPORTED_ABIS.any { "arm64" in it } ||
+                (!name.endsWith("arm64_v8a.apk") && !name.endsWith("arm64-v8a.apk"))
+        )
     }
 }

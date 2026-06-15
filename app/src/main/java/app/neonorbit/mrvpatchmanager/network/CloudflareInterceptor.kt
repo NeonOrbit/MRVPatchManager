@@ -3,6 +3,7 @@ package app.neonorbit.mrvpatchmanager.network
 import android.os.Handler
 import android.os.Looper
 import android.webkit.CookieManager
+import app.neonorbit.mrvpatchmanager.remote.ApkMirrorService
 import app.neonorbit.mrvpatchmanager.ui.CloudflareDialog
 import app.neonorbit.mrvpatchmanager.util.Utils
 import app.neonorbit.mrvpatchmanager.util.Utils.LOG
@@ -26,6 +27,9 @@ class CloudflareInterceptor : Interceptor {
         val request = chain.request()
         val url = request.url.toString()
         val response = chain.proceed(request)
+        if (ApkMirrorService.server() !in url) {
+            return response   // TODO: fix cloudflare challenge for others
+        }
         // https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/detect-response/
         if (response.header("cf-mitigated")?.contains("challenge", true) == true) {
             response.close()

@@ -18,20 +18,20 @@ import app.neonorbit.mrvpatchmanager.remote.GithubService
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.util.concurrent.atomic.AtomicReference
+import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     companion object {
         val current: AppCompatActivity; get() = instance?.get()!!
-        private var instance: AtomicReference<MainActivity>? = null
+        private var instance: WeakReference<MainActivity>? = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         this.installSplashScreen()
         super.onCreate(savedInstanceState)
-        instance = AtomicReference(this)
+        instance = WeakReference(this)
         binding = ActivityMainBinding.inflate(layoutInflater).also {
             setContentView(it.root)
             setSupportActionBar(it.toolbar)

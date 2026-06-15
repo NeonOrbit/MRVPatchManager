@@ -1,7 +1,11 @@
 package app.neonorbit.mrvpatchmanager.apk
 
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import app.neonorbit.mrvpatchmanager.AppConfigs
+import app.neonorbit.mrvpatchmanager.AppServices
 import com.google.gson.JsonParser
 import java.io.BufferedOutputStream
 import java.io.File
@@ -67,6 +71,15 @@ object ApkBundles {
                     file.inputStream().use { it.copyTo(zos, 128 * 1024) }
                     zos.closeEntry()
                 }
+                try {
+                    ApkUtil.getApkIcon(base)?.let {
+                        val bmp = it.toBitmap(width = 512, height = 512, config = Bitmap.Config.ARGB_8888)
+                        zos.putNextEntry(ZipEntry("icon.png"))
+                        bmp.compress(Bitmap.CompressFormat.PNG, 100, zos)
+                        zos.closeEntry()
+                        bmp.recycle()
+                    }
+                } catch (_: Exception) {}
             }
         }
     }
@@ -77,7 +90,11 @@ object ApkBundles {
                 if (zip.getEntry(ANDROID_MANIFEST) != null) return null
                 return zip.getEntry("icon.png")?.open(zip)?.use {
                     Drawable.createFromStream(it, "icon")
-                }
+                } ?: try {
+                    bundle.name.substringBefore("-v").replace('-', ' ').let { title ->
+                        AppConfigs.FB_APP_LIST.firstOrNull { title in it.name }
+                    }?.let { ContextCompat.getDrawable(AppServices.application, it.icon) }
+                } catch (_: Exception) {null}
             }
         } catch (_: Exception) { null }
     }
