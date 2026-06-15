@@ -74,7 +74,7 @@ android {
 }
 
 dependencies {
-    implementation mrvpatcher('5.7.7', '91eaea99b56434a838c046336826a07895be52a2')
+    implementation mrvpatcher('5.8.1', 'f613fbf9525c60eeaa414e5efc2fa546d44f3a4f')
 
     implementation 'androidx.core:core-ktx:1.15.0'
     implementation "androidx.core:core-splashscreen:1.0.1"
